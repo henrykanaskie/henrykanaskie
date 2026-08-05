@@ -28,6 +28,8 @@ jobs:
 
       - name: Generate cards
         run: python3 scripts/gen_cards.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit if changed
         run: |

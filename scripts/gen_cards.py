@@ -16,7 +16,9 @@ declarative animation still runs.
 import collections
 import datetime as dt
 import json
+import os
 import urllib.request
+import xml.dom.minidom
 from pathlib import Path
 
 USER = "henrykanaskie"
@@ -122,8 +124,17 @@ def shell(w, h, t, body, defs=""):
 
 
 def api(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "profile-cards"})
-    return json.load(urllib.request.urlopen(req))
+    """GET as JSON.
+
+    Unauthenticated GitHub API access is capped at 60 requests/hour and this
+    script makes one call per repo, so it uses GITHUB_TOKEN when the workflow
+    provides one (5000/hour) and falls back to anonymous locally.
+    """
+    headers = {"User-Agent": "profile-cards"}
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    return json.load(urllib.request.urlopen(urllib.request.Request(url, headers=headers)))
 
 
 # ── data ──────────────────────────────────────────────────────────────────
@@ -399,6 +410,9 @@ def main():
             ("stats", card_stats(stats, t)),
             ("activity", card_activity(series, top_repos, last, t)),
         ):
+            # Parse before writing — a malformed card renders as a broken
+            # image on the profile, which is worse than an unchanged one.
+            xml.dom.minidom.parseString(svg)
             (OUT / f"{name}-{theme}.svg").write_text(svg)
             print("wrote", f"{name}-{theme}.svg", len(svg), "bytes")
 
