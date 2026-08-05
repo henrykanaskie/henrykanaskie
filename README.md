@@ -26,8 +26,8 @@ couldn't answer by reading, so I write the thing that answers it.
 ---
 
 <a href="https://github.com/henrykanaskie?tab=repositories"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/stats-dark.svg">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/stats-light.svg" alt="By the numbers">
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/stats?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/stats?theme=light" alt="By the numbers">
 </picture></a>
 
 <table>
@@ -35,16 +35,16 @@ couldn't answer by reading, so I write the thing that answers it.
 <td width="50%">
 
 <a href="https://github.com/henrykanaskie?tab=repositories"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/languages-dark.svg">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/languages-light.svg" alt="Languages">
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/languages?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/languages?theme=light" alt="Languages">
 </picture></a>
 
 </td>
 <td width="50%">
 
 <a href="https://github.com/henrykanaskie?tab=repositories"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/focus-dark.svg">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/focus-light.svg" alt="Focus areas">
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/focus?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/focus?theme=light" alt="Focus areas">
 </picture></a>
 
 </td>
@@ -159,8 +159,8 @@ WidgetKit suite over the same shared data.
 ---
 
 <a href="https://github.com/henrykanaskie?tab=repositories"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/projects-dark.svg">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/projects-light.svg" alt="Project stage">
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/projects?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/projects?theme=light" alt="Project stage">
 </picture></a>
 
 ---
@@ -168,8 +168,8 @@ WidgetKit suite over the same shared data.
 ### Contributions
 
 <a href="https://github.com/henrykanaskie?tab=overview"><picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg" alt="Recent activity">
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/activity?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/activity?theme=light" alt="Recent activity">
 </picture></a>
 
 <p align="center">
@@ -183,7 +183,7 @@ WidgetKit suite over the same shared data.
 
 <p align="center">
   <sub>
-    Cards in <code>assets/</code> are built by <a href="./scripts/gen_cards.py"><code>scripts/gen_cards.py</code></a> and regenerated daily, so nothing here depends on a third-party renderer.<br>
+    Cards are rendered live by <a href="https://henrykanaskie.com">henrykanaskie.com</a> when you load this page, reading the GitHub API at request time.<br>
     Cards animate on load (SMIL) and degrade to their final state where animation is unsupported. The snake is rebuilt daily by <a href="https://github.com/Platane/snk">Platane/snk</a>.
   </sub>
 </p>
