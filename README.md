@@ -14,12 +14,12 @@
 
 ### About
 
-I build things that sit at the boundary between models and hardware — a transformer written
+I build things that sit at the boundary between models and hardware. A transformer written
 from first principles, an optimizer that picks real capacitor networks, a habit tracker that
 renders your streaks as a living neural graph. Most of my work starts as a question I
 couldn't answer by reading, so I write the thing that answers it.
 
-- Currently deepest in **quantitative research** — block bootstrapping, log-return modeling, correlation structure
+- Currently deepest in **quantitative research**: block bootstrapping, log-return modeling, correlation structure
 - Recently built a **GPT from scratch** to stop treating attention as a black box
 - Happiest in a debugger, at the point where the theory stops matching the trace
 
@@ -58,7 +58,7 @@ couldn't answer by reading, so I write the thing that answers it.
 <sub>Click any project to expand.</sub>
 
 <details>
-<summary><b>gpt-scratch</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;—&nbsp; a GPT with nothing imported</summary>
+<summary><b>gpt-scratch</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;·&nbsp; a GPT with nothing imported</summary>
 
 <br>
 
@@ -71,13 +71,13 @@ one. Grew out of my NeetCode ML coursework, then kept going past where the cours
 </details>
 
 <details>
-<summary><b>ML_quantitative_research</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;—&nbsp; which signals survive a resample</summary>
+<summary><b>ML_quantitative_research</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;·&nbsp; which signals survive a resample</summary>
 
 <br>
 
 Financial time-series research: log-return modeling, Pearson correlation structure, Kalman
 filtering, and block-bootstrap resampling measured against a Gaussian baseline. The whole
-point is separating apparent signal from noise wearing a pattern — a correlation that
+point is separating apparent signal from noise wearing a pattern. A correlation that
 doesn't survive a block bootstrap was never there.
 
 **→ [github.com/henrykanaskie/ML_quantitative_research](https://github.com/henrykanaskie/ML_quantitative_research)**
@@ -85,7 +85,7 @@ doesn't survive a block bootstrap was never there.
 </details>
 
 <details>
-<summary><b>Cap_Match_Net</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;—&nbsp; impedance matching as a constraint problem</summary>
+<summary><b>Cap_Match_Net</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;·&nbsp; impedance matching as a constraint problem</summary>
 
 <br>
 
@@ -98,11 +98,11 @@ ideal values a textbook would hand you.
 </details>
 
 <details>
-<summary><b>small-shell</b> &nbsp;·&nbsp; <code>C</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;—&nbsp; a Unix shell, signals and all</summary>
+<summary><b>small-shell</b> &nbsp;·&nbsp; <code>C</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;·&nbsp; a Unix shell, signals and all</summary>
 
 <br>
 
-Job control, I/O redirection, and signal handling — including the parts that only start
+Job control, I/O redirection, and signal handling, including the parts that only start
 misbehaving once a process is backgrounded and something sends it a SIGTSTP at the wrong
 moment.
 
@@ -111,7 +111,7 @@ moment.
 </details>
 
 <details>
-<summary><b>rLog</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;—&nbsp; talk at it, get LaTeX back</summary>
+<summary><b>rLog</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;·&nbsp; talk at it, get LaTeX back</summary>
 
 <br>
 
@@ -127,7 +127,7 @@ schema, and LaTeX comes out. CLI and web front ends over one shared store.
 
 <br>
 
-Formula 1 telemetry built on FastF1 — currently a tire-degradation regression over stint
+Formula 1 telemetry built on FastF1, currently a tire-degradation regression over stint
 data, split backend/frontend. Aimed at the strategy question of when a set of tires stops
 paying for itself.
 
@@ -140,7 +140,7 @@ paying for itself.
 
 An agent pipeline that writes a mechanical-engineering curriculum and builds a static site
 around it. Every numerical claim in every lesson has a matching assertion executed at build
-time — generated physics is confidently wrong at a low but non-zero rate, and unverified
+time. Generated physics is confidently wrong at a low but non-zero rate, and unverified
 output you study from for seven weeks is worse than no output at all.
 
 </details>

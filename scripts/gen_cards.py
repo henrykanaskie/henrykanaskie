@@ -54,7 +54,7 @@ STAGE_COLORS = {
 PROJECTS = [
     ("gpt-scratch", "GPT built from first principles", "shipped", 1.00),
     ("Cap_Match_Net", "Capacitor matching via OR-Tools", "shipped", 1.00),
-    ("small-shell", "Unix shell in C — jobs, signals, redirection", "shipped", 1.00),
+    ("small-shell", "Unix shell in C: jobs, signals, redirection", "shipped", 1.00),
     ("ML_quantitative_research", "Block bootstrap, log-return modeling", "active", 0.70),
     ("rLog", "Voice-driven logging tool", "active", 0.60),
     ("me-tutor", "Agents generating a verified ME curriculum", "active", 0.50),
@@ -180,11 +180,11 @@ def fetch_activity():
 def fetch_stats(langs, activity):
     u = api(f"https://api.github.com/users/{USER}")
     total = sum(v for _, v in langs) or 1
-    top_name, top_val = langs[0] if langs else ("—", 0)
+    top_name, top_val = langs[0] if langs else ("n/a", 0)
     recent = sum(n for _, n in activity)
 
     return [
-        ("Public repos", str(u.get("public_repos", "—")), "#58a6ff"),
+        ("Public repos", str(u.get("public_repos", "n/a")), "#58a6ff"),
         ("Languages", str(len(langs)), "#bc8cff"),
         (f"{top_name}", f"{100*top_val/total:.0f}%", "#3572A5"),
         ("Code written", f"{total/1024:.0f} KB", "#3fb950"),
@@ -258,7 +258,7 @@ def card_projects(t):
     body = (f'<text x="{pad}" y="34" fill="{t["title"]}" font-size="15" '
             f'font-weight="600">Project stage</text>')
     body += (f'<text x="{pad}" y="52" fill="{t["muted"]}" font-size="11.5">'
-             f'Where each project actually sits — a status readout, not a roadmap.</text>')
+             f'Where each project actually sits. A status readout, not a roadmap.</text>')
 
     bar_x, bar_w = 470, 250
     for i, (name, desc, stage, frac) in enumerate(PROJECTS):
