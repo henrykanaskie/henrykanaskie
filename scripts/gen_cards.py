@@ -24,9 +24,11 @@ from pathlib import Path
 USER = "henrykanaskie"
 OUT = Path(__file__).resolve().parent.parent / "assets"
 
-# personal_webpage has node_modules committed — 21.4 MB of vendored JS/TS that
-# would otherwise drown out every line of real work in the byte counts.
-EXCLUDE_REPOS = {"personal_webpage"}
+# personal_webpage used to commit its Next.js build output, which put 21 MB of
+# compiled JS ahead of every hand-written line. That is untracked now and its
+# generated path data is marked linguist-generated, so GitHub's own numbers are
+# honest and nothing needs excluding here.
+EXCLUDE_REPOS = set()
 EXCLUDE_LANGS = {"CSS", "HTML"}
 
 THEMES = {
@@ -237,7 +239,7 @@ def card_languages(langs, t):
 
     h = 88 + ((len(shown) + 1) // 2) * 26 + 26
     body += (f'<text x="{pad}" y="{h-12}" fill="{t["muted"]}" font-size="10.5">'
-             f'by bytes across public repos · vendored node_modules excluded</text>')
+             f'by bytes across public repos · generated and vendored files excluded</text>')
     return shell(w, h, t, body, defs)
 
 
