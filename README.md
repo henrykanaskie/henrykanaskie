@@ -55,42 +55,106 @@ couldn't answer by reading, so I write the thing that answers it.
 
 ### What I'm building
 
-**[gpt-scratch](https://github.com/henrykanaskie/gpt-scratch)** · `Python` · shipped
-A GPT assembled from first principles — attention, tokenization, and the training loop
-written by hand rather than imported. Built to replace a vague sense of how transformers
-work with the ability to derive one.
+<sub>Click any project to expand.</sub>
 
-**[ML_quantitative_research](https://github.com/henrykanaskie/ML_quantitative_research)** · `Python` · active
+<details>
+<summary><b>gpt-scratch</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;—&nbsp; a GPT with nothing imported</summary>
+
+<br>
+
+Attention, tokenization, and the training loop written by hand rather than pulled from a
+library. Built to replace a vague sense of how transformers work with the ability to derive
+one. Grew out of my NeetCode ML coursework, then kept going past where the course stopped.
+
+**→ [github.com/henrykanaskie/gpt-scratch](https://github.com/henrykanaskie/gpt-scratch)**
+
+</details>
+
+<details>
+<summary><b>ML_quantitative_research</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;—&nbsp; which signals survive a resample</summary>
+
+<br>
+
 Financial time-series research: log-return modeling, Pearson correlation structure, Kalman
-filtering, and block-bootstrap resampling measured against a Gaussian baseline. The point is
-knowing which apparent signal survives a resample and which was noise wearing a pattern.
+filtering, and block-bootstrap resampling measured against a Gaussian baseline. The whole
+point is separating apparent signal from noise wearing a pattern — a correlation that
+doesn't survive a block bootstrap was never there.
 
-**[Cap_Match_Net](https://github.com/henrykanaskie/Cap_Match_Net)** · `Python` · shipped
-Capacitor matching networks solved as a constraint problem with Google OR-Tools. Takes a
-target impedance and returns a network of components that actually exist in a parts bin.
+**→ [github.com/henrykanaskie/ML_quantitative_research](https://github.com/henrykanaskie/ML_quantitative_research)**
 
-**[small-shell](https://github.com/henrykanaskie/small-shell)** · `C` · shipped
-A working Unix shell — job control, I/O redirection, and signal handling, including the
-parts that only misbehave once a process is backgrounded.
+</details>
 
-**[rLog](https://github.com/henrykanaskie/rLog)** · `Python` · active
-Voice-driven logging. Audio goes in, gets transcribed, an LLM structures it against a
-schema, and LaTeX comes out. CLI and web front ends over the same store.
+<details>
+<summary><b>Cap_Match_Net</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;—&nbsp; impedance matching as a constraint problem</summary>
 
-**pitwall** · `Python` · in progress · *private*
-Formula 1 telemetry built on FastF1, currently a tire-degradation regression over stint
-data. Split backend/frontend, aimed at the strategy question of when a set of tires stops
+<br>
+
+Capacitor matching networks solved with Google OR-Tools. Takes a target impedance and
+returns a network built from components that actually exist in a parts bin, rather than the
+ideal values a textbook would hand you.
+
+**→ [github.com/henrykanaskie/Cap_Match_Net](https://github.com/henrykanaskie/Cap_Match_Net)**
+
+</details>
+
+<details>
+<summary><b>small-shell</b> &nbsp;·&nbsp; <code>C</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;—&nbsp; a Unix shell, signals and all</summary>
+
+<br>
+
+Job control, I/O redirection, and signal handling — including the parts that only start
+misbehaving once a process is backgrounded and something sends it a SIGTSTP at the wrong
+moment.
+
+**→ [github.com/henrykanaskie/small-shell](https://github.com/henrykanaskie/small-shell)**
+
+</details>
+
+<details>
+<summary><b>rLog</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;—&nbsp; talk at it, get LaTeX back</summary>
+
+<br>
+
+Voice-driven logging. Audio goes in, gets transcribed, an LLM structures it against a fixed
+schema, and LaTeX comes out. CLI and web front ends over one shared store.
+
+**→ [github.com/henrykanaskie/rLog](https://github.com/henrykanaskie/rLog)**
+
+</details>
+
+<details>
+<summary><b>pitwall</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟠 in progress &nbsp;·&nbsp; <i>private</i></summary>
+
+<br>
+
+Formula 1 telemetry built on FastF1 — currently a tire-degradation regression over stint
+data, split backend/frontend. Aimed at the strategy question of when a set of tires stops
 paying for itself.
 
-**me-tutor** · `Python` / `Astro` · active · *private*
+</details>
+
+<details>
+<summary><b>me-tutor</b> &nbsp;·&nbsp; <code>Python</code> / <code>Astro</code> &nbsp;·&nbsp; 🔵 active &nbsp;·&nbsp; <i>private</i></summary>
+
+<br>
+
 An agent pipeline that writes a mechanical-engineering curriculum and builds a static site
 around it. Every numerical claim in every lesson has a matching assertion executed at build
-time — generated physics is confidently wrong often enough that unverified output is worse
-than none.
+time — generated physics is confidently wrong at a low but non-zero rate, and unverified
+output you study from for seven weeks is worse than no output at all.
 
-**GrowthApp** · `Swift` · scaffold · *private*
-A SwiftUI habit tracker whose home screen is a living record: each habit a filament from the
-center, each kept day a node. Full WidgetKit suite over shared data.
+</details>
+
+<details>
+<summary><b>GrowthApp</b> &nbsp;·&nbsp; <code>Swift</code> &nbsp;·&nbsp; 🟣 scaffold &nbsp;·&nbsp; <i>private</i></summary>
+
+<br>
+
+A SwiftUI habit tracker whose home screen is a living record: each habit a filament
+radiating from the center, each kept day a node, the day just kept glowing gold. Full
+WidgetKit suite over the same shared data.
+
+</details>
 
 ---
 
@@ -115,6 +179,6 @@ center, each kept day a node. Full WidgetKit suite over shared data.
 <p align="center">
   <sub>
     Cards in <code>assets/</code> are built by <a href="./scripts/gen_cards.py"><code>scripts/gen_cards.py</code></a> and regenerated daily, so nothing here depends on a third-party renderer.<br>
-    The contribution snake is rebuilt daily by <a href="https://github.com/Platane/snk">Platane/snk</a>.
+    Cards animate on load (SMIL) and degrade to their final state where animation is unsupported. The snake is rebuilt daily by <a href="https://github.com/Platane/snk">Platane/snk</a>.
   </sub>
 </p>
