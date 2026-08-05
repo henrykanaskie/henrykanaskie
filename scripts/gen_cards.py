@@ -200,6 +200,68 @@ def card_projects(t):
     return shell(w, h, t, body, defs)
 
 
+def fetch_stats(langs):
+    """Headline numbers. All from public endpoints — no token needed."""
+    u = json.load(urllib.request.urlopen(f"https://api.github.com/users/{USER}"))
+    total = sum(v for _, v in langs) or 1
+    top_name, top_val = langs[0] if langs else ("—", 0)
+
+    # The contribution count only exists in the profile HTML, not the REST API
+    # (the GraphQL endpoint that exposes it requires auth). Scrape it, but treat
+    # a miss as non-fatal so a markup change can't break the whole build.
+    contrib = None
+    try:
+        req = urllib.request.Request(
+            f"https://github.com/{USER}",
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        html = urllib.request.urlopen(req).read().decode("utf-8", "replace")
+        import re
+        m = re.search(r"([\d,]+)\s+contributions\s+in\s+the\s+last\s+year", html)
+        if m:
+            contrib = m.group(1)
+    except Exception:
+        pass
+
+    stats = [
+        ("Public repos", str(u.get("public_repos", "—")), "#58a6ff"),
+        ("Languages", str(len(langs)), "#bc8cff"),
+        (f"{top_name}", f"{100*top_val/total:.0f}%", "#3572A5"),
+        ("Code written", f"{total/1024:.0f} KB", "#3fb950"),
+        ("On GitHub since", u.get("created_at", "----")[:4], "#d29922"),
+    ]
+    if contrib:
+        stats.insert(4, ("Contributions, past year", contrib, "#f34b7d"))
+    return stats
+
+
+def card_stats(stats, t):
+    w, pad = 900, 24
+    cols = 3
+    rows = (len(stats) + cols - 1) // cols
+    cell_w = (w - 2 * pad) / cols
+    cell_h = 62
+    top = 56
+
+    body = (f'<text x="{pad}" y="34" fill="{t["title"]}" font-size="15" '
+            f'font-weight="600">By the numbers</text>')
+
+    for i, (label, value, raw) in enumerate(stats):
+        c = adapt(raw, t["name"])
+        cx = pad + (i % cols) * cell_w
+        cy = top + (i // cols) * cell_h
+
+        body += (f'<rect x="{cx}" y="{cy}" width="{cell_w-12:.0f}" height="{cell_h-12}" '
+                 f'rx="8" fill="{c}" fill-opacity="0.08" stroke="{c}" '
+                 f'stroke-opacity="0.28"/>')
+        body += (f'<text x="{cx+16}" y="{cy+30}" fill="{c}" font-size="21" '
+                 f'font-weight="700">{esc(value)}</text>')
+        body += (f'<text x="{cx+16}" y="{cy+44}" fill="{t["muted"]}" '
+                 f'font-size="10.5">{esc(label)}</text>')
+
+    return shell(w, top + rows * cell_h + 8, t, body)
+
+
 def card_focus(t):
     w, pad = 440, 20
     body = (f'<text x="{pad}" y="34" fill="{t["title"]}" font-size="15" '
@@ -225,12 +287,15 @@ def main():
     OUT.mkdir(exist_ok=True)
     langs = fetch_languages()
     print("languages:", [(k, v) for k, v in langs[:6]])
+    stats = fetch_stats(langs)
+    print("stats:", [(l, v) for l, v, _ in stats])
 
     for theme, t in THEMES.items():
         for name, svg in (
             ("languages", card_languages(langs, t)),
             ("projects", card_projects(t)),
             ("focus", card_focus(t)),
+            ("stats", card_stats(stats, t)),
         ):
             p = OUT / f"{name}-{theme}.svg"
             p.write_text(svg)
