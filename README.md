@@ -5,8 +5,13 @@
 </p>
 
 <p align="center">
-  <a href="https://henrykanskie.github.io"><img src="https://img.shields.io/badge/website-henrykanskie.github.io-1f2328?style=for-the-badge&logo=githubpages&logoColor=white" alt="Website"></a>
-  <img src="https://komarev.com/ghpvc/?username=henrykanaskie&style=for-the-badge&color=1f2328&label=PROFILE+VIEWS" alt="Profile views">
+  <a href="https://henrykanskie.github.io"><img src="https://img.shields.io/badge/Website-1f6feb?style=for-the-badge&logo=githubpages&logoColor=white" alt="Website"></a>
+  <a href="https://github.com/henrykanaskie?tab=repositories"><img src="https://img.shields.io/badge/Repositories-8957e5?style=for-the-badge&logo=github&logoColor=white" alt="Repositories"></a>
+  <img src="https://komarev.com/ghpvc/?username=henrykanaskie&style=for-the-badge&color=3fb950&label=PROFILE+VIEWS" alt="Profile views">
+</p>
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=python,c,cpp,swift,js,pytorch,sklearn,r,git,linux,bash,vscode" alt="Tech stack">
 </p>
 
 ---
@@ -22,26 +27,46 @@ couldn't answer by reading, so I write the thing that answers it.
 - Recently built a **GPT from scratch** to stop treating attention as a black box
 - Happiest in a debugger, at the point where the theory stops matching the trace
 
+---
+
+<table>
+<tr>
+<td width="50%">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/languages-dark.svg">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/languages-light.svg" alt="Languages">
+</picture>
+
+</td>
+<td width="50%">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/focus-dark.svg">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/focus-light.svg" alt="Focus areas">
+</picture>
+
+</td>
+</tr>
+</table>
+
+---
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/projects-dark.svg">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/projects-light.svg" alt="Project stage">
+</picture>
+
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=python,c,swift,js,pytorch,sklearn,r,git,linux,bash&theme=light" alt="Tech stack">
+  <a href="https://github.com/henrykanaskie/gpt-scratch"><img src="https://img.shields.io/badge/gpt--scratch-3fb950?style=for-the-badge&logo=pytorch&logoColor=white" alt="gpt-scratch"></a>
+  <a href="https://github.com/henrykanaskie/ML_quantitative_research"><img src="https://img.shields.io/badge/ML__quantitative__research-58a6ff?style=for-the-badge&logo=python&logoColor=white" alt="ML_quantitative_research"></a>
+  <a href="https://github.com/henrykanaskie/Cap_Match_Net"><img src="https://img.shields.io/badge/Cap__Match__Net-3fb950?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Cap_Match_Net"></a>
+  <a href="https://github.com/henrykanaskie/small-shell"><img src="https://img.shields.io/badge/small--shell-555555?style=for-the-badge&logo=gnubash&logoColor=white" alt="small-shell"></a>
 </p>
 
 ---
 
-### Stats
-
-<img src="./metrics/overview.svg" alt="GitHub metrics overview">
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true&theme=github-dark&ring=58a6ff&fire=58a6ff&currStreakLabel=58a6ff">
-    <img src="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true" alt="Commit streak">
-  </picture>
-</p>
-
----
-
-### Contribution snake
+### Contributions
 
 <p align="center">
   <picture>
@@ -50,70 +75,18 @@ couldn't answer by reading, so I write the thing that answers it.
   </picture>
 </p>
 
----
-
-### Commit calendar
-
 <p align="center">
-  <img src="./metrics/isocalendar.svg" alt="Isometric commit calendar">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true&theme=github-dark&ring=58a6ff&fire=3fb950&currStreakLabel=58a6ff">
+    <img src="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true&ring=1f6feb&fire=3fb950&currStreakLabel=1f6feb" alt="Commit streak">
+  </picture>
 </p>
 
 ---
 
-### Languages and interests
-
-<table>
-<tr>
-<td><img src="./metrics/languages.svg" alt="Most used languages"></td>
-<td><img src="./metrics/topics.svg" alt="Starred topics"></td>
-</tr>
-</table>
-
----
-
-### Featured work
-
-<img src="./metrics/repositories.svg" alt="Featured repositories">
-
 <p align="center">
-  <a href="https://github.com/henrykanaskie/gpt-scratch"><img src="https://img.shields.io/badge/gpt--scratch-1f2328?style=for-the-badge&logo=pytorch&logoColor=white" alt="gpt-scratch"></a>
-  <a href="https://github.com/henrykanaskie/ML_quantitative_research"><img src="https://img.shields.io/badge/ML__quantitative__research-1f2328?style=for-the-badge&logo=python&logoColor=white" alt="ML_quantitative_research"></a>
-  <a href="https://github.com/henrykanaskie/Cap_Match_Net"><img src="https://img.shields.io/badge/Cap__Match__Net-1f2328?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Cap_Match_Net"></a>
-  <a href="https://github.com/henrykanaskie/small-shell"><img src="https://img.shields.io/badge/small--shell-1f2328?style=for-the-badge&logo=gnubash&logoColor=white" alt="small-shell"></a>
-</p>
-
----
-
-### Project stage
-
-Where my active projects actually sit — not a roadmap, a status readout.
-
-| Project | What it is | Stage | |
-|---|---|---|---|
-| **gpt-scratch** | GPT built from first principles, assembled from my NeetCode ML coursework | shipped | `██████████` |
-| **Cap_Match_Net** | Capacitor matching networks solved with Google OR-Tools | shipped | `██████████` |
-| **small-shell** | A working Unix shell in C — jobs, redirection, signals | shipped | `██████████` |
-| **ML_quantitative_research** | Block bootstrap, log-return and correlation modeling for financial series | active | `███████░░░` |
-| **rLog** | Voice-driven logging tool | active | `██████░░░░` |
-| **me-tutor** | Agent pipeline generating a verified mechanical-engineering curriculum | active | `█████░░░░░` |
-| **pitwall** | Motorsport strategy and telemetry tooling | in progress | `████░░░░░░` |
-| **GrowthApp** | SwiftUI habit tracker — streaks as a living neural graph, full WidgetKit suite | scaffold | `███░░░░░░░` |
-
-<sub><b>shipped</b> — runs end to end, no known blockers · <b>active</b> — core works, under regular development · <b>in progress</b> — partial implementation · <b>scaffold</b> — running skeleton, architecture settled</sub>
-
----
-
-### Habits
-
-<table>
-<tr>
-<td><img src="./metrics/habits.svg" alt="Coding habits"></td>
-<td><img src="./metrics/lines.svg" alt="Lines of code changed"></td>
-</tr>
-</table>
-
----
-
-<p align="center">
-  <sub>Cards regenerated daily by <a href="https://github.com/lowlighter/metrics">lowlighter/metrics</a> and <a href="https://github.com/Platane/snk">Platane/snk</a>.</sub>
+  <sub>
+    Cards in <code>assets/</code> are generated by <a href="./scripts/gen_cards.py"><code>scripts/gen_cards.py</code></a> and committed, so nothing here depends on a third-party renderer.<br>
+    The contribution snake is rebuilt daily by <a href="https://github.com/Platane/snk">Platane/snk</a>.
+  </sub>
 </p>

@@ -1,0 +1,42 @@
+# Regenerates the profile SVG cards and commits them if anything changed.
+# Runs on the built-in GITHUB_TOKEN — no secrets to configure.
+
+name: Cards
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/gen_cards.py"
+      - ".github/workflows/cards.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  cards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generate cards
+        run: python3 scripts/gen_cards.py
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain assets)" ]; then
+            git add assets
+            git commit -m "Regenerate profile cards"
+            git push
+          else
+            echo "No changes."
+          fi
