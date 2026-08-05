@@ -167,6 +167,11 @@ WidgetKit suite over the same shared data.
 
 ### Contributions
 
+<a href="https://github.com/henrykanaskie?tab=overview"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg" alt="Recent activity">
+</picture></a>
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/output/github-snake-dark.svg">
