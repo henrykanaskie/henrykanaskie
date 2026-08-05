@@ -14,6 +14,42 @@ jobs:
   metrics:
     runs-on: ubuntu-latest
     steps:
+      # ── Overview header: bio, activity, community ──────────────────────
+      - name: Overview
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics/overview.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: henrykanaskie
+          committer_branch: main
+          config_timezone: America/Los_Angeles
+          base: header, activity, community, repositories, metadata
+          config_display: large
+          config_animations: yes
+
+      # ── Featured repositories ──────────────────────────────────────────
+      - name: Featured repositories
+        uses: lowlighter/metrics@latest
+        with:
+          filename: metrics/repositories.svg
+          token: ${{ secrets.METRICS_TOKEN }}
+          user: henrykanaskie
+          committer_branch: main
+          config_timezone: America/Los_Angeles
+          base: ""
+          plugin_repositories: yes
+          plugin_repositories_featured: >-
+            henrykanaskie/gpt-scratch,
+            henrykanaskie/ML_quantitative_research,
+            henrykanaskie/Cap_Match_Net,
+            henrykanaskie/small-shell,
+            henrykanaskie/rLog,
+            henrykanaskie/emnist
+          plugin_repositories_pinned: 6
+          plugin_repositories_order: featured, pinned, starred
+          plugin_repositories_forks: no
+          plugin_repositories_affiliations: owner
+
       # ── Isometric commit calendar ──────────────────────────────────────
       - name: Isometric commit calendar
         uses: lowlighter/metrics@latest

@@ -30,14 +30,12 @@ couldn't answer by reading, so I write the thing that answers it.
 
 ### Stats
 
+<img src="./metrics/overview.svg" alt="GitHub metrics overview">
+
 <p align="center">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api?username=henrykanaskie&show_icons=true&include_all_commits=true&hide_border=true&theme=github_dark&title_color=58a6ff&icon_color=58a6ff">
-    <img src="https://github-readme-stats.vercel.app/api?username=henrykanaskie&show_icons=true&include_all_commits=true&hide_border=true&title_color=1f2328&icon_color=1f2328" alt="GitHub stats" height="170">
-  </picture>
-  <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true&theme=github-dark&ring=58a6ff&fire=58a6ff&currStreakLabel=58a6ff">
-    <img src="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true" alt="Commit streak" height="170">
+    <img src="https://streak-stats.demolab.com?user=henrykanaskie&hide_border=true" alt="Commit streak">
   </picture>
 </p>
 
@@ -75,31 +73,13 @@ couldn't answer by reading, so I write the thing that answers it.
 
 ### Featured work
 
+<img src="./metrics/repositories.svg" alt="Featured repositories">
+
 <p align="center">
-  <a href="https://github.com/henrykanaskie/gpt-scratch">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=gpt-scratch&hide_border=true&theme=github_dark&title_color=58a6ff&icon_color=58a6ff">
-      <img src="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=gpt-scratch&hide_border=true&title_color=1f2328&icon_color=1f2328" alt="gpt-scratch">
-    </picture>
-  </a>
-  <a href="https://github.com/henrykanaskie/ML_quantitative_research">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=ML_quantitative_research&hide_border=true&theme=github_dark&title_color=58a6ff&icon_color=58a6ff">
-      <img src="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=ML_quantitative_research&hide_border=true&title_color=1f2328&icon_color=1f2328" alt="ML_quantitative_research">
-    </picture>
-  </a>
-  <a href="https://github.com/henrykanaskie/Cap_Match_Net">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=Cap_Match_Net&hide_border=true&theme=github_dark&title_color=58a6ff&icon_color=58a6ff">
-      <img src="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=Cap_Match_Net&hide_border=true&title_color=1f2328&icon_color=1f2328" alt="Cap_Match_Net">
-    </picture>
-  </a>
-  <a href="https://github.com/henrykanaskie/small-shell">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=small-shell&hide_border=true&theme=github_dark&title_color=58a6ff&icon_color=58a6ff">
-      <img src="https://github-readme-stats.vercel.app/api/pin/?username=henrykanaskie&repo=small-shell&hide_border=true&title_color=1f2328&icon_color=1f2328" alt="small-shell">
-    </picture>
-  </a>
+  <a href="https://github.com/henrykanaskie/gpt-scratch"><img src="https://img.shields.io/badge/gpt--scratch-1f2328?style=for-the-badge&logo=pytorch&logoColor=white" alt="gpt-scratch"></a>
+  <a href="https://github.com/henrykanaskie/ML_quantitative_research"><img src="https://img.shields.io/badge/ML__quantitative__research-1f2328?style=for-the-badge&logo=python&logoColor=white" alt="ML_quantitative_research"></a>
+  <a href="https://github.com/henrykanaskie/Cap_Match_Net"><img src="https://img.shields.io/badge/Cap__Match__Net-1f2328?style=for-the-badge&logo=googlecolab&logoColor=white" alt="Cap_Match_Net"></a>
+  <a href="https://github.com/henrykanaskie/small-shell"><img src="https://img.shields.io/badge/small--shell-1f2328?style=for-the-badge&logo=gnubash&logoColor=white" alt="small-shell"></a>
 </p>
 
 ---
