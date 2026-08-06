@@ -25,27 +25,27 @@ couldn't answer by reading, so I write the thing that answers it.
 
 ---
 
-<a href="https://github.com/henrykanaskie?tab=repositories"><picture>
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/stats?theme=dark">
   <img src="https://henrykanaskie.com/api/cards/stats?theme=light" alt="By the numbers">
-</picture></a>
+</picture>
 
 <table>
 <tr>
 <td width="50%">
 
-<a href="https://github.com/henrykanaskie?tab=repositories"><picture>
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/languages?theme=dark">
   <img src="https://henrykanaskie.com/api/cards/languages?theme=light" alt="Languages">
-</picture></a>
+</picture>
 
 </td>
 <td width="50%">
 
-<a href="https://github.com/henrykanaskie?tab=repositories"><picture>
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/focus?theme=dark">
   <img src="https://henrykanaskie.com/api/cards/focus?theme=light" alt="Focus areas">
-</picture></a>
+</picture>
 
 </td>
 </tr>
@@ -158,19 +158,19 @@ WidgetKit suite over the same shared data.
 
 ---
 
-<a href="https://github.com/henrykanaskie?tab=repositories"><picture>
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/projects?theme=dark">
   <img src="https://henrykanaskie.com/api/cards/projects?theme=light" alt="Project stage">
-</picture></a>
+</picture>
 
 ---
 
 ### Contributions
 
-<a href="https://github.com/henrykanaskie?tab=overview"><picture>
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/activity?theme=dark">
   <img src="https://henrykanaskie.com/api/cards/activity?theme=light" alt="Recent activity">
-</picture></a>
+</picture>
 
 <p align="center">
   <picture>
