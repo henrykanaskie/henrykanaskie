@@ -100,7 +100,7 @@ schema, and LaTeX comes out. CLI and web front ends over one shared store.
 </details>
 
 <details>
-<summary><code>pitwall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟠 building</code></summary>
+<summary><code>pitwall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟠 in progress</code></summary>
 <br>
 
 **Formula 1 strategy and telemetry. Private.**
