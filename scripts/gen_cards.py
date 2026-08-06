@@ -142,15 +142,29 @@ def api(url):
 # ── data ──────────────────────────────────────────────────────────────────
 
 def fetch_languages():
+    """Language mix with every repository weighted equally.
+
+    Summing raw bytes lets one verbose project speak for the whole profile: the
+    personal site was 359 KB of the 787 KB total and read as 46% TypeScript,
+    against Python being the primary language in seven of nine repositories. So
+    each repo contributes its own percentage breakdown and those are averaged.
+
+    Returns (distribution, total_bytes).
+    """
     repos = api(f"https://api.github.com/users/{USER}/repos?per_page=100")
-    totals = {}
+    acc, total_bytes = {}, 0
     for r in repos:
         if r["fork"] or r["name"] in EXCLUDE_REPOS:
             continue
-        for k, v in api(r["languages_url"]).items():
-            if k not in EXCLUDE_LANGS:
-                totals[k] = totals.get(k, 0) + v
-    return sorted(totals.items(), key=lambda kv: -kv[1])
+        kept = {k: v for k, v in api(r["languages_url"]).items()
+                if k not in EXCLUDE_LANGS}
+        s = sum(kept.values())
+        total_bytes += s
+        if s < 500:                      # skip empty or placeholder repos
+            continue
+        for k, v in kept.items():
+            acc[k] = acc.get(k, 0) + v / s
+    return sorted(acc.items(), key=lambda kv: -kv[1]), total_bytes
 
 
 def fetch_activity():
@@ -177,7 +191,7 @@ def fetch_activity():
     return series, repos.most_common(3), last
 
 
-def fetch_stats(langs, activity):
+def fetch_stats(langs, total_bytes, activity):
     u = api(f"https://api.github.com/users/{USER}")
     total = sum(v for _, v in langs) or 1
     top_name, top_val = langs[0] if langs else ("n/a", 0)
@@ -187,7 +201,7 @@ def fetch_stats(langs, activity):
         ("Public repos", str(u.get("public_repos", "n/a")), "#58a6ff"),
         ("Languages", str(len(langs)), "#bc8cff"),
         (f"{top_name}", f"{100*top_val/total:.0f}%", "#3572A5"),
-        ("Code written", f"{total/1024:.0f} KB", "#3fb950"),
+        ("Code written", f"{total_bytes/1024:.0f} KB", "#3fb950"),
         (f"Pushes, last {ACTIVITY_DAYS}d", str(recent), "#f34b7d"),
         ("On GitHub since", str(u.get("created_at", "----"))[:4], "#d29922"),
     ]
@@ -241,7 +255,7 @@ def card_languages(langs, t):
 
     h = 88 + ((len(shown) + 1) // 2) * 26 + 26
     body += (f'<text x="{pad}" y="{h-12}" fill="{t["muted"]}" font-size="10.5">'
-             f'by bytes across public repos · generated and vendored files excluded</text>')
+             f'each repo weighted equally · generated and vendored files excluded</text>')
     return shell(w, h, t, body, defs)
 
 
@@ -399,9 +413,9 @@ def card_focus(t):
 
 def main():
     OUT.mkdir(exist_ok=True)
-    langs = fetch_languages()
+    langs, total_bytes = fetch_languages()
     series, top_repos, last = fetch_activity()
-    stats = fetch_stats(langs, series)
+    stats = fetch_stats(langs, total_bytes, series)
     print("languages:", langs[:6])
     print("stats:", [(l, v) for l, v, _ in stats])
     print("activity: %d pushes over %d days" % (sum(n for _, n in series), len(series)))
