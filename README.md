@@ -27,112 +27,109 @@ couldn't answer by reading, so I write the thing that answers it.
 
 ### What I'm building
 
-<sub>Click any project to expand.</sub>
+<sub>Click a project for detail.</sub>
 
 <details>
-<summary><code>Cap_Match_Net&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
-<br>
-
-**Impedance matching as a constraint problem.**
+<summary><b>Cap_Match_Net</b> &nbsp;<sub>impedance matching as a constraint problem</sub></summary>
+<blockquote>
 
 Capacitor matching networks solved with Google OR-Tools. Takes a target impedance and
 returns a network built from components that actually exist in a parts bin, rather than the
 ideal values a textbook would hand you.
 
-[View on GitHub &rarr;](https://github.com/henrykanaskie/Cap_Match_Net)
+<a href="https://github.com/henrykanaskie/Cap_Match_Net">View the repository &rarr;</a>
 
+</blockquote>
 </details>
 
 <details>
-<summary><code>small-shell&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
-<br>
-
-**A Unix shell, signals and all.**
+<summary><b>small-shell</b> &nbsp;<sub>a Unix shell, signals and all</sub></summary>
+<blockquote>
 
 Job control, I/O redirection, and signal handling, including the parts that only start
 misbehaving once a process is backgrounded and something sends it a SIGTSTP at the wrong
 moment.
 
-[View on GitHub &rarr;](https://github.com/henrykanaskie/small-shell)
+<a href="https://github.com/henrykanaskie/small-shell">View the repository &rarr;</a>
 
+</blockquote>
 </details>
 
 <details>
-<summary><code>ML_quantitative_research&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
-<br>
-
-**Which signals survive a resample.**
+<summary><b>ML_quantitative_research</b> &nbsp;<sub>which signals survive a resample</sub></summary>
+<blockquote>
 
 Financial time-series research: log-return modeling, Pearson correlation structure, Kalman
 filtering, and block-bootstrap resampling measured against a Gaussian baseline. The whole
 point is separating apparent signal from noise wearing a pattern. A correlation that
 doesn't survive a block bootstrap was never there.
 
-[View on GitHub &rarr;](https://github.com/henrykanaskie/ML_quantitative_research)
+<a href="https://github.com/henrykanaskie/ML_quantitative_research">View the repository &rarr;</a>
 
+</blockquote>
 </details>
 
 <details>
-<summary><code>rLog&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
-<br>
-
-**Talk at it, get LaTeX back.**
+<summary><b>rLog</b> &nbsp;<sub>talk at it, get LaTeX back</sub></summary>
+<blockquote>
 
 Voice-driven logging. Audio goes in, gets transcribed, an LLM structures it against a fixed
 schema, and LaTeX comes out. CLI and web front ends over one shared store.
 
-[View on GitHub &rarr;](https://github.com/henrykanaskie/rLog)
+<sub>The code is local; the repository is still empty.</sub>
 
+</blockquote>
 </details>
 
 <details>
-<summary><code>gpt-scratch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
-<br>
-
-**A GPT with nothing imported. Still building it.**
+<summary><b>gpt-scratch</b> &nbsp;<sub>a GPT with nothing imported</sub></summary>
+<blockquote>
 
 Attention, tokenization, and the training loop written by hand rather than pulled from a
-library. Built to replace a vague sense of how transformers work with the ability to derive
-one. Grew out of my NeetCode ML coursework, then kept going past where the course stopped.
+library. The foundations and attention primitives are done; the transformer block, the GPT
+itself, and the training loop are still to come.
 
-[View on GitHub &rarr;](https://github.com/henrykanaskie/gpt-scratch)
+<a href="https://github.com/henrykanaskie/gpt-scratch">View the repository &rarr;</a>
 
+</blockquote>
 </details>
 
 <details>
-<summary><code>GrowthApp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Swift&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟣 scaffold</code></summary>
-<br>
-
-**A habit tracker that draws itself as a neural graph. Private.**
+<summary><b>GrowthApp</b> &nbsp;<sub>a habit tracker that draws itself as a neural graph</sub></summary>
+<blockquote>
 
 Each habit is a filament radiating from the center, each kept day a node, the day just kept
 glowing gold. Full WidgetKit suite over the same shared data.
 
+<sub>Private repository.</sub>
+
+</blockquote>
 </details>
 
 <details>
-<summary><code>me-tutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python/Astro&nbsp;🔵 active</code></summary>
-<br>
-
-**Agents writing a verified engineering curriculum. Private.**
+<summary><b>me-tutor</b> &nbsp;<sub>agents writing a verified engineering curriculum</sub></summary>
+<blockquote>
 
 An agent pipeline that writes a mechanical-engineering curriculum and builds a static site
 around it. Every numerical claim in every lesson has a matching assertion executed at build
 time. Generated physics is confidently wrong at a low but non-zero rate, and unverified
 output you study from for seven weeks is worse than no output at all.
 
+<sub>Private repository. Three of roughly fourteen modules written so far.</sub>
+
+</blockquote>
 </details>
 
 <details>
-<summary><code>pitwall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟠 in progress</code></summary>
-<br>
+<summary><b>pitwall</b> &nbsp;<sub>Formula 1 strategy and telemetry</sub></summary>
+<blockquote>
 
-**Formula 1 strategy and telemetry. Private.**
+Built on FastF1, currently a tire-degradation regression over stint data. Aimed at the
+strategy question of when a set of tires stops paying for itself.
 
-Built on FastF1, currently a tire-degradation regression over stint data, split
-backend/frontend. Aimed at the strategy question of when a set of tires stops paying for
-itself.
+<sub>Private repository.</sub>
 
+</blockquote>
 </details>
 
 <picture>
