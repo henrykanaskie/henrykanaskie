@@ -27,93 +27,95 @@ couldn't answer by reading, so I write the thing that answers it.
 
 ### What I'm building
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/projects?theme=dark">
-  <img src="https://henrykanaskie.com/api/cards/projects?theme=light" alt="Project stage">
-</picture>
-
 <sub>Click any project to expand.</sub>
 
 <details>
-<summary><b>gpt-scratch</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;·&nbsp; a GPT with nothing imported</summary>
-
+<summary><code>gpt-scratch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
 <br>
+
+**A GPT with nothing imported.**
 
 Attention, tokenization, and the training loop written by hand rather than pulled from a
 library. Built to replace a vague sense of how transformers work with the ability to derive
 one. Grew out of my NeetCode ML coursework, then kept going past where the course stopped.
 
-**→ [github.com/henrykanaskie/gpt-scratch](https://github.com/henrykanaskie/gpt-scratch)**
+[View on GitHub &rarr;](https://github.com/henrykanaskie/gpt-scratch)
 
 </details>
 
 <details>
-<summary><b>ML_quantitative_research</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;·&nbsp; which signals survive a resample</summary>
-
+<summary><code>ML_quantitative_research&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
 <br>
+
+**Which signals survive a resample.**
 
 Financial time-series research: log-return modeling, Pearson correlation structure, Kalman
 filtering, and block-bootstrap resampling measured against a Gaussian baseline. The whole
 point is separating apparent signal from noise wearing a pattern. A correlation that
 doesn't survive a block bootstrap was never there.
 
-**→ [github.com/henrykanaskie/ML_quantitative_research](https://github.com/henrykanaskie/ML_quantitative_research)**
+[View on GitHub &rarr;](https://github.com/henrykanaskie/ML_quantitative_research)
 
 </details>
 
 <details>
-<summary><b>Cap_Match_Net</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;·&nbsp; impedance matching as a constraint problem</summary>
-
+<summary><code>Cap_Match_Net&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
 <br>
+
+**Impedance matching as a constraint problem.**
 
 Capacitor matching networks solved with Google OR-Tools. Takes a target impedance and
 returns a network built from components that actually exist in a parts bin, rather than the
 ideal values a textbook would hand you.
 
-**→ [github.com/henrykanaskie/Cap_Match_Net](https://github.com/henrykanaskie/Cap_Match_Net)**
+[View on GitHub &rarr;](https://github.com/henrykanaskie/Cap_Match_Net)
 
 </details>
 
 <details>
-<summary><b>small-shell</b> &nbsp;·&nbsp; <code>C</code> &nbsp;·&nbsp; 🟢 shipped &nbsp;·&nbsp; a Unix shell, signals and all</summary>
-
+<summary><code>small-shell&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;C&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
 <br>
+
+**A Unix shell, signals and all.**
 
 Job control, I/O redirection, and signal handling, including the parts that only start
 misbehaving once a process is backgrounded and something sends it a SIGTSTP at the wrong
 moment.
 
-**→ [github.com/henrykanaskie/small-shell](https://github.com/henrykanaskie/small-shell)**
+[View on GitHub &rarr;](https://github.com/henrykanaskie/small-shell)
 
 </details>
 
 <details>
-<summary><b>rLog</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🔵 active &nbsp;·&nbsp; talk at it, get LaTeX back</summary>
-
+<summary><code>rLog&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
 <br>
+
+**Talk at it, get LaTeX back.**
 
 Voice-driven logging. Audio goes in, gets transcribed, an LLM structures it against a fixed
 schema, and LaTeX comes out. CLI and web front ends over one shared store.
 
-**→ [github.com/henrykanaskie/rLog](https://github.com/henrykanaskie/rLog)**
+[View on GitHub &rarr;](https://github.com/henrykanaskie/rLog)
 
 </details>
 
 <details>
-<summary><b>pitwall</b> &nbsp;·&nbsp; <code>Python</code> &nbsp;·&nbsp; 🟠 in progress &nbsp;·&nbsp; <i>private</i></summary>
-
+<summary><code>pitwall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟠 building</code></summary>
 <br>
 
-Formula 1 telemetry built on FastF1, currently a tire-degradation regression over stint
-data, split backend/frontend. Aimed at the strategy question of when a set of tires stops
-paying for itself.
+**Formula 1 strategy and telemetry. Private.**
+
+Built on FastF1, currently a tire-degradation regression over stint data, split
+backend/frontend. Aimed at the strategy question of when a set of tires stops paying for
+itself.
 
 </details>
 
 <details>
-<summary><b>me-tutor</b> &nbsp;·&nbsp; <code>Python</code> / <code>Astro</code> &nbsp;·&nbsp; 🔵 active &nbsp;·&nbsp; <i>private</i></summary>
-
+<summary><code>me-tutor&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python/Astro&nbsp;🔵 active</code></summary>
 <br>
+
+**Agents writing a verified engineering curriculum. Private.**
 
 An agent pipeline that writes a mechanical-engineering curriculum and builds a static site
 around it. Every numerical claim in every lesson has a matching assertion executed at build
@@ -123,15 +125,20 @@ output you study from for seven weeks is worse than no output at all.
 </details>
 
 <details>
-<summary><b>GrowthApp</b> &nbsp;·&nbsp; <code>Swift</code> &nbsp;·&nbsp; 🟣 scaffold &nbsp;·&nbsp; <i>private</i></summary>
-
+<summary><code>GrowthApp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Swift&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟣 scaffold</code></summary>
 <br>
 
-A SwiftUI habit tracker whose home screen is a living record: each habit a filament
-radiating from the center, each kept day a node, the day just kept glowing gold. Full
-WidgetKit suite over the same shared data.
+**A habit tracker that draws itself as a neural graph. Private.**
+
+Each habit is a filament radiating from the center, each kept day a node, the day just kept
+glowing gold. Full WidgetKit suite over the same shared data.
 
 </details>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/projects?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/projects?theme=light" alt="Project stage">
+</picture>
 
 ---
 
