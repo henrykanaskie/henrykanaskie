@@ -221,11 +221,13 @@ def card_languages(langs, t):
         x += seg
     body += "</g></g>"
 
-    # Percentage sits at a fixed column rather than after the name — estimating
-    # text width packed "C++" against "0.3%".
+    # Anchor each percentage to its column's right edge rather than a fixed
+    # offset from the name, so the right-hand column ends flush with the bar
+    # instead of stopping short of it.
     for i, (name, val) in enumerate(shown):
         col_i, row = i % 2, i // 2
         lx = pad + col_i * (bar_w / 2)
+        pct_x = pad + bar_w / 2 - 24 if col_i == 0 else pad + bar_w
         ly = 88 + row * 26
         pct = 100 * val / total
         dot = adapt(LANG_COLORS.get(name, "#8b949e"), t["name"])
@@ -234,7 +236,7 @@ def card_languages(langs, t):
                  f'<circle cx="{lx+5}" cy="{ly-4}" r="5" fill="{dot}"/>'
                  f'<text x="{lx+18}" y="{ly}" fill="{t["text"]}" font-size="12.5" '
                  f'font-weight="500">{esc(name)}</text>'
-                 f'<text x="{lx+150:.0f}" y="{ly}" fill="{t["muted"]}" '
+                 f'<text x="{pct_x:.0f}" y="{ly}" fill="{t["muted"]}" '
                  f'font-size="12.5" text-anchor="end">{pct:.1f}%</text></g>')
 
     h = 88 + ((len(shown) + 1) // 2) * 26 + 26
