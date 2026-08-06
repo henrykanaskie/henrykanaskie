@@ -51,15 +51,18 @@ STAGE_COLORS = {
     "scaffold":    ("#bc8cff", "#8957e5"),
 }
 
+# Stage is a band of the progress figure, not an independent label, so a
+# scaffold can never outrank something active:
+#   scaffold < 25 <= in progress < 45 <= active < 90 <= shipped
 PROJECTS = [
     ("Cap_Match_Net", "Capacitor matching via OR-Tools", "shipped", 1.00),
     ("small-shell", "Unix shell in C: jobs, signals, redirection", "shipped", 1.00),
     ("ML_quantitative_research", "Block bootstrap, log-return modeling", "active", 0.60),
-    ("rLog", "Voice-driven logging tool", "active", 0.55),
+    ("rLog", "Voice-driven logging, code not yet pushed", "active", 0.55),
     ("gpt-scratch", "Attention and foundations done, no GPT yet", "active", 0.45),
-    ("GrowthApp", "SwiftUI habit tracker, WidgetKit suite", "scaffold", 0.30),
-    ("me-tutor", "3 of ~14 modules written and verified", "active", 0.25),
-    ("pitwall", "Tire-degradation regression, early", "in progress", 0.20),
+    ("me-tutor", "3 of ~14 modules written and verified", "in progress", 0.25),
+    ("GrowthApp", "Running skeleton, one orb variant real", "scaffold", 0.22),
+    ("pitwall", "One regression file, frontend empty", "scaffold", 0.18),
 ]
 
 FOCUS = [
@@ -264,7 +267,7 @@ def card_projects(t):
     bar, percentage, stage label. The unfilled track is tinted with the row's
     own stage colour rather than left grey, which read as a stray pill."""
     w, pad, row_h, head_h = 900, 28, 56, 72
-    h = head_h + len(PROJECTS) * row_h + 18
+    h = head_h + len(PROJECTS) * row_h + 40
     bar_x, bar_w, bar_h = 452, 250, 8
     pct_x, label_x = 766, w - pad   # 766 clears the widest stage label
 
@@ -313,6 +316,9 @@ def card_projects(t):
                  f'letter-spacing="0.9" text-anchor="end">{fade(delay+0.5)}'
                  f'{esc(stage.upper())}</text>')
 
+    body += (f'<text x="{pad}" y="{h-14}" fill="{t["muted"]}" font-size="10">'
+             f'scaffold under 25%  ·  in progress 25 to 45  ·  active 45 to 90'
+             f'  ·  shipped 90 and up</text>')
     return shell(w, h, t, body, defs)
 
 
