@@ -30,35 +30,6 @@ couldn't answer by reading, so I write the thing that answers it.
 <sub>Click any project to expand.</sub>
 
 <details>
-<summary><code>gpt-scratch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
-<br>
-
-**A GPT with nothing imported.**
-
-Attention, tokenization, and the training loop written by hand rather than pulled from a
-library. Built to replace a vague sense of how transformers work with the ability to derive
-one. Grew out of my NeetCode ML coursework, then kept going past where the course stopped.
-
-[View on GitHub &rarr;](https://github.com/henrykanaskie/gpt-scratch)
-
-</details>
-
-<details>
-<summary><code>ML_quantitative_research&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
-<br>
-
-**Which signals survive a resample.**
-
-Financial time-series research: log-return modeling, Pearson correlation structure, Kalman
-filtering, and block-bootstrap resampling measured against a Gaussian baseline. The whole
-point is separating apparent signal from noise wearing a pattern. A correlation that
-doesn't survive a block bootstrap was never there.
-
-[View on GitHub &rarr;](https://github.com/henrykanaskie/ML_quantitative_research)
-
-</details>
-
-<details>
 <summary><code>Cap_Match_Net&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟢 shipped</code></summary>
 <br>
 
@@ -87,6 +58,21 @@ moment.
 </details>
 
 <details>
+<summary><code>ML_quantitative_research&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
+<br>
+
+**Which signals survive a resample.**
+
+Financial time-series research: log-return modeling, Pearson correlation structure, Kalman
+filtering, and block-bootstrap resampling measured against a Gaussian baseline. The whole
+point is separating apparent signal from noise wearing a pattern. A correlation that
+doesn't survive a block bootstrap was never there.
+
+[View on GitHub &rarr;](https://github.com/henrykanaskie/ML_quantitative_research)
+
+</details>
+
+<details>
 <summary><code>rLog&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
 <br>
 
@@ -100,14 +86,27 @@ schema, and LaTeX comes out. CLI and web front ends over one shared store.
 </details>
 
 <details>
-<summary><code>pitwall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟠 in progress</code></summary>
+<summary><code>gpt-scratch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🔵 active</code></summary>
 <br>
 
-**Formula 1 strategy and telemetry. Private.**
+**A GPT with nothing imported. Still building it.**
 
-Built on FastF1, currently a tire-degradation regression over stint data, split
-backend/frontend. Aimed at the strategy question of when a set of tires stops paying for
-itself.
+Attention, tokenization, and the training loop written by hand rather than pulled from a
+library. Built to replace a vague sense of how transformers work with the ability to derive
+one. Grew out of my NeetCode ML coursework, then kept going past where the course stopped.
+
+[View on GitHub &rarr;](https://github.com/henrykanaskie/gpt-scratch)
+
+</details>
+
+<details>
+<summary><code>GrowthApp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Swift&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟣 scaffold</code></summary>
+<br>
+
+**A habit tracker that draws itself as a neural graph. Private.**
+
+Each habit is a filament radiating from the center, each kept day a node, the day just kept
+glowing gold. Full WidgetKit suite over the same shared data.
 
 </details>
 
@@ -125,13 +124,14 @@ output you study from for seven weeks is worse than no output at all.
 </details>
 
 <details>
-<summary><code>GrowthApp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Swift&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟣 scaffold</code></summary>
+<summary><code>pitwall&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Python&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🟠 in progress</code></summary>
 <br>
 
-**A habit tracker that draws itself as a neural graph. Private.**
+**Formula 1 strategy and telemetry. Private.**
 
-Each habit is a filament radiating from the center, each kept day a node, the day just kept
-glowing gold. Full WidgetKit suite over the same shared data.
+Built on FastF1, currently a tire-degradation regression over stint data, split
+backend/frontend. Aimed at the strategy question of when a set of tires stops paying for
+itself.
 
 </details>
 

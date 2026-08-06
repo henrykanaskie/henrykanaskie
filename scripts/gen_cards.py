@@ -52,14 +52,14 @@ STAGE_COLORS = {
 }
 
 PROJECTS = [
-    ("gpt-scratch", "GPT built from first principles", "shipped", 1.00),
     ("Cap_Match_Net", "Capacitor matching via OR-Tools", "shipped", 1.00),
     ("small-shell", "Unix shell in C: jobs, signals, redirection", "shipped", 1.00),
-    ("ML_quantitative_research", "Block bootstrap, log-return modeling", "active", 0.70),
-    ("rLog", "Voice-driven logging tool", "active", 0.60),
-    ("me-tutor", "Agents generating a verified ME curriculum", "active", 0.50),
-    ("pitwall", "Motorsport strategy and telemetry", "in progress", 0.40),
+    ("ML_quantitative_research", "Block bootstrap, log-return modeling", "active", 0.60),
+    ("rLog", "Voice-driven logging tool", "active", 0.55),
+    ("gpt-scratch", "Attention and foundations done, no GPT yet", "active", 0.45),
     ("GrowthApp", "SwiftUI habit tracker, WidgetKit suite", "scaffold", 0.30),
+    ("me-tutor", "3 of ~14 modules written and verified", "active", 0.25),
+    ("pitwall", "Tire-degradation regression, early", "in progress", 0.20),
 ]
 
 FOCUS = [
@@ -260,9 +260,13 @@ def card_languages(langs, t):
 
 
 def card_projects(t):
-    w, pad = 900, 24
-    row_h, top = 46, 62
-    h = top + len(PROJECTS) * row_h + 24
+    """Rows are a four-column grid: status dot + name/description, progress
+    bar, percentage, stage label. The unfilled track is tinted with the row's
+    own stage colour rather than left grey, which read as a stray pill."""
+    w, pad, row_h, head_h = 900, 28, 56, 72
+    h = head_h + len(PROJECTS) * row_h + 18
+    bar_x, bar_w, bar_h = 452, 250, 8
+    pct_x, label_x = 766, w - pad   # 766 clears the widest stage label
 
     defs = ""
     for stage, (c1, c2) in STAGE_COLORS.items():
@@ -271,39 +275,43 @@ def card_projects(t):
                  f'<stop offset="0" stop-color="{c1}"/>'
                  f'<stop offset="1" stop-color="{c2}"/></linearGradient>')
 
-    body = (f'<text x="{pad}" y="34" fill="{t["title"]}" font-size="15" '
-            f'font-weight="600">Project stage</text>')
-    body += (f'<text x="{pad}" y="52" fill="{t["muted"]}" font-size="11.5">'
+    body = (f'<text x="{pad}" y="34" fill="{t["title"]}" font-size="16" '
+            f'font-weight="600" letter-spacing="-0.2">Project stage</text>')
+    body += (f'<text x="{pad}" y="54" fill="{t["muted"]}" font-size="11.5">'
              f'Where each project actually sits. A status readout, not a roadmap.</text>')
+    body += (f'<line x1="{pad}" y1="{head_h-0.5}" x2="{w-pad}" y2="{head_h-0.5}" '
+             f'stroke="{t["border"]}"/>')
 
-    bar_x, bar_w = 470, 250
     for i, (name, desc, stage, frac) in enumerate(PROJECTS):
-        y = top + i * row_h + 22
-        c1, c2 = STAGE_COLORS[stage]
         gid = "g" + stage.replace(" ", "")
-        delay = 0.2 + i * 0.09
+        accent = adapt(STAGE_COLORS[stage][0], t["name"])
+        row_y = head_h + i * row_h
+        mid = row_y + row_h / 2
+        delay = 0.18 + i * 0.08
 
-        body += (f'<text x="{pad}" y="{y}" fill="{t["text"]}" font-size="13" '
-                 f'font-weight="600">{esc(name)}</text>')
-        body += (f'<text x="{pad}" y="{y+15}" fill="{t["muted"]}" font-size="11">'
-                 f'{esc(desc)}</text>')
+        if i:
+            body += (f'<line x1="{pad}" y1="{row_y-0.5}" x2="{w-pad}" '
+                     f'y2="{row_y-0.5}" stroke="{t["border"]}" stroke-opacity="0.5"/>')
 
-        body += (f'<rect x="{bar_x}" y="{y-9}" width="{bar_w}" height="9" rx="4.5" '
-                 f'fill="{t["track"]}"/>')
-        body += (f'<rect x="{bar_x}" y="{y-9}" width="{bar_w*frac:.1f}" height="9" rx="4.5" '
-                 f'fill="url(#{gid})">{grow("width", f"{bar_w*frac:.1f}", delay)}</rect>')
-        body += (f'<text x="{bar_x+bar_w+12}" y="{y}" fill="{t["muted"]}" '
-                 f'font-size="11.5" font-weight="500">{fade(delay+0.5)}'
+        body += f'<circle cx="{pad+4}" cy="{mid-5}" r="4" fill="{accent}"/>'
+        body += (f'<text x="{pad+18}" y="{mid-1}" fill="{t["text"]}" '
+                 f'font-size="13.5" font-weight="600">{esc(name)}</text>')
+        body += (f'<text x="{pad+18}" y="{mid+15}" fill="{t["muted"]}" '
+                 f'font-size="11">{esc(desc)}</text>')
+
+        body += (f'<rect x="{bar_x}" y="{mid-bar_h/2}" width="{bar_w}" '
+                 f'height="{bar_h}" rx="{bar_h/2}" fill="{accent}" fill-opacity="0.14"/>')
+        body += (f'<rect x="{bar_x}" y="{mid-bar_h/2}" width="{bar_w*frac:.1f}" '
+                 f'height="{bar_h}" rx="{bar_h/2}" fill="url(#{gid})">'
+                 f'{grow("width", f"{bar_w*frac:.1f}", delay)}</rect>')
+
+        body += (f'<text x="{pct_x}" y="{mid+4}" fill="{accent}" font-size="13" '
+                 f'font-weight="700" text-anchor="end">{fade(delay+0.45)}'
                  f'{int(frac*100)}%</text>')
-
-        px = bar_x + bar_w + 56
-        pw = 8 + len(stage) * 6.6
-        body += (f'<g>{fade(delay+0.55)}'
-                 f'<rect x="{px}" y="{y-13}" width="{pw:.0f}" height="18" rx="9" '
-                 f'fill="{c2}" fill-opacity="0.16" stroke="{c2}" '
-                 f'stroke-opacity="0.45"/>'
-                 f'<text x="{px+pw/2:.0f}" y="{y}" fill="{c1}" font-size="10.5" '
-                 f'font-weight="600" text-anchor="middle">{esc(stage)}</text></g>')
+        body += (f'<text x="{label_x}" y="{mid+4}" fill="{accent}" '
+                 f'fill-opacity="0.85" font-size="9.5" font-weight="600" '
+                 f'letter-spacing="0.9" text-anchor="end">{fade(delay+0.5)}'
+                 f'{esc(stage.upper())}</text>')
 
     return shell(w, h, t, body, defs)
 
