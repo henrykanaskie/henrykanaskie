@@ -26,6 +26,11 @@ couldn't answer by reading, so I write the thing that answers it.
 ---
 
 <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/projects?theme=dark">
+  <img src="https://henrykanaskie.com/api/cards/projects?theme=light" alt="Project stage">
+</picture>
+
+<picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/stats?theme=dark">
   <img src="https://henrykanaskie.com/api/cards/stats?theme=light" alt="By the numbers">
 </picture>
@@ -155,13 +160,6 @@ radiating from the center, each kept day a node, the day just kept glowing gold.
 WidgetKit suite over the same shared data.
 
 </details>
-
----
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://henrykanaskie.com/api/cards/projects?theme=dark">
-  <img src="https://henrykanaskie.com/api/cards/projects?theme=light" alt="Project stage">
-</picture>
 
 ---
 
