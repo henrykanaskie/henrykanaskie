@@ -38,11 +38,33 @@ THEMES = {
                   text="#e6edf3", muted="#8b949e", track="#21262d"),
 }
 
-LANG_COLORS = {
-    "Python": "#3572A5", "C": "#555555", "C++": "#f34b7d", "JavaScript": "#f1e05a",
-    "TypeScript": "#3178c6", "Swift": "#F05138", "R": "#198CE7", "Shell": "#89e051",
-    "HTML": "#e34c26", "CSS": "#563d7c", "Jupyter Notebook": "#DA5B0B",
+# Linguist's own colors are not a palette: they were picked per language in
+# isolation, so Python (#3572A5) and TypeScript (#3178c6) are the same blue and
+# the bar reads as one undifferentiated block, while C (#555555) is a muddy grey.
+# These are eight categorical slots checked for colorblind separation against
+# both card backgrounds — (light, dark) per slot, dark stepped for #0d1117
+# rather than lightened from the light value.
+LANG_SLOTS = [
+    ("#2a78d6", "#3987e5"),   # blue
+    ("#eb6834", "#d95926"),   # orange
+    ("#1baf7a", "#199e70"),   # aqua
+    ("#eda100", "#c98500"),   # yellow
+    ("#e87ba4", "#d55181"),   # magenta
+    ("#008300", "#008300"),   # green
+    ("#4a3aa7", "#9085e9"),   # violet
+    ("#e34948", "#e66767"),   # red
+]
+
+# Colour follows the language, not its rank, so a card regenerated after the mix
+# shifts doesn't repaint everything. The order matches the usual ranking, which
+# keeps neighbouring bar segments on the slot pairs with the widest separation.
+LANG_SLOT = {
+    "Python": 0, "C": 1, "TypeScript": 2, "JavaScript": 3,
+    "Swift": 4, "Shell": 5, "R": 6, "C++": 7,
 }
+
+# Below this share a segment is a sub-pixel sliver and a legend row of noise.
+MIN_SHARE = 0.01
 
 STAGE_COLORS = {
     "shipped":     ("#3fb950", "#2ea043"),
@@ -212,53 +234,75 @@ def fetch_stats(langs, total_bytes, activity):
 
 # ── cards ─────────────────────────────────────────────────────────────────
 
+def lang_palette(names, theme):
+    """Map each shown language to a slot colour for this theme.
+
+    Anything outside LANG_SLOT takes the first slot no named language claimed,
+    so an unexpected language is still distinct rather than sharing a hue.
+    """
+    i = 1 if theme == "dark" else 0
+    taken = {LANG_SLOT[n] for n in names if n in LANG_SLOT}
+    spare = (s for s in range(len(LANG_SLOTS)) if s not in taken)
+    out = {}
+    for n in names:
+        slot = LANG_SLOT.get(n)
+        if slot is None:
+            slot = next(spare, len(LANG_SLOTS) - 1)
+        out[n] = LANG_SLOTS[slot][i]
+    return out
+
+
 def card_languages(langs, t):
     w, pad = 440, 20
-    total = sum(v for _, v in langs) or 1
-    shown = langs[:6]
+    grand = sum(v for _, v in langs) or 1
+    shown = [(n, v) for n, v in langs if v / grand >= MIN_SHARE][:6]
+    total = sum(v for _, v in shown) or 1
+    color = lang_palette([n for n, _ in shown], t["name"])
 
-    body = (f'<text x="{pad}" y="34" fill="{t["title"]}" font-size="15" '
+    body = (f'<text x="{pad}" y="32" fill="{t["title"]}" font-size="15" '
             f'font-weight="600">Languages</text>')
 
-    bar_y, bar_w, bar_h = 50, w - 2 * pad, 10
+    bar_y, bar_w, bar_h = 54, w - 2 * pad, 12
     defs = (f'<clipPath id="bar"><rect x="{pad}" y="{bar_y}" width="{bar_w}" '
-            f'height="{bar_h}" rx="5"/></clipPath>'
+            f'height="{bar_h}" rx="{bar_h/2}"/></clipPath>'
             f'<clipPath id="reveal"><rect x="{pad}" y="{bar_y}" width="{bar_w}" '
-            f'height="{bar_h}">{grow("width", bar_w, 0.15, 1.0)}</rect></clipPath>')
+            f'height="{bar_h}">{grow("width", bar_w, 0.15, 0.95)}</rect></clipPath>')
 
+    # The track sits under the segments, so the 2px it shows through between
+    # them separates neighbouring colours without a hard white cut.
     body += (f'<rect x="{pad}" y="{bar_y}" width="{bar_w}" height="{bar_h}" '
-             f'rx="5" fill="{t["track"]}"/>')
+             f'rx="{bar_h/2}" fill="{t["track"]}"/>')
     body += '<g clip-path="url(#bar)"><g clip-path="url(#reveal)">'
     x = pad
-    for name, val in shown:
+    for i, (name, val) in enumerate(shown):
         seg = bar_w * val / total
-        col = adapt(LANG_COLORS.get(name, "#8b949e"), t["name"])
-        body += (f'<rect x="{x:.2f}" y="{bar_y}" width="{seg:.2f}" '
-                 f'height="{bar_h}" fill="{col}"/>')
+        drawn = seg if i == len(shown) - 1 else max(1.0, seg - 2)
+        body += (f'<rect x="{x:.2f}" y="{bar_y}" width="{drawn:.2f}" '
+                 f'height="{bar_h}" fill="{color[name]}"/>')
         x += seg
     body += "</g></g>"
 
-    # Anchor each percentage to its column's right edge rather than a fixed
-    # offset from the name, so the right-hand column ends flush with the bar
-    # instead of stopping short of it.
+    # Two fixed columns with a gutter, each percentage flush to its own column's
+    # right edge — the pair of columns then ends flush with the bar above.
+    gutter, top, row_h = 22, 96, 24
+    col_w = (bar_w - gutter) / 2
     for i, (name, val) in enumerate(shown):
-        col_i, row = i % 2, i // 2
-        lx = pad + col_i * (bar_w / 2)
-        pct_x = pad + bar_w / 2 - 24 if col_i == 0 else pad + bar_w
-        ly = 88 + row * 26
-        pct = 100 * val / total
-        dot = adapt(LANG_COLORS.get(name, "#8b949e"), t["name"])
-        d = 0.4 + i * 0.07
-        body += (f'<g>{fade(d)}'
-                 f'<circle cx="{lx+5}" cy="{ly-4}" r="5" fill="{dot}"/>'
+        lx = pad + (i % 2) * (col_w + gutter)
+        ly = top + (i // 2) * row_h
+        body += (f'<g>{fade(0.35 + i * 0.07)}'
+                 f'<rect x="{lx}" y="{ly-9}" width="10" height="10" rx="3" '
+                 f'fill="{color[name]}"/>'
                  f'<text x="{lx+18}" y="{ly}" fill="{t["text"]}" font-size="12.5" '
                  f'font-weight="500">{esc(name)}</text>'
-                 f'<text x="{pct_x:.0f}" y="{ly}" fill="{t["muted"]}" '
-                 f'font-size="12.5" text-anchor="end">{pct:.1f}%</text></g>')
+                 f'<text x="{lx+col_w:.0f}" y="{ly}" fill="{t["muted"]}" '
+                 f'font-size="12" text-anchor="end">{100*val/total:.1f}%</text></g>')
 
-    h = 88 + ((len(shown) + 1) // 2) * 26 + 26
-    body += (f'<text x="{pad}" y="{h-12}" fill="{t["muted"]}" font-size="10.5">'
-             f'each repo weighted equally · generated and vendored files excluded</text>')
+    h = top + ((len(shown) + 1) // 2) * row_h + 28
+    body += (f'<line x1="{pad}" y1="{h-27.5}" x2="{w-pad}" y2="{h-27.5}" '
+             f'stroke="{t["border"]}" stroke-opacity="0.6"/>')
+    body += (f'<text x="{pad}" y="{h-11}" fill="{t["muted"]}" font-size="10.5">'
+             f'each repo weighted equally · under 1%, generated and vendored '
+             f'excluded</text>')
     return shell(w, h, t, body, defs)
 
 
