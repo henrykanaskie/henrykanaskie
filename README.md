@@ -57,11 +57,11 @@ Job control, I/O redirection, and signal handling, including the parts that only
 <tr>
 <td width="48" align="center">🔵</td>
 <td width="46" align="center"><img src="https://cdn.simpleicons.org/swift/F05138" alt="Swift" height="14" width="14" align="absmiddle"></td>
-<td><b>teamwork</b></td>
+<td><b>animAgent</b></td>
 <td><details><summary>Sprite Room: your agents rendered as pixel-art characters, dropping from the notch</summary><br>
 A macOS app that turns live Claude Code activity into a small pixel-art room of working characters — each agent a character, each tool call something it's visibly doing. Read-only by design: it never controls an agent and never shows prompt or response content. Milestone-driven build (M0 through M6); currently at M5, with 396 tests passing and the art pipeline not yet integrated, since the packs are purchased assets the repo can't redistribute.
 <br><br>
-<a href="https://github.com/henrykanaskie/teamwork">view the repository&nbsp;&rarr;</a>
+<a href="https://github.com/henrykanaskie/animAgent">view the repository&nbsp;&rarr;</a>
 </details></td>
 </tr>
 <tr>

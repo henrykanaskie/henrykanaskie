@@ -79,7 +79,7 @@ STAGE_COLORS = {
 PROJECTS = [
     ("Cap_Match_Net", "Capacitor matching via OR-Tools", "shipped", 1.00),
     ("small-shell", "Unix shell in C: jobs, signals, redirection", "shipped", 1.00),
-    ("teamwork", "Sprite Room: M5 of 7, tests pass, art not yet integrated", "active", 0.70),
+    ("animAgent", "Sprite Room: M5 of 7, tests pass, art not yet integrated", "active", 0.70),
     ("ML_quantitative_research", "Block bootstrap, log-return modeling", "active", 0.60),
     ("rLog", "Voice-driven logging, code not yet pushed", "active", 0.55),
     ("gpt-scratch", "Attention and foundations done, no GPT yet", "active", 0.45),
