@@ -1521,14 +1521,23 @@ def repo_chips(cfg: dict, t: dict) -> list:
 
 
 
-# The sheets are 900 wide. A row of chips is narrower than that and, left on its
-# own, floats in the middle of the page looking like it belongs to neither the
-# sheet above nor the one below. So each chip row is padded out to the sheet
-# width with two rule segments, which is what a drawing would do anyway: a label,
-# a leader out to the things being referenced, and a rule carrying on to the
-# sheet edge.
+# A chip row left on its own floats in the middle of the page, belonging to
+# neither the sheet above nor the one below. A label and a short leader fixes
+# that, which is what a drawing would do anyway.
 #
-# The rails are plain <img>, not anchors. Only the chips between them are links.
+# What does NOT work is padding the row out to the sheet width. A sheet is one
+# image and scales down to whatever the container is: GitHub's README column is
+# 846 CSS pixels, so a 900 wide sheet renders at 846. A row of small images does
+# not scale, it wraps, so a row built to total 900 breaks onto two lines and the
+# trailing rule lands alone on the second one. Measured on the live profile, a
+# row built to 900 wrapped as 679 + 220.
+#
+# So there is no trailing rule and the row is deliberately narrower than the
+# sheet. It has to survive wrapping anyway, because on a phone it will wrap no
+# matter what it totals, and a row of chips flowing onto a second line reads
+# fine as long as no rule fragment goes with them.
+#
+# The rail is a plain <img>, not an anchor. Only the chips are links.
 
 SHEET_W = 900
 
@@ -1553,18 +1562,19 @@ def chip_rail(width: float, t: dict, *, label: str = "") -> str:
             f'font-family="{bp.MONO}" role="presentation">{body}</svg>')
 
 
-def rail_widths(specs: list, label: str) -> tuple:
-    """Lead and trail widths so label + rails + chips total the sheet width.
+def rail_width(label: str) -> float:
+    """Width of the leading rail: the label plus a short leader stub.
 
-    Returns (0, 0) when the chips already fill the row, in which case the rails
-    are skipped rather than drawn a pixel wide.
+    Fixed, and short. It does not stretch to fill the row, because the row has
+    no fixed width to fill.
     """
-    used = sum(chip_width(lab, accent=bool(acc)) for _s, lab, _h, acc in specs)
-    lead = _w(label.upper(), 7.5, 1.3) + 34
-    trail = SHEET_W - used - lead
-    if trail < 16 or used >= SHEET_W:
-        return 0, 0
-    return lead, trail
+    return _w(str(label).upper(), 7.5, 1.3) + 34 if label else 0.0
+
+
+def row_width(specs: list, label: str) -> float:
+    """Total advance of a chip row, for checking it clears the README column."""
+    return rail_width(label) + sum(
+        chip_width(lab, accent=bool(acc)) for _s, lab, _h, acc in specs)
 
 
 _RENDERERS = {

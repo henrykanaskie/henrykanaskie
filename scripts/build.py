@@ -42,6 +42,10 @@ RAW = "https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets
 LINK_LABEL = "REFERENCES"
 REPO_LABEL = "SOURCE"
 
+# GitHub renders a README into an 846 CSS pixel column on a desktop profile page
+# and 861 in the blob view. Measured, not guessed.
+README_COL = 846
+
 
 # ── validation ───────────────────────────────────────────────────────────────
 
@@ -217,13 +221,13 @@ def chip_row(specs: list, stamp: str, label: str, slug: str) -> str:
     up as a ragged gap in the strip. Each chip carries its own padding instead,
     so the line is long and unbroken on purpose.
     """
-    lead, trail = cards.rail_widths(specs, label)
     parts = []
+    lead = cards.rail_width(label)
     if lead:
         parts.append(
             f'<picture><source media="(prefers-color-scheme: dark)" '
-            f'srcset="{RAW}/rail-{slug}-lead-dark.svg?v={stamp}">'
-            f'<img src="{RAW}/rail-{slug}-lead-light.svg?v={stamp}" alt="">'
+            f'srcset="{RAW}/rail-{slug}-dark.svg?v={stamp}">'
+            f'<img src="{RAW}/rail-{slug}-light.svg?v={stamp}" alt="">'
             f'</picture>')
     for slug_, label_, href, _accent in specs:
         parts.append(
@@ -234,12 +238,6 @@ def chip_row(specs: list, stamp: str, label: str, slug: str) -> str:
             f'<img src="{RAW}/chip-{slug_}-light.svg?v={stamp}" '
             f'alt="{esc_attr(label_)}">'
             f'</picture></a>')
-    if trail:
-        parts.append(
-            f'<picture><source media="(prefers-color-scheme: dark)" '
-            f'srcset="{RAW}/rail-{slug}-trail-dark.svg?v={stamp}">'
-            f'<img src="{RAW}/rail-{slug}-trail-light.svg?v={stamp}" alt="">'
-            f'</picture>')
     return "".join(parts)
 
 
@@ -404,14 +402,17 @@ def main() -> int:
         for row, rlabel, rspecs in (
                 ("links", LINK_LABEL, cards.link_chips(cfg)),
                 ("repos", REPO_LABEL, cards.repo_chips(cfg, t))):
-            lead, trail = cards.rail_widths(rspecs, rlabel)
-            for side, w, lab in (("lead", lead, rlabel), ("trail", trail, "")):
-                if not w:
-                    continue
-                svg = cards.chip_rail(w, t, label=lab)
-                xml.dom.minidom.parseString(svg)
-                (ASSETS / f"rail-{row}-{side}-{ground}.svg").write_text(svg)
-                written += 1
+            svg = cards.chip_rail(cards.rail_width(rlabel), t, label=rlabel)
+            xml.dom.minidom.parseString(svg)
+            (ASSETS / f"rail-{row}-{ground}.svg").write_text(svg)
+            written += 1
+            # The README column is 846 CSS pixels on a desktop profile. A row
+            # wider than that wraps, which is survivable but not intended, so
+            # say so at build time rather than discovering it on the page.
+            total = cards.row_width(rspecs, rlabel)
+            if ground == "light" and total > README_COL:
+                print(f"  note: the {row} chip row is {total:.0f}px and will "
+                      f"wrap below {total:.0f}px of column", file=sys.stderr)
     print(f"  wrote {written - len(cards.CARDS) * 2} chips")
 
     README.write_text(render_readme(cfg, data))
