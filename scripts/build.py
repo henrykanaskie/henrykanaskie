@@ -37,6 +37,11 @@ README = ROOT / "README.md"
 
 RAW = "https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets"
 
+# Labels on the two chip rails. They read as drawing furniture, so they are set
+# in the same small caps as the zone letters rather than as a sentence.
+LINK_LABEL = "REFERENCES"
+REPO_LABEL = "SOURCE"
+
 
 # ── validation ───────────────────────────────────────────────────────────────
 
@@ -204,7 +209,7 @@ def picture(card: str, alt: str, stamp: str, width: str | None = None) -> str:
     )
 
 
-def chip_row(specs: list, stamp: str) -> str:
+def chip_row(specs: list, stamp: str, label: str, slug: str) -> str:
     """A row of anchored chips, as one line of markdown with no gaps.
 
     The chips MUST be emitted with no whitespace between them. A newline or a
@@ -212,16 +217,29 @@ def chip_row(specs: list, stamp: str) -> str:
     up as a ragged gap in the strip. Each chip carries its own padding instead,
     so the line is long and unbroken on purpose.
     """
+    lead, trail = cards.rail_widths(specs, label)
     parts = []
-    for slug, label, href, _accent in specs:
+    if lead:
+        parts.append(
+            f'<picture><source media="(prefers-color-scheme: dark)" '
+            f'srcset="{RAW}/rail-{slug}-lead-dark.svg?v={stamp}">'
+            f'<img src="{RAW}/rail-{slug}-lead-light.svg?v={stamp}" alt="">'
+            f'</picture>')
+    for slug_, label_, href, _accent in specs:
         parts.append(
             f'<a href="{esc_attr(href)}">'
             f'<picture>'
             f'<source media="(prefers-color-scheme: dark)" '
-            f'srcset="{RAW}/chip-{slug}-dark.svg?v={stamp}">'
-            f'<img src="{RAW}/chip-{slug}-light.svg?v={stamp}" '
-            f'alt="{esc_attr(label)}">'
+            f'srcset="{RAW}/chip-{slug_}-dark.svg?v={stamp}">'
+            f'<img src="{RAW}/chip-{slug_}-light.svg?v={stamp}" '
+            f'alt="{esc_attr(label_)}">'
             f'</picture></a>')
+    if trail:
+        parts.append(
+            f'<picture><source media="(prefers-color-scheme: dark)" '
+            f'srcset="{RAW}/rail-{slug}-trail-dark.svg?v={stamp}">'
+            f'<img src="{RAW}/rail-{slug}-trail-light.svg?v={stamp}" alt="">'
+            f'</picture>')
     return "".join(parts)
 
 
@@ -230,55 +248,50 @@ def esc_attr(v: str) -> str:
             .replace("<", "&lt;").replace(">", "&gt;"))
 
 
-def bom_table(cfg: dict) -> str:
-    """The project list as collapsible markdown rows.
 
-    The bom card already draws the same projects, but a card is an image: it is
-    not selectable, not searchable, and a screen reader gets only the alt text.
-    So the card carries the drawing and this carries the words, and the detail
-    stays behind <details> so the section is scannable at rest.
+
+def card_alt(card: str, cfg: dict, data: dict) -> str:
+    """Alt text that carries the sheet's content, not its name.
+
+    Removing the plain-text index made this the only thing a screen reader gets,
+    so "Bill of materials" is not good enough: the alt has to say what is on the
+    sheet. Kept to one flowing sentence per sheet, because a screen reader reads
+    alt text straight through with no punctuation pauses to lean on.
     """
-    marks = {s["key"]: s.get("mark", "") for s in cfg["status"]}
-    rows = []
-    for p in cfg["projects"]:
-        link = (f'<a href="{p["repo"]}">view the repository&nbsp;&rarr;</a>'
-                if p.get("repo") else f'<sub>{p.get("private", "private")}</sub>')
-        notes = " · ".join(p.get("notes", []))
-        notes = f'<br><sub>{notes}</sub>' if notes else ""
-        rows.append(
-            f'<tr>\n'
-            f'<td align="center"><code>{p["pn"]}</code></td>\n'
-            f'<td align="center">{marks.get(p["status"], "")}</td>\n'
-            f'<td><details><summary><b>{p["name"]}</b>: {p["summary"]}</summary>'
-            f'<br>\n{" ".join(p["detail"].split())}\n{notes}<br><br>\n{link}\n'
-            f'</details></td>\n'
-            f'</tr>'
-        )
-    return ("<table>\n<tbody>\n" + "\n".join(rows) + "\n</tbody>\n</table>")
-
-
-def notes_block(cfg: dict, data: dict) -> str:
-    """The numbered notes, in markdown, for the written index.
-
-    The notes sheet draws these same notes. Both call cards.todays_note() rather
-    than each picking a note for itself, because two implementations of "which
-    note is today's" would eventually disagree and the sheet would then contradict
-    the text underneath it.
-    """
-    note = cards.todays_note(cfg, data)
-    lines = [
-        "1. All figures are read from the GitHub API at build time. Status and "
-        "completion are hand-set in "
-        "[`data/profile.toml`](data/profile.toml) and reviewed, not inferred.",
-    ]
-    if note:
-        lines.append(f"2. {note}")
-    if data.get("errors"):
-        lines.append(
-            f"{len(lines) + 1}. This build degraded {len(data['errors'])} "
-            f"telemetry channel(s); those cells read NO DATA rather than "
-            f"showing stale values.")
-    return "\n".join(lines)
+    if card == "bom":
+        parts = ", ".join(
+            f'{p["name"]} {p["status"].lower()} at {round(p["completion"]*100)}%'
+            for p in cfg.get("projects", []))
+        return f"Bill of materials. {parts}." if parts else "Bill of materials, empty."
+    if card == "general":
+        body = " ".join(" ".join(cfg.get("about", {}).get("body", [])).split())
+        pts = ". ".join(x.replace("**", "")
+                        for x in cfg.get("about", {}).get("points", []))
+        foc = ", ".join(cfg.get("focus", []))
+        return f"{body} {pts}. Focus areas: {foc}."
+    if card == "telemetry":
+        bits = []
+        if data.get("launch"):
+            bits.append(f'next launch {data["launch"].get("name")}')
+        if data.get("humans") is not None:
+            bits.append(f'{data["humans"]} people in space')
+        if data.get("iss"):
+            bits.append(f'ISS at {data["iss"]["lat"]:.1f} degrees latitude')
+        if data.get("last_push"):
+            bits.append(f'last push to {data["last_push"].get("repo")}')
+        return "Daily telemetry. " + ("; ".join(bits) + "." if bits else "No data.")
+    if card == "composition":
+        langs = ", ".join(f"{n} {100*v:.0f}%" for n, v in
+                          (data.get("languages") or [])[:6])
+        return f"Language composition: {langs}." if langs else "Language composition, no data."
+    if card == "activity":
+        total = sum(c for _d, c in (data.get("activity") or []))
+        return f"Push activity, {total} pushes over the last 30 days."
+    if card == "notes":
+        return "Notes. " + (cards.todays_note(cfg, data) or "No notes.")
+    ident = cfg.get("identity", {})
+    return (f'Title block. {ident.get("name")}. {ident.get("title")}. '
+            f'{ident.get("tagline")} Revision {ident.get("revision")}.')
 
 
 def render_readme(cfg: dict, data: dict) -> str:
@@ -295,24 +308,20 @@ def render_readme(cfg: dict, data: dict) -> str:
         "WEBSITE": ident["website"],
         "GITHUB": ident["github"],
         "REVISION": ident["revision"],
-        "ABOUT": about,
-        "POINTS": points,
-        "FOCUS": focus,
-        "BOM_TABLE": bom_table(cfg),
-        "NOTES": notes_block(cfg, data),
         "BUILT": now.strftime("%Y-%m-%d %H:%M UTC"),
         "SHEET_COUNT": len(cards.CARDS),
         "WEBSITE_LABEL": ident["website"].split("//")[-1].rstrip("/"),
-        "LINK_CHIPS": chip_row(cards.link_chips(cfg), stamp),
-        "REPO_CHIPS": chip_row(
-            cards.repo_chips(cfg, blueprint.GROUNDS["light"]), stamp),
-        "CARD_TITLEBLOCK": picture("titleblock", "Title block", stamp),
-        "CARD_GENERAL": picture("general", "General notes", stamp),
-        "CARD_NOTES": picture("notes", "Notes", stamp),
-        "CARD_BOM": picture("bom", "Bill of materials", stamp),
-        "CARD_TELEMETRY": picture("telemetry", "Daily telemetry", stamp),
-        "CARD_COMPOSITION": picture("composition", "Language composition", stamp),
-        "CARD_ACTIVITY": picture("activity", "Push activity", stamp),
+        "LINK_CHIPS": chip_row(cards.link_chips(cfg), stamp,
+                               LINK_LABEL, "links"),
+        "REPO_CHIPS": chip_row(cards.repo_chips(cfg, blueprint.GROUNDS["light"]),
+                               stamp, REPO_LABEL, "repos"),
+        "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), stamp),
+        "CARD_GENERAL": picture("general", card_alt("general", cfg, data), stamp),
+        "CARD_NOTES": picture("notes", card_alt("notes", cfg, data), stamp),
+        "CARD_BOM": picture("bom", card_alt("bom", cfg, data), stamp),
+        "CARD_TELEMETRY": picture("telemetry", card_alt("telemetry", cfg, data), stamp),
+        "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), stamp),
+        "CARD_ACTIVITY": picture("activity", card_alt("activity", cfg, data), stamp),
     }
 
     out = tmpl
@@ -392,6 +401,17 @@ def main() -> int:
             xml.dom.minidom.parseString(svg)
             (ASSETS / f"chip-{slug}-{ground}.svg").write_text(svg)
             written += 1
+        for row, rlabel, rspecs in (
+                ("links", LINK_LABEL, cards.link_chips(cfg)),
+                ("repos", REPO_LABEL, cards.repo_chips(cfg, t))):
+            lead, trail = cards.rail_widths(rspecs, rlabel)
+            for side, w, lab in (("lead", lead, rlabel), ("trail", trail, "")):
+                if not w:
+                    continue
+                svg = cards.chip_rail(w, t, label=lab)
+                xml.dom.minidom.parseString(svg)
+                (ASSETS / f"rail-{row}-{side}-{ground}.svg").write_text(svg)
+                written += 1
     print(f"  wrote {written - len(cards.CARDS) * 2} chips")
 
     README.write_text(render_readme(cfg, data))

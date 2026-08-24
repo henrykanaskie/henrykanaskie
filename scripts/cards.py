@@ -1520,6 +1520,53 @@ def repo_chips(cfg: dict, t: dict) -> list:
     return out
 
 
+
+# The sheets are 900 wide. A row of chips is narrower than that and, left on its
+# own, floats in the middle of the page looking like it belongs to neither the
+# sheet above nor the one below. So each chip row is padded out to the sheet
+# width with two rule segments, which is what a drawing would do anyway: a label,
+# a leader out to the things being referenced, and a rule carrying on to the
+# sheet edge.
+#
+# The rails are plain <img>, not anchors. Only the chips between them are links.
+
+SHEET_W = 900
+
+
+def chip_rail(width: float, t: dict, *, label: str = "") -> str:
+    """A rule segment that pads a chip row out to the sheet width.
+
+    Transparent: it sits on the page ground, not on a card ground, so filling it
+    would draw a visible box edge where the drawing wants a bare line.
+    """
+    width = max(1.0, float(width))
+    y = CHIP_H / 2
+    body = ""
+    x = 0.0
+    if label:
+        body += caps(2, y + 3.2, label, t, size=7.5, track=1.3, color="faint")
+        x = _w(str(label).upper(), 7.5, 1.3) + 10
+    if width - x > 4:
+        body += rule(x, y, width - 2, y, t, color="rule", w=1.0, opacity=0.8)
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{width:.0f}" '
+            f'height="{CHIP_H}" viewBox="0 0 {width:.1f} {CHIP_H}" '
+            f'font-family="{bp.MONO}" role="presentation">{body}</svg>')
+
+
+def rail_widths(specs: list, label: str) -> tuple:
+    """Lead and trail widths so label + rails + chips total the sheet width.
+
+    Returns (0, 0) when the chips already fill the row, in which case the rails
+    are skipped rather than drawn a pixel wide.
+    """
+    used = sum(chip_width(lab, accent=bool(acc)) for _s, lab, _h, acc in specs)
+    lead = _w(label.upper(), 7.5, 1.3) + 34
+    trail = SHEET_W - used - lead
+    if trail < 16 or used >= SHEET_W:
+        return 0, 0
+    return lead, trail
+
+
 _RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
