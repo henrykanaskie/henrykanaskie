@@ -1,0 +1,104 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  GENERATED FILE — DO NOT EDIT                                            ║
+  ║                                                                          ║
+  ║  Every word below comes from data/profile.toml, laid into                ║
+  ║  templates/README.md.tmpl by scripts/build.py. Edits made here are       ║
+  ║  overwritten by the next daily build.                                    ║
+  ║                                                                          ║
+  ║      change the words   ->  data/profile.toml                            ║
+  ║      change the layout  ->  templates/README.md.tmpl                     ║
+  ║      change the cards   ->  scripts/cards.py                             ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+-->
+
+<div align="center">
+
+{{CARD_TITLEBLOCK}}
+
+<em>{{TAGLINE}}</em>
+
+<a href="{{WEBSITE}}"><img src="https://img.shields.io/badge/{{GITHUB}}.com-16202b?style=flat-square&logo=safari&logoColor=white&labelColor=16202b" alt="Website"></a>
+<a href="https://github.com/{{GITHUB}}?tab=repositories"><img src="https://img.shields.io/badge/repositories-16202b?style=flat-square&logo=github&logoColor=white&labelColor=16202b" alt="Repositories"></a>
+<img src="https://komarev.com/ghpvc/?username={{GITHUB}}&style=flat-square&color=1f6feb&label=sheet+views" alt="Profile views">
+
+</div>
+
+---
+
+### `A1` &nbsp; GENERAL
+
+{{ABOUT}}
+
+{{POINTS}}
+
+---
+
+### `B1` &nbsp; BILL OF MATERIALS
+
+{{CARD_BOM}}
+
+<sub>Completion is dimensioned, not asserted. The red revision cloud marks whichever part was
+last pushed to. Expand a row for the full description.</sub>
+
+{{BOM_TABLE}}
+
+---
+
+### `C1` &nbsp; TELEMETRY
+
+<sub>Rebuilt every morning. Orbital data from <a href="https://thespacedevs.com">thespacedevs</a>
+and <a href="https://wheretheiss.at">wheretheiss.at</a>; push activity from the GitHub API. Any
+channel that cannot be reached reads NO DATA rather than showing a stale figure.</sub>
+
+{{CARD_TELEMETRY}}
+
+---
+
+### `D1` &nbsp; MATERIALS AND ACTIVITY
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+{{CARD_COMPOSITION}}
+
+</td>
+<td width="50%" valign="top">
+
+{{CARD_ACTIVITY}}
+
+</td>
+</tr>
+</table>
+
+<sub>Focus:</sub> {{FOCUS}}
+
+---
+
+### `E1` &nbsp; NOTES
+
+{{NOTES}}
+
+---
+
+### `F1` &nbsp; CONTRIBUTION GRAPH
+
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/{{GITHUB}}/{{GITHUB}}/output/github-snake-dark.svg">
+    <img src="https://raw.githubusercontent.com/{{GITHUB}}/{{GITHUB}}/output/github-snake.svg" alt="A snake eating the contribution graph">
+  </picture>
+</div>
+
+---
+
+<div align="center">
+<sub>
+REV {{REVISION}} &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT {{BUILT}} &nbsp;·&nbsp; SCALE NONE<br>
+Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
+<a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
+Cards animate as they draw themselves in; they degrade to their finished state where
+SMIL is unsupported.
+</sub>
+</div>

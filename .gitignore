@@ -1,0 +1,4 @@
+# Bytecode from scripts/. The daily workflow runs build.py directly, so nothing
+# here is ever needed at rest.
+__pycache__/
+*.pyc
