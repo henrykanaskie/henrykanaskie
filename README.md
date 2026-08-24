@@ -197,7 +197,7 @@ channel that cannot be reached reads NO DATA rather than showing a stale figure.
 
 <div align="center">
 <sub>
-REV D &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT 2026-08-24 08:10 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV D &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT 2026-08-24 08:12 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
 <a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
 Cards animate as they draw themselves in; they degrade to their finished state where
