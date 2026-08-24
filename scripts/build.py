@@ -204,6 +204,32 @@ def picture(card: str, alt: str, stamp: str, width: str | None = None) -> str:
     )
 
 
+def chip_row(specs: list, stamp: str) -> str:
+    """A row of anchored chips, as one line of markdown with no gaps.
+
+    The chips MUST be emitted with no whitespace between them. A newline or a
+    space between two inline images becomes a rendered space, which would show
+    up as a ragged gap in the strip. Each chip carries its own padding instead,
+    so the line is long and unbroken on purpose.
+    """
+    parts = []
+    for slug, label, href, _accent in specs:
+        parts.append(
+            f'<a href="{esc_attr(href)}">'
+            f'<picture>'
+            f'<source media="(prefers-color-scheme: dark)" '
+            f'srcset="{RAW}/chip-{slug}-dark.svg?v={stamp}">'
+            f'<img src="{RAW}/chip-{slug}-light.svg?v={stamp}" '
+            f'alt="{esc_attr(label)}">'
+            f'</picture></a>')
+    return "".join(parts)
+
+
+def esc_attr(v: str) -> str:
+    return (str(v).replace("&", "&amp;").replace('"', "&quot;")
+            .replace("<", "&lt;").replace(">", "&gt;"))
+
+
 def bom_table(cfg: dict) -> str:
     """The project list as collapsible markdown rows.
 
@@ -277,6 +303,9 @@ def render_readme(cfg: dict, data: dict) -> str:
         "BUILT": now.strftime("%Y-%m-%d %H:%M UTC"),
         "SHEET_COUNT": len(cards.CARDS),
         "WEBSITE_LABEL": ident["website"].split("//")[-1].rstrip("/"),
+        "LINK_CHIPS": chip_row(cards.link_chips(cfg), stamp),
+        "REPO_CHIPS": chip_row(
+            cards.repo_chips(cfg, blueprint.GROUNDS["light"]), stamp),
         "CARD_TITLEBLOCK": picture("titleblock", "Title block", stamp),
         "CARD_GENERAL": picture("general", "General notes", stamp),
         "CARD_NOTES": picture("notes", "Notes", stamp),
@@ -351,6 +380,19 @@ def main() -> int:
             (ASSETS / f"{name}-{ground}.svg").write_text(svg)
             written += 1
             print(f"  wrote {name}-{ground}.svg  {len(svg):>6,} B")
+
+    # Chips are per link rather than per card, and there is one file per chip
+    # per ground. They are small, and it is the only construct GitHub leaves
+    # intact that can both carry a link and look like part of the drawing.
+    for ground, t in blueprint.GROUNDS.items():
+        specs = (cards.link_chips(cfg)
+                 + cards.repo_chips(cfg, t))
+        for slug, label, _href, accent in specs:
+            svg = cards.chip(label, t, accent=accent)
+            xml.dom.minidom.parseString(svg)
+            (ASSETS / f"chip-{slug}-{ground}.svg").write_text(svg)
+            written += 1
+    print(f"  wrote {written - len(cards.CARDS) * 2} chips")
 
     README.write_text(render_readme(cfg, data))
     print(f"wrote {written} cards and README.md")

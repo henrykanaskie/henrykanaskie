@@ -19,22 +19,28 @@
   set in the default UI font, sitting directly above a monospace drawing, was
   the single thing making the page read as two documents stapled together.
 
-  The only prose left outside a card is the link row and the collapsed index.
-  That index is not decoration. An SVG served through <img> gives a screen
-  reader nothing but its alt text, and no link inside it is clickable. So every
-  word that appears on a sheet also appears there as selectable text with real
-  anchors.
+  Links are drawings too. An <img> is inert, so nothing inside a sheet is
+  clickable, and GitHub's sanitiser removes inline <svg>, <object> and <map>.
+  What it keeps is an <a> around a <picture>, so every link on this page is its
+  own small chip SVG wrapped in an anchor. They are emitted with no whitespace
+  between them, because a newline between two inline images renders as a gap.
+
+  The collapsed index is still not decoration. Those sheets give a screen reader
+  nothing but alt text, so every word on every sheet also appears there as
+  selectable text.
 -->
 
 <div align="center">
 
 {{CARD_TITLEBLOCK}}
 
-[`{{WEBSITE_LABEL}}`]({{WEBSITE}}) &nbsp;·&nbsp; [`repositories`](https://github.com/{{GITHUB}}?tab=repositories) &nbsp;·&nbsp; [`how this is built`](SETUP.md) &nbsp;·&nbsp; [`the source of truth`](data/profile.toml)
+{{LINK_CHIPS}}
 
 {{CARD_GENERAL}}
 
 {{CARD_BOM}}
+
+{{REPO_CHIPS}}
 
 </div>
 

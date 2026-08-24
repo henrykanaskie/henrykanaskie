@@ -19,11 +19,15 @@
   set in the default UI font, sitting directly above a monospace drawing, was
   the single thing making the page read as two documents stapled together.
 
-  The only prose left outside a card is the link row and the collapsed index.
-  That index is not decoration. An SVG served through <img> gives a screen
-  reader nothing but its alt text, and no link inside it is clickable. So every
-  word that appears on a sheet also appears there as selectable text with real
-  anchors.
+  Links are drawings too. An <img> is inert, so nothing inside a sheet is
+  clickable, and GitHub's sanitiser removes inline <svg>, <object> and <map>.
+  What it keeps is an <a> around a <picture>, so every link on this page is its
+  own small chip SVG wrapped in an anchor. They are emitted with no whitespace
+  between them, because a newline between two inline images renders as a gap.
+
+  The collapsed index is still not decoration. Those sheets give a screen reader
+  nothing but alt text, so every word on every sheet also appears there as
+  selectable text.
 -->
 
 <div align="center">
@@ -33,7 +37,7 @@
   <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=20260824" alt="Title block">
 </picture>
 
-[`henrykanaskie.com`](https://henrykanaskie.com) &nbsp;·&nbsp; [`repositories`](https://github.com/henrykanaskie?tab=repositories) &nbsp;·&nbsp; [`how this is built`](SETUP.md) &nbsp;·&nbsp; [`the source of truth`](data/profile.toml)
+<a href="https://henrykanaskie.com"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-light.svg?v=20260824" alt="henrykanaskie.com"></picture></a><a href="https://github.com/henrykanaskie?tab=repositories"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-light.svg?v=20260824" alt="repositories"></picture></a><a href="SETUP.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-light.svg?v=20260824" alt="how this is built"></picture></a><a href="data/profile.toml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-light.svg?v=20260824" alt="the source of truth"></picture></a>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-dark.svg?v=20260824">
@@ -44,6 +48,8 @@
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-dark.svg?v=20260824">
   <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-light.svg?v=20260824" alt="Bill of materials">
 </picture>
+
+<a href="https://github.com/henrykanaskie/Cap_Match_Net"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-opt-01-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-opt-01-light.svg?v=20260824" alt="Cap_Match_Net"></picture></a><a href="https://github.com/henrykanaskie/small-shell"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-sys-01-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-sys-01-light.svg?v=20260824" alt="small-shell"></picture></a><a href="https://github.com/henrykanaskie/gpt-scratch"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-mdl-01-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-mdl-01-light.svg?v=20260824" alt="gpt-scratch"></picture></a><a href="https://github.com/henrykanaskie/animAgent"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-app-01-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-app-01-light.svg?v=20260824" alt="animAgent"></picture></a><a href="https://github.com/henrykanaskie/ML_quantitative_research"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-qnt-01-dark.svg?v=20260824"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-qnt-01-light.svg?v=20260824" alt="ML_quantitative_research"></picture></a>
 
 </div>
 
@@ -195,7 +201,7 @@ Built on FastF1, currently a tire-degradation regression over stint data. Aimed 
 </picture>
 
 <sub>
-REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 20:22 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 20:31 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
 <a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.

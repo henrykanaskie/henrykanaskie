@@ -1424,6 +1424,102 @@ def _notes(cfg, data, t):
 
 # ── entry point ──────────────────────────────────────────────────────────────
 
+
+# ── link chips ───────────────────────────────────────────────────────────────
+#
+# A sheet is served through <img>, and an <img> is inert: no link inside an SVG
+# is clickable once GitHub renders it that way. Inline <svg>, <object> and
+# <map>/<area> are all removed by GitHub's HTML sanitiser, so none of them can
+# carry a link either. What does survive is an <a> wrapping a <picture>, and two
+# of those set side by side with no whitespace between them stay touching.
+#
+# So a link is its own small drawing. Each chip is one SVG, anchored in the
+# markdown, and a row of them tiles into a strip that belongs to the drawing
+# instead of a line of default-font markdown links sitting underneath it.
+#
+# Padding is baked into each chip rather than added between them, because the
+# markdown emits them with no separating whitespace and there is nowhere else
+# for the gap to come from.
+
+CHIP_H = 30
+CHIP_GAP = 5        # half-gap per side, so neighbours sit CHIP_GAP * 2 apart
+CHIP_TEXT = 9.5
+CHIP_TRACK = 1.1
+
+
+def chip_width(label: str, *, accent: bool = False) -> float:
+    """Total advance of a chip, padding and arrow included."""
+    w = _w(str(label).upper(), CHIP_TEXT, CHIP_TRACK)
+    return CHIP_GAP * 2 + 13 + w + 15 + (5 if accent else 0)
+
+
+def chip(label: str, t: dict, *, accent: str | None = None) -> str:
+    """One clickable-looking tag, drawn to match the sheets.
+
+    `accent` is a colour for the left edge bar, used by the repository chips so
+    a part's chip carries the same material colour as its BOM row.
+    """
+    label = str(label).upper()
+    bar = 5 if accent else 0
+    inner_x = CHIP_GAP + bar
+    tw = _w(label, CHIP_TEXT, CHIP_TRACK)
+    w = chip_width(label, accent=bool(accent))
+    y0, h = 1.0, CHIP_H - 2
+
+    body = (f'<rect x="{CHIP_GAP}" y="{y0}" width="{w - CHIP_GAP * 2:.1f}" '
+            f'height="{h}" rx="2" fill="{t["ground"]}" stroke="{t["rule"]}" '
+            f'stroke-width="1"/>')
+    if accent:
+        # Clipped to the chip so the bar keeps the rounded left corners.
+        body += (f'<clipPath id="cc"><rect x="{CHIP_GAP}" y="{y0}" '
+                 f'width="{w - CHIP_GAP * 2:.1f}" height="{h}" rx="2"/></clipPath>'
+                 f'<rect x="{CHIP_GAP}" y="{y0}" width="{bar}" height="{h}" '
+                 f'fill="{accent}" clip-path="url(#cc)"/>')
+    body += caps(inner_x + 7, CHIP_H / 2 + 3.4, label, t, size=CHIP_TEXT,
+                 track=CHIP_TRACK, color="ink")
+    # The arrow is the only thing saying "this goes somewhere", since a drawing
+    # has no hover state and the sheet cannot underline anything.
+    body += text(inner_x + 7 + tw + 7, CHIP_H / 2 + 3.6, "\u2192", t,
+                 size=10, color="accent")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w:.0f}" '
+            f'height="{CHIP_H}" viewBox="0 0 {w:.1f} {CHIP_H}" '
+            f'font-family="{bp.MONO}" role="img">{body}</svg>')
+
+
+def link_chips(cfg: dict) -> list:
+    """The chips under the title block: where to go from here."""
+    ident = cfg.get("identity") or {}
+    site = str(ident.get("website") or "")
+    user = str(ident.get("github") or "")
+    out = []
+    if site:
+        out.append(("site", site.split("//")[-1].rstrip("/"), site, None))
+    if user:
+        out.append(("repos", "repositories",
+                    f"https://github.com/{user}?tab=repositories", None))
+    out.append(("setup", "how this is built", "SETUP.md", None))
+    out.append(("source", "the source of truth", "data/profile.toml", None))
+    return out
+
+
+def repo_chips(cfg: dict, t: dict) -> list:
+    """One chip per part that has somewhere to go.
+
+    Parts without a repository are skipped rather than drawn dead. A chip that
+    goes nowhere is worse than no chip, and the written index already explains
+    why those repositories are missing.
+    """
+    out = []
+    for pr in cfg.get("projects") or []:
+        repo = pr.get("repo")
+        if not repo:
+            continue
+        out.append((str(pr.get("pn") or pr.get("name")).lower().replace("/", "-"),
+                    str(pr.get("name")), repo,
+                    _lang_color(cfg, pr.get("lang"), t)))
+    return out
+
+
 _RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
