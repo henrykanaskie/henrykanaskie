@@ -52,19 +52,30 @@ and `README.md` if they changed. If nothing changed it exits clean and commits n
 
 ---
 
+## The revision cloud
+
+`[bom] mark_last_push` draws a red drafting revision cloud around whichever project
+was pushed to most recently. It is **off**. The mark is real drafting practice and the
+data behind it is real, but red is the loudest thing on the sheet and it moves to a
+different row every day, so it reads as an alarm rather than a note — and the telemetry
+sheet already says the same thing calmly under LAST CONTACT. Set it to `true` if you
+want it back.
+
+---
+
 ## Adding a project
 
 Projects are the bill of materials on the drawing. Add a `[[projects]]` block to
-`data/profile.toml` — order in the file is order on the sheet.
+`data/profile.toml` — order in the file is order on the sheet, kept descending by `completion`.
 
 ```toml
 [[projects]]
-pn         = "0x0A"
+pn         = "QNT-03"
 name       = "repo-name"
 lang       = "Python"
 status     = "FLIGHT"
 completion = 0.60
-summary    = "one line, shown collapsed, keep it under about 90 characters"
+summary    = "one line, shown collapsed, at most 81 characters"
 detail     = """
 The expanded paragraph. What it is, and the actual interesting problem in it."""
 notes      = ["tolerance callout", "another one", "at most three"]
@@ -73,7 +84,7 @@ repo       = "https://github.com/henrykanaskie/repo-name"
 
 | Field        | Notes                                                              |
 | ------------ | ------------------------------------------------------------------ |
-| `pn`         | Part number. Yours to assign, printed as-is. Keep the hex sequence. |
+| `pn`         | Reference designator, `CLASS-NN`. The prefix says what the thing is before you read its name: `OPT` solver, `SYS` systems, `QNT` quantitative, `MDL` model from scratch, `APP` application, `TUL` tool, `EDU` teaching. Invent a class when none fits. |
 | `name`       | Repository name.                                                   |
 | `lang`       | Must exist in `[palette.lang]` further down the file, or the build fails. |
 | `status`     | One of the `[[status]]` keys. See the band rule below.              |

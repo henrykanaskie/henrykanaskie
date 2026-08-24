@@ -85,7 +85,13 @@ blurb = "scaffold and intent"
 #
 #  Each project is a part on the drawing. Order here is the order on the sheet.
 #
-#    pn         part number, yours to assign, shown as-is
+#    pn         reference designator. Drawings key parts by CLASS-NN rather than
+#               a bare serial, because the prefix says what a thing is before you
+#               read its name. Classes in use, extend freely:
+#                 OPT solver / optimizer      SYS systems and OS-level
+#                 QNT quantitative research   MDL model built from scratch
+#                 APP end-user application    TUL tool for my own use
+#                 EDU teaching material
 #    name       repository name
 #    lang       must appear in [palette.lang] below
 #    status     one of the keys above
@@ -99,7 +105,7 @@ blurb = "scaffold and intent"
 #    private    optional note explaining why there is no link
 
 [[projects]]
-pn         = "0x01"
+pn         = "OPT-01"
 name       = "Cap_Match_Net"
 lang       = "Python"
 status     = "QUALIFIED"
@@ -113,7 +119,7 @@ notes      = ["OR-Tools CP-SAT", "E12 series parts only"]
 repo       = "https://github.com/henrykanaskie/Cap_Match_Net"
 
 [[projects]]
-pn         = "0x02"
+pn         = "SYS-01"
 name       = "small-shell"
 lang       = "C"
 status     = "QUALIFIED"
@@ -127,37 +133,72 @@ notes      = ["POSIX job control", "SIGTSTP / SIGINT handled"]
 repo       = "https://github.com/henrykanaskie/small-shell"
 
 [[projects]]
-pn         = "0x03"
+pn         = "MDL-01"
+name       = "gpt-scratch"
+lang       = "Python"
+status     = "QUALIFIED"
+completion = 1.00
+summary    = "a working GPT from scratch — BPE, attention, training loop, sampling"
+detail     = """
+Gradient descent up to a GPT that trains and generates: BPE tokenizer, embeddings, \
+self-attention, transformer blocks, KV-cache and grouped-query attention, all written \
+by hand rather than pulled from a library. The submitted course files are left exactly \
+as graded; a separate runtime adapter works around four grading artifacts that would \
+otherwise make the model untrainable — a rounded forward pass with zero gradient, a \
+seed reset inside every forward and every init, and a causal mask pinned to the CPU."""
+notes      = ["Build GPT 10/10", "trains in ~9 min on an M2 Max", "KV-cache + GQA"]
+repo       = "https://github.com/henrykanaskie/gpt-scratch"
+
+[[projects]]
+pn         = "APP-01"
 name       = "animAgent"
 lang       = "Swift"
 status     = "FLIGHT"
-completion = 0.70
+completion = 0.88
 summary    = "Sprite Room: your agents as pixel-art characters, dropping from the notch"
 detail     = """
 A macOS app that turns live Claude Code activity into a small pixel-art room of \
 working characters — each agent a character, each tool call something it's visibly \
 doing. Read-only by design: it never controls an agent and never shows prompt or \
-response content."""
-notes      = ["M5 of M6", "396 / 396 tests pass", "art pipeline not integrated"]
+response content. The room is a lattice — every character confined to its own seat's \
+column — with six themed rooms behind a picker."""
+notes      = ["M0 through M6 committed", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
 
 [[projects]]
-pn         = "0x04"
+pn         = "QNT-01"
 name       = "ML_quantitative_research"
 lang       = "Python"
 status     = "FLIGHT"
-completion = 0.60
-summary    = "which correlations survive a block bootstrap, and which were only noise"
+completion = 0.72
+summary    = "a Monte Carlo risk engine: the distribution of outcomes, not a forecast"
 detail     = """
-Log-return modeling, Pearson correlation structure, Kalman filtering, and \
-block-bootstrap resampling measured against a Gaussian baseline. The point is \
-separating apparent signal from noise wearing a pattern. A correlation that \
-doesn't survive a block bootstrap was never there."""
-notes      = ["block bootstrap", "Gaussian baseline"]
+A risk and planning tool rather than a predictor: given a set of holdings it reports \
+the distribution of outcomes, especially the ugly tail, and says nothing about what to \
+buy. Three return engines behind one frozen data contract — historical, block bootstrap, \
+and a Gaussian baseline kept only so the others can be measured against it. Log returns \
+throughout, correlation drawn from joint historical sampling, and an explicit statement \
+of the model's blind spot."""
+notes      = ["3 return engines", "log returns throughout", "tail + drawdown metrics"]
 repo       = "https://github.com/henrykanaskie/ML_quantitative_research"
 
 [[projects]]
-pn         = "0x05"
+pn         = "APP-02"
+name       = "GrowthApp"
+lang       = "Swift"
+status     = "FLIGHT"
+completion = 0.62
+summary    = "a SwiftUI habit tracker that draws your streaks as a living neural graph"
+detail     = """
+Each habit is a filament radiating from the center, each kept day a node, the day \
+just kept glowing gold. A full WidgetKit suite renders the same sphere held still, \
+compiled from code shared with the app and reading one App Group store. Themes and \
+board composition are real; every reader choice survives a relaunch."""
+notes      = ["full WidgetKit suite", "shared App Group store", "no remote yet"]
+private    = "private repository"
+
+[[projects]]
+pn         = "TUL-01"
 name       = "rLog"
 lang       = "Python"
 status     = "FLIGHT"
@@ -170,21 +211,7 @@ notes      = ["schema-bound output"]
 private    = "code is local, the repository is still empty"
 
 [[projects]]
-pn         = "0x06"
-name       = "gpt-scratch"
-lang       = "Python"
-status     = "FLIGHT"
-completion = 0.45
-summary    = "attention, embeddings and the neural foundations, written by hand"
-detail     = """
-Attention, tokenization, and the training loop written by hand rather than pulled \
-from a library. The foundations and attention primitives are done; the transformer \
-block, the GPT itself, and the training loop are still to come."""
-notes      = ["no autograd library", "foundations complete"]
-repo       = "https://github.com/henrykanaskie/gpt-scratch"
-
-[[projects]]
-pn         = "0x07"
+pn         = "EDU-01"
 name       = "me-tutor"
 lang       = "Python"
 status     = "BREADBOARD"
@@ -195,24 +222,11 @@ An agent pipeline that writes a mechanical-engineering curriculum and builds a \
 static site around it. Every numerical claim has a matching assertion executed at \
 build time, because generated physics is confidently wrong at a low but non-zero \
 rate."""
-notes      = ["3 of ~14 modules", "every number asserted"]
+notes      = ["3 of ~27 modules", "every number asserted"]
 private    = "private repository"
 
 [[projects]]
-pn         = "0x08"
-name       = "GrowthApp"
-lang       = "Swift"
-status     = "CONCEPT"
-completion = 0.22
-summary    = "a SwiftUI habit tracker that draws your streaks as a living neural graph"
-detail     = """
-Each habit is a filament radiating from the center, each kept day a node, the day \
-just kept glowing gold. Full WidgetKit suite over the same shared data."""
-notes      = ["WidgetKit suite", "one orb variant real"]
-private    = "private repository"
-
-[[projects]]
-pn         = "0x09"
+pn         = "QNT-02"
 name       = "pitwall"
 lang       = "Python"
 status     = "CONCEPT"
@@ -223,6 +237,14 @@ Built on FastF1, currently a tire-degradation regression over stint data. Aimed 
 the strategy question of when a set of tires stops paying for itself."""
 notes      = ["FastF1 stint data", "frontend not populated"]
 private    = "private repository"
+
+[bom]
+# Draw a red drafting revision cloud around whichever project was pushed to most
+# recently. It is real drawing practice and the data behind it is real, but red is
+# the loudest mark on the sheet and it moves to a different row every day, which
+# reads as an alarm rather than a note. The telemetry sheet says the same thing
+# calmly under LAST CONTACT. Set true to bring it back.
+mark_last_push = false
 
 
 # ─── NOTES BLOCK ─────────────────────────────────────────────────────────────

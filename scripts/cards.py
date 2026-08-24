@@ -25,7 +25,7 @@ Three rules run through every card:
 3.  Nothing on these sheets is a joke. The character is supposed to come from
     real mechanisms doing something charming with true data: completion drawn
     as an actual dimension, the ISS track drawn from its actual inclination, a
-    revision cloud around the row that actually changed today.
+    completion band drawn in the material the part is made of.
 
 Text metrics: an SVG loaded through <img> cannot measure text, so column fits
 are computed from the monospace advance width (0.60 em for every family in
@@ -463,7 +463,7 @@ def _bom(cfg, data, t):
                            gap=4.5, w=1.0)
 
     out = ""
-    heads = ((COL_ITEM, "ITEM", "middle"), (COL_PN, "P/N", "start"),
+    heads = ((COL_ITEM, "ITEM", "middle"), (COL_PN, "DES", "start"),
              (COL_DESC, "DESCRIPTION", "start"), (COL_MATL, "MATL", "start"),
              (COL_STAT, "STATUS", "start"), (COL_COMP0, "COMPLETION", "start"))
     out += _g(D_LETTER, "".join(
@@ -481,6 +481,7 @@ def _bom(cfg, data, t):
 
     changed = _repo_name((data.get("last_push") or {}).get("repo")).casefold()
     cloud = ""
+    mark_last_push = bool((cfg.get("bom") or {}).get("mark_last_push", False))
 
     for i, p in enumerate(projects):
         ty = BOM_BODY_Y + i * BOM_ROW_H
@@ -559,9 +560,13 @@ def _bom(cfg, data, t):
                              d + 0.3, stroke=stroke, sw=0.7)
 
         # ── revision cloud ──────────────────────────────────────────────────
-        # Drawn last so it sits over the row, and only around the part that
-        # actually moved since the last issue of the sheet.
-        if changed and name.casefold() == changed:
+        # Off by default: [bom] mark_last_push in profile.toml. It is a genuine
+        # drafting mark — the scalloped outline around whatever moved since the
+        # last issue — but red is the loudest thing on the sheet and it lands on
+        # a different row every day, which reads as an alarm rather than a note.
+        # The same fact is stated calmly by LAST CONTACT on the telemetry sheet,
+        # so nothing is lost by leaving this off.
+        if mark_last_push and changed and name.casefold() == changed:
             cloud = revcloud(BOM_X0 + 4, ty + 3, BOM_X1 - BOM_X0 - 8,
                              BOM_ROW_H - 8, t, delay=D_DATA + n * 0.05 + 0.35)
             rev_letter = str((cfg.get("identity") or {}).get("revision") or "")

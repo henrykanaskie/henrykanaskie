@@ -46,13 +46,14 @@ I build things that sit at the boundary between models and hardware. A transform
   <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-light.svg?v=20260824" alt="Bill of materials">
 </picture>
 
-<sub>Completion is dimensioned, not asserted. The red revision cloud marks whichever part was
-last pushed to. Expand a row for the full description.</sub>
+<sub>Completion is dimensioned rather than asserted, and the fill is hatched in the part's own
+material. Reference designators are keyed by class: OPT solver, SYS systems, QNT quantitative,
+MDL model, APP application, TUL tool, EDU teaching. Expand a row for the full description.</sub>
 
 <table>
 <tbody>
 <tr>
-<td align="center"><code>0x01</code></td>
+<td align="center"><code>OPT-01</code></td>
 <td align="center">✓</td>
 <td><details><summary><b>Cap_Match_Net</b> — impedance matching solved as a constraint problem, in real component values</summary><br>
 Capacitor matching networks solved with Google OR-Tools. Takes a target impedance and returns a network built from components that actually exist in a parts bin, rather than the ideal values a textbook would hand you.
@@ -61,7 +62,7 @@ Capacitor matching networks solved with Google OR-Tools. Takes a target impedanc
 </details></td>
 </tr>
 <tr>
-<td align="center"><code>0x02</code></td>
+<td align="center"><code>SYS-01</code></td>
 <td align="center">✓</td>
 <td><details><summary><b>small-shell</b> — a Unix shell in C: job control, redirection, and the awkward parts of signals</summary><br>
 Job control, I/O redirection, and signal handling, including the parts that only start misbehaving once a process is backgrounded and something sends it a SIGTSTP at the wrong moment.
@@ -70,25 +71,43 @@ Job control, I/O redirection, and signal handling, including the parts that only
 </details></td>
 </tr>
 <tr>
-<td align="center"><code>0x03</code></td>
+<td align="center"><code>MDL-01</code></td>
+<td align="center">✓</td>
+<td><details><summary><b>gpt-scratch</b> — a working GPT from scratch — BPE, attention, training loop, sampling</summary><br>
+Gradient descent up to a GPT that trains and generates: BPE tokenizer, embeddings, self-attention, transformer blocks, KV-cache and grouped-query attention, all written by hand rather than pulled from a library. The submitted course files are left exactly as graded; a separate runtime adapter works around four grading artifacts that would otherwise make the model untrainable — a rounded forward pass with zero gradient, a seed reset inside every forward and every init, and a causal mask pinned to the CPU.
+<br><sub>Build GPT 10/10 · trains in ~9 min on an M2 Max · KV-cache + GQA</sub><br><br>
+<a href="https://github.com/henrykanaskie/gpt-scratch">view the repository&nbsp;&rarr;</a>
+</details></td>
+</tr>
+<tr>
+<td align="center"><code>APP-01</code></td>
 <td align="center">▲</td>
 <td><details><summary><b>animAgent</b> — Sprite Room: your agents as pixel-art characters, dropping from the notch</summary><br>
-A macOS app that turns live Claude Code activity into a small pixel-art room of working characters — each agent a character, each tool call something it's visibly doing. Read-only by design: it never controls an agent and never shows prompt or response content.
-<br><sub>M5 of M6 · 396 / 396 tests pass · art pipeline not integrated</sub><br><br>
+A macOS app that turns live Claude Code activity into a small pixel-art room of working characters — each agent a character, each tool call something it's visibly doing. Read-only by design: it never controls an agent and never shows prompt or response content. The room is a lattice — every character confined to its own seat's column — with six themed rooms behind a picker.
+<br><sub>M0 through M6 committed · 871 tests / 87 suites green</sub><br><br>
 <a href="https://github.com/henrykanaskie/animAgent">view the repository&nbsp;&rarr;</a>
 </details></td>
 </tr>
 <tr>
-<td align="center"><code>0x04</code></td>
+<td align="center"><code>QNT-01</code></td>
 <td align="center">▲</td>
-<td><details><summary><b>ML_quantitative_research</b> — which correlations survive a block bootstrap, and which were only noise</summary><br>
-Log-return modeling, Pearson correlation structure, Kalman filtering, and block-bootstrap resampling measured against a Gaussian baseline. The point is separating apparent signal from noise wearing a pattern. A correlation that doesn't survive a block bootstrap was never there.
-<br><sub>block bootstrap · Gaussian baseline</sub><br><br>
+<td><details><summary><b>ML_quantitative_research</b> — a Monte Carlo risk engine: the distribution of outcomes, not a forecast</summary><br>
+A risk and planning tool rather than a predictor: given a set of holdings it reports the distribution of outcomes, especially the ugly tail, and says nothing about what to buy. Three return engines behind one frozen data contract — historical, block bootstrap, and a Gaussian baseline kept only so the others can be measured against it. Log returns throughout, correlation drawn from joint historical sampling, and an explicit statement of the model's blind spot.
+<br><sub>3 return engines · log returns throughout · tail + drawdown metrics</sub><br><br>
 <a href="https://github.com/henrykanaskie/ML_quantitative_research">view the repository&nbsp;&rarr;</a>
 </details></td>
 </tr>
 <tr>
-<td align="center"><code>0x05</code></td>
+<td align="center"><code>APP-02</code></td>
+<td align="center">▲</td>
+<td><details><summary><b>GrowthApp</b> — a SwiftUI habit tracker that draws your streaks as a living neural graph</summary><br>
+Each habit is a filament radiating from the center, each kept day a node, the day just kept glowing gold. A full WidgetKit suite renders the same sphere held still, compiled from code shared with the app and reading one App Group store. Themes and board composition are real; every reader choice survives a relaunch.
+<br><sub>full WidgetKit suite · shared App Group store · no remote yet</sub><br><br>
+<sub>private repository</sub>
+</details></td>
+</tr>
+<tr>
+<td align="center"><code>TUL-01</code></td>
 <td align="center">▲</td>
 <td><details><summary><b>rLog</b> — speak into it, and structured LaTeX comes back out of a schema-bound LLM</summary><br>
 Voice-driven logging. Audio goes in, gets transcribed, an LLM structures it against a fixed schema, and LaTeX comes out. CLI and web front ends over one shared store.
@@ -97,34 +116,16 @@ Voice-driven logging. Audio goes in, gets transcribed, an LLM structures it agai
 </details></td>
 </tr>
 <tr>
-<td align="center"><code>0x06</code></td>
-<td align="center">▲</td>
-<td><details><summary><b>gpt-scratch</b> — attention, embeddings and the neural foundations, written by hand</summary><br>
-Attention, tokenization, and the training loop written by hand rather than pulled from a library. The foundations and attention primitives are done; the transformer block, the GPT itself, and the training loop are still to come.
-<br><sub>no autograd library · foundations complete</sub><br><br>
-<a href="https://github.com/henrykanaskie/gpt-scratch">view the repository&nbsp;&rarr;</a>
-</details></td>
-</tr>
-<tr>
-<td align="center"><code>0x07</code></td>
+<td align="center"><code>EDU-01</code></td>
 <td align="center">◗</td>
 <td><details><summary><b>me-tutor</b> — agents writing a mechanical engineering curriculum, verified at build time</summary><br>
 An agent pipeline that writes a mechanical-engineering curriculum and builds a static site around it. Every numerical claim has a matching assertion executed at build time, because generated physics is confidently wrong at a low but non-zero rate.
-<br><sub>3 of ~14 modules · every number asserted</sub><br><br>
+<br><sub>3 of ~27 modules · every number asserted</sub><br><br>
 <sub>private repository</sub>
 </details></td>
 </tr>
 <tr>
-<td align="center"><code>0x08</code></td>
-<td align="center">○</td>
-<td><details><summary><b>GrowthApp</b> — a SwiftUI habit tracker that draws your streaks as a living neural graph</summary><br>
-Each habit is a filament radiating from the center, each kept day a node, the day just kept glowing gold. Full WidgetKit suite over the same shared data.
-<br><sub>WidgetKit suite · one orb variant real</sub><br><br>
-<sub>private repository</sub>
-</details></td>
-</tr>
-<tr>
-<td align="center"><code>0x09</code></td>
+<td align="center"><code>QNT-02</code></td>
 <td align="center">○</td>
 <td><details><summary><b>pitwall</b> — Formula 1 tire degradation, regressed over FastF1 stint telemetry</summary><br>
 Built on FastF1, currently a tire-degradation regression over stint data. Aimed at the strategy question of when a set of tires stops paying for itself.
@@ -197,7 +198,7 @@ channel that cannot be reached reads NO DATA rather than showing a stale figure.
 
 <div align="center">
 <sub>
-REV D &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT 2026-08-24 08:13 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV D &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT 2026-08-24 08:26 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
 <a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
 Cards animate as they draw themselves in; they degrade to their finished state where
