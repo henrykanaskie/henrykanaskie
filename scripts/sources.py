@@ -20,8 +20,9 @@ requirements file to drift and no cache to warm.
     collect(cfg, offline=True)    # sample data, no sockets opened
 
 Channels are gated by the [telemetry] table in data/profile.toml. A channel
-switched off there returns None with *no* entry in `errors` — it is off by
-design, not broken, and the two states should not look alike to a caller.
+switched off there returns None with *no* entry in `errors`. Off by design and
+broken are different states, and a caller should not have to guess which one it
+is looking at.
 """
 
 from __future__ import annotations
@@ -142,7 +143,7 @@ def _fetch_languages(cfg, user, cache):
     against Python being the primary language in seven of nine repositories.
     Bytes measure how much a language types, not how much it is used. So each
     repository contributes its *own* percentage breakdown and those breakdowns
-    are averaged across repositories — one repo, one vote.
+    are averaged across repositories. One repo, one vote.
 
     Forks are skipped because they are someone else's line count, and a repo
     whose kept bytes fall under `min_bytes` is skipped because a placeholder
@@ -150,11 +151,11 @@ def _fetch_languages(cfg, user, cache):
     those bytes: it is a measure of code written, not a measure of who votes.
 
     `min_share` and `show` from the same config table are deliberately not
-    applied here — they decide what fits on a card, which is the renderer's
-    problem, and this returns the complete normalized distribution.
+    applied here. They decide what fits on a card, which is the renderer's
+    problem. This returns the complete normalized distribution.
 
     Set `weighting = "bytes"` in [languages] to sum raw bytes instead. The two
-    answer different questions and the gap is not small — measured 2026-08-24:
+    answer different questions and the gap is not small. Measured 2026-08-24:
 
                     equal        bytes
         Python      64.7%        23.3%
@@ -231,9 +232,8 @@ def _fetch_activity(user, cache):
 
     These are PUSHES, not commits. The public events API strips per-push commit
     counts for unauthenticated reads, so `payload.size` cannot be trusted and is
-    not consulted. Nothing downstream should say "commits" — one push carrying
-    nine commits counts once here, and labelling it otherwise would be a lie
-    told in a monospace font.
+    not consulted. Nothing downstream should say "commits". One push carrying
+    nine commits counts once here, so any other label on this number is wrong.
 
     The series is dense and zero-filled so the renderer can index it by position
     without reasoning about gaps.
@@ -328,10 +328,10 @@ def _fetch_launch():
     """The next orbital launch worldwide.
 
     Anonymous access to thespacedevs is roughly 15 requests/hour, so this makes
-    exactly one call and asks for exactly one result. `mode=list` is what keeps
-    the response small enough to be polite, at the cost of dropping the `pad`
-    object — hence the fallback below, which is the normal path rather than an
-    edge case.
+    exactly one call and asks for exactly one result. `mode=list` keeps the
+    response small enough to be polite, at the cost of dropping the `pad`
+    object. That is what the fallback below is for, and it is the normal path
+    rather than an edge case.
     """
     data = _get_json(f"{LL}/launches/upcoming/?limit=1&mode=list")
     results = data.get("results") or []
@@ -339,8 +339,9 @@ def _fetch_launch():
         return None
     launch = results[0]
 
-    # "Long March 6C | Unknown Payload" — provider before the pipe, mission
-    # after it. In list mode this split is the only source for either.
+    # Names arrive as "Long March 6C | Unknown Payload": provider before the
+    # pipe, mission after it. In list mode this split is the only source for
+    # either.
     raw = str(launch.get("name") or "")
     provider, _, mission = raw.partition(" | ")
     provider = provider.strip() or None
@@ -492,15 +493,16 @@ def collect(cfg, *, offline=False):
     # The failure fallback for activity is an EMPTY series, deliberately, and
     # not a 30-day run of zeros.
     #
-    # A zero-filled series is a measurement: it says "this person pushed nothing
-    # for thirty days". An unreachable events API says nothing at all. Those two
-    # render identically as an empty plot, and the plot is the more confident of
-    # the two claims, so handing zeros to the renderer on failure quietly turns
-    # an outage into an accusation. An empty list is unrepresentable as a plot
-    # and forces the card into its voided-field branch, which is the truth.
+    # Thirty zeros is a measurement. It says this person pushed nothing for
+    # thirty days, and it plots as a flat line, which is the honest picture of a
+    # quiet month. An unreachable events API says nothing at all, and it must
+    # not borrow that flat line: the line is a claim the outage cannot support.
+    # Handing zeros to the renderer on failure turns downtime into an accusation.
     #
-    # A genuinely quiet month still arrives here as thirty real zeros from
-    # _fetch_activity and still plots as an honest flat line.
+    # An empty list cannot be plotted, so it forces the card into its
+    # voided-field branch and the cell reads NO DATA. A genuinely quiet month
+    # still arrives from _fetch_activity as thirty real zeros and still gets its
+    # flat line.
     activity = []
 
     if user and telemetry.get("repo_telemetry", True):

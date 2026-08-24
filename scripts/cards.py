@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """The five sheets of the drawing set.
 
-blueprint.py owns the look — frame, grounds, rule weights, motion. This module
-owns the *layout*: what goes on each sheet and where. Nothing here invents a
-colour or a border; if a card needs a mark that isn't a blueprint primitive,
-that is a sign the primitive is missing rather than a licence to draw it locally.
+blueprint.py owns the look. Frame, grounds, rule weights, and motion all live
+there. This module owns the *layout*: what goes on each sheet and where. Nothing
+here invents a colour or a border; if a card needs a mark that isn't a blueprint
+primitive, that is a sign the primitive is missing rather than a licence to draw
+it locally.
 
     CARDS                       the five sheet names, in sheet order
     render(name, cfg, data, t)  -> a complete SVG document string
@@ -16,16 +17,16 @@ Three rules run through every card:
     is not. Every layout here accumulates y downward and the frame closes under
     whatever it ended up with.
 
-2.  Missing data draws as a voided field. Every channel can be down — the
-    launch API, the ISS API, GitHub, all of it — and the honest drafting answer
-    to an empty field is a dashed box reading NO DATA, not a fabricated value
-    and not a missing card. The one exception is the audio channel, which is
+2.  Missing data draws as a voided field. Any channel can be down: the launch
+    API, the ISS API, GitHub, all of it. The honest drafting answer to an empty
+    field is a dashed box reading NO DATA. Never a fabricated value, and never
+    a card left off the set. The one exception is the audio channel, which is
     off by configuration rather than broken, so it is omitted entirely.
 
 3.  Nothing on these sheets is a joke. The character is supposed to come from
     real mechanisms doing something charming with true data: completion drawn
-    as an actual dimension, the ISS track drawn from its actual inclination, a
-    completion band drawn in the material the part is made of.
+    as an actual dimension, the ISS track drawn from the orbit's real
+    inclination, each material given its own section hatch.
 
 Text metrics: an SVG loaded through <img> cannot measure text, so column fits
 are computed from the monospace advance width (0.60 em for every family in
@@ -53,7 +54,7 @@ CARDS = ["titleblock", "bom", "telemetry", "composition", "activity"]
 
 CW = 0.60          # monospace advance, as a fraction of font-size
 INSET = 12         # must match blueprint.sheet's frame inset
-DASH = "—"    # em dash: the drafting answer to a field with no value
+DASH = "N/A"  # what a field with no value letters as
 
 # Delay bands. The sheet is supposed to assemble the way it would be drawn:
 # frame first (it is static, so it is simply there), then the rules that carve
@@ -61,8 +62,8 @@ DASH = "—"    # em dash: the drafting answer to a field with no value
 D_RULE, D_LETTER, D_DATA = 0.10, 0.30, 0.58
 
 # Section-hatch angles, in the order materials get assigned them. Adjacent
-# angles are far apart so two neighbouring segments never read as one region —
-# this is also what keeps the composition card legible in greyscale.
+# angles are far apart so two neighbouring segments never read as one region.
+# That is also what keeps the composition card legible in greyscale.
 HATCH_ANGLES = (45, 135, 0, 90, 30, 120, 60, 15)
 
 # Status colours are assigned by rank within the configured vocabulary rather
@@ -131,8 +132,8 @@ def _grow_col(x, base, w, h, fill, delay) -> str:
     """A column that grows upward off the axis.
 
     grow() animates one attribute from zero, which is wrong for a rect anchored
-    at its bottom — height alone grows downward — so y is animated with it. Both
-    keep their final value as the base attribute.
+    at its bottom: growing height alone extends it downward. So y is animated
+    alongside it. Both keep their final value as the base attribute.
     """
     y = base - h
     a = (f'<animate attributeName="y" from="{base:.1f}" to="{y:.1f}" dur="0.8s" '
@@ -161,7 +162,7 @@ def _ago(then, now) -> str | None:
         return None
     try:
         secs = (now - then).total_seconds()
-    except TypeError:                    # naive/aware mismatch — not worth a crash
+    except TypeError:                    # naive/aware mismatch, not worth a crash
         return None
     if secs < 0:
         secs = 0
@@ -213,7 +214,7 @@ def _repo_name(s) -> str:
 # ── configuration readers ────────────────────────────────────────────────────
 
 def _ground_idx(t) -> int:
-    """Palette entries are [light, dark] — index by which sheet we are on."""
+    """Palette entries are [light, dark]. Index by the ground we are drawing."""
     return 0 if t.get("name") == "light" else 1
 
 
@@ -238,9 +239,8 @@ def _status_map(cfg) -> dict:
 #
 # The revision table on sheet 1 cites zones on sheet 2, so the two sheets have
 # to agree about where a part sits. These constants are the single source of
-# that agreement — _bom_zone() derives the zone from the same numbers the BOM
-# actually lays itself out with, which means the citation is true rather than
-# plausible.
+# that agreement. _bom_zone() derives the zone from the same numbers the BOM
+# actually lays itself out with, so the citation is true rather than plausible.
 
 BOM_W = 900
 BOM_X0, BOM_X1 = 26, 874
@@ -263,10 +263,10 @@ def summary_capacity() -> int:
 
     Exported so build.py can reject an over-long summary during validation
     instead of letting it reach the sheet as a silent ellipsis. A truncated
-    description is the one failure here that looks deliberate — nothing about
-    "…the not…" says "your config is too long" — so it is worth failing the
-    build over, and worth the check living next to the metrics it depends on
-    rather than as a magic number in the validator.
+    description is the one failure here that looks deliberate. Nothing about
+    "…the not…" says "your config is too long". That is worth failing the build
+    over, and the check belongs next to the metrics it depends on rather than
+    living as a magic number in the validator.
     """
     return int((COL_DESC_R - COL_DESC) / (SUMMARY_SIZE * CW))
 
@@ -309,8 +309,9 @@ def _rev_rows(cfg, data, n=3):
     A revision block records what changed and where. Pushes are the only real
     change record this repository has, so the most recent one becomes the
     current revision letter and the ones behind it step back through the
-    alphabet. Only the newest push carries a timestamp — the API does not date
-    the rest — and an undated revision row is dashed, not invented.
+    alphabet. Only the newest push carries a timestamp, because the API does not
+    date the rest. An undated revision row letters as N/A rather than an
+    invented date.
     """
     ident = cfg.get("identity") or {}
     rev = str(ident.get("revision") or "A").strip()[:1].upper()
@@ -330,7 +331,7 @@ def _rev_rows(cfg, data, n=3):
         date = _datestr(lp.get("at")) if i == 0 else None
         rows.append((letter, _bom_zone(cfg, name), name, date))
     while len(rows) < n:
-        rows.append(None)                # a blank revision block is dashed rows
+        rows.append(None)                # a blank revision block still gets rows
     return rows
 
 
@@ -394,8 +395,8 @@ def _titleblock(cfg, data, t):
             out += _g(D_RULE + 0.1,
                       rule(rev_x0, ry - 15, x1, ry - 15, t, w=0.6, opacity=0.7))
         if row is None:
-            # An unfilled revision block is not empty on a real sheet — it is
-            # ruled and dashed, waiting for the next issue.
+            # An unfilled revision block is not blank on a real sheet. It is
+            # ruled and voided, waiting for the next issue.
             out += _g(d, "".join(
                 text(cx, ry, DASH, t, size=9, color="faint")
                 for cx, _k, _wd in cols)
@@ -469,7 +470,7 @@ def _bom(cfg, data, t):
     out += _g(D_LETTER, "".join(
         caps(x, BOM_HEAD_Y, s, t, size=7.4, track=1.2, anchor=a)
         for x, s, a in heads))
-    # Heavier under the header, hairlines between rows — standard table weight.
+    # Heavier under the header, hairlines between rows. Standard table weight.
     out += _drawn_rule(BOM_X0, BOM_HEAD_RULE, BOM_X1, BOM_HEAD_RULE, t, D_RULE,
                        w=1.6, color="rule", dur=0.9)
 
@@ -560,12 +561,12 @@ def _bom(cfg, data, t):
                              d + 0.3, stroke=stroke, sw=0.7)
 
         # ── revision cloud ──────────────────────────────────────────────────
-        # Off by default: [bom] mark_last_push in profile.toml. It is a genuine
-        # drafting mark — the scalloped outline around whatever moved since the
-        # last issue — but red is the loudest thing on the sheet and it lands on
-        # a different row every day, which reads as an alarm rather than a note.
-        # The same fact is stated calmly by LAST CONTACT on the telemetry sheet,
-        # so nothing is lost by leaving this off.
+        # Off by default: [bom] mark_last_push in profile.toml. The mark itself
+        # is genuine drafting practice, a scalloped outline around whatever
+        # moved since the last issue. But red is the loudest thing on the sheet
+        # and it lands on a different row every day, so it reads as an alarm
+        # rather than a note. LAST CONTACT on the telemetry sheet states the
+        # same fact calmly, so nothing is lost by leaving this off.
         if mark_last_push and changed and name.casefold() == changed:
             cloud = revcloud(BOM_X0 + 4, ty + 3, BOM_X1 - BOM_X0 - 8,
                              BOM_ROW_H - 8, t, delay=D_DATA + n * 0.05 + 0.35)
@@ -680,7 +681,7 @@ def _graticule(x, y, w, h, t, delay):
     out += caps(x + 4, y + h / 2 - 4, "EQ", t, size=6, track=0.6, opacity=0.8)
 
     # The orbit's latitude limits, drawn as the dashed extremes they are. The
-    # track is tangent to these two lines and never crosses them — that is the
+    # track is tangent to these two lines and never crosses them. That is the
     # whole reason the sinusoid peaks where it does, and showing it turns the
     # curve from a decorative wave into a consequence of the inclination.
     for lat in (ISS_INCL, -ISS_INCL):
@@ -870,7 +871,7 @@ def _telemetry(cfg, data, t):
               ("ISS GROUND TRACK", 1.62, _panel_iss),
               ("CONTACT", 1.00, _panel_contact)]
     # The audio channel is off by configuration, not broken, so it is omitted
-    # rather than voided — a NO DATA cell would imply a failure that never
+    # rather than voided. A NO DATA cell would imply a failure that never
     # happened.
     if data.get("listening"):
         panels.append(("AUDIO CHANNEL", 0.88, _panel_audio))
@@ -952,8 +953,9 @@ def _composition(cfg, data, t):
     # Conditioned on `langs`, not on `kept`, and that distinction is the whole
     # point: with no language data at all, a remainder computed from an empty
     # `kept` comes out as 1.0 and the card draws a full bar reading OTHER 100%.
-    # That is a fabricated measurement — the exact failure this sheet is meant
-    # to make impossible. No data must reach the voided-field branch below.
+    # That is a fabricated measurement. It is the exact failure this sheet
+    # exists to make impossible. No data must reach the voided-field branch
+    # below.
     # Languages that arrived but all fell under min_share are a different case:
     # there really is material, it is really all in the tail, and OTHER 100% is
     # then the honest answer.

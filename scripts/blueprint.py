@@ -7,8 +7,8 @@ nothing in cards.py invents its own frame, rule weight, or colour.
 
 Two grounds, picked by the README with <picture> and prefers-color-scheme:
 
-    vellum      warm paper, dark ink       — for GitHub's light theme
-    cyanotype   deep navy, pale cyan ink   — for GitHub's dark theme
+    vellum      warm paper, dark ink       (GitHub's light theme)
+    cyanotype   deep navy, pale cyan ink   (GitHub's dark theme)
 
 Cyanotype is the reason this works as a dark theme at all. A blueprint is
 already a light-on-dark medium, so the dark variant is the historically correct
@@ -16,7 +16,7 @@ one and the light variant is the drafting-vellum original. Neither is a tinted
 copy of the other.
 
 Motion: cards animate on load with SMIL (<animate>), which is the one form of
-animation GitHub's markdown pipeline preserves — an SVG referenced by <img> is
+animation GitHub's markdown pipeline preserves. An SVG referenced by <img> is
 rendered non-interactively, so CSS :hover and <script> are inert, but
 declarative animation still runs. Every animated element carries its final value
 as the base attribute and animates to it with fill="freeze", so a renderer that
@@ -27,7 +27,7 @@ from __future__ import annotations
 
 # Monospace only, and only families that ship with the OS. An SVG loaded through
 # <img> cannot fetch a webfont, so anything not already installed silently falls
-# back — naming real stacks is the whole of font handling here.
+# back. Naming real stacks is the whole of font handling here.
 MONO = ("ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,"
         "'DejaVu Sans Mono',monospace")
 
@@ -102,7 +102,7 @@ def text(x, y, s, t, *, size=11, color="ink", weight=400, anchor="start",
          track=0.0, opacity=None, anim="") -> str:
     """A run of monospace lettering.
 
-    `track` is letter-spacing in px — drawing lettering is spaced out, and the
+    `track` is letter-spacing in px. Drawing lettering is spaced out, and the
     caps runs in this set are tracked between 0.5 and 1.6.
     """
     op = "" if opacity is None else f' opacity="{opacity}"'
@@ -172,7 +172,7 @@ def balloon(x, y, s, t, *, r=9, color="soft") -> str:
 
 
 def revcloud(x, y, w, h, t, *, delay=0.0, scallop=7.0) -> str:
-    """A revision cloud — the scalloped outline drafters draw around whatever
+    """A revision cloud: the scalloped outline drafters draw around whatever
     changed since the last issue of the sheet.
 
     Always red, on both grounds, because that is the one thing a revision mark
@@ -227,7 +227,7 @@ def zone_marks(w, h, t, *, inset=12, pitch=88) -> str:
     """Zone letters down the sides and numbers across the top and bottom.
 
     Every real engineering sheet is gridded into zones so a note can say "see
-    detail B3". Nothing here references a zone — they are furniture, and they
+    detail B3". Nothing here references a zone. They are furniture, and they
     are what makes the frame read as a drawing at a glance rather than a box.
     """
     out = ""
@@ -259,9 +259,9 @@ def sheet(w, h, t, body, *, defs="", label=None, sheet_no=None, grid=True,
           zones=True, inset=12) -> str:
     """Wrap card content in the drawing frame.
 
-    The frame is a double border — an outer trim edge and an inner drawing
-    border with the zone strip between them — which is the single strongest cue
-    that this is a drawing, and costs four rectangles.
+    The frame is a double border: an outer trim edge and an inner drawing
+    border with the zone strip between them. Four rectangles, and they do more
+    to make the card read as a drawing than anything else here.
     """
     d = defs_grid(t) + defs
     out = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
@@ -299,12 +299,12 @@ def sheet(w, h, t, body, *, defs="", label=None, sheet_no=None, grid=True,
 def not_for_issue(w, h, t, *, note="SAMPLE DATA") -> str:
     """The stamp drafters put on a drawing that must not be built from.
 
-    This exists because `--offline` does not blank the telemetry — it substitutes
+    This exists because `--offline` does not blank the telemetry. It substitutes
     plausible sample values (a language mix, a crew count, an ISS fix) so layout
-    can be worked on without burning rate limit. Those numbers are indistinguish-
-    able from real ones at a glance, and a sheet whose entire claim is that every
-    figure is measured cannot afford to ship invented ones because someone
-    iterated on spacing and committed the result.
+    can be worked on without burning rate limit. Those numbers look real at a
+    glance, and a sheet whose entire claim is that every figure is measured
+    cannot afford to ship invented ones because someone iterated on spacing and
+    committed the result.
 
     So an offline build is stamped, the way a preliminary drawing is stamped, and
     the stamp is the loudest thing on the card.

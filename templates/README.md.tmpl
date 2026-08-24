@@ -1,6 +1,6 @@
 <!--
   ╔══════════════════════════════════════════════════════════════════════════╗
-  ║  GENERATED FILE — DO NOT EDIT                                            ║
+  ║  GENERATED FILE. DO NOT EDIT.                                            ║
   ║                                                                          ║
   ║  Every word below comes from data/profile.toml, laid into                ║
   ║  templates/README.md.tmpl by scripts/build.py. Edits made here are       ║
@@ -38,9 +38,10 @@
 
 {{CARD_BOM}}
 
-<sub>Completion is dimensioned rather than asserted, and the fill is hatched in the part's own
-material. Reference designators are keyed by class: OPT solver, SYS systems, QNT quantitative,
-MDL model, APP application, TUL tool, EDU teaching. Expand a row for the full description.</sub>
+<sub>Completion is drawn as a real dimension rather than a claimed percentage, and each bar is
+hatched in the part's own material. Designators are keyed by class: OPT solver, SYS systems,
+QNT quantitative, MDL model, APP application, TUL tool, EDU teaching. Expand a row for the
+full description.</sub>
 
 {{BOM_TABLE}}
 
@@ -48,9 +49,9 @@ MDL model, APP application, TUL tool, EDU teaching. Expand a row for the full de
 
 ### `C1` &nbsp; TELEMETRY
 
-<sub>Rebuilt every morning. Orbital data from <a href="https://thespacedevs.com">thespacedevs</a>
-and <a href="https://wheretheiss.at">wheretheiss.at</a>; push activity from the GitHub API. Any
-channel that cannot be reached reads NO DATA rather than showing a stale figure.</sub>
+<sub>Rebuilt every morning. Orbital data comes from <a href="https://thespacedevs.com">thespacedevs</a>
+and <a href="https://wheretheiss.at">wheretheiss.at</a>, push activity from the GitHub API. If a
+channel can't be reached it reads NO DATA instead of showing a stale figure.</sub>
 
 {{CARD_TELEMETRY}}
 
@@ -96,10 +97,10 @@ channel that cannot be reached reads NO DATA rather than showing a stale figure.
 
 <div align="center">
 <sub>
-REV {{REVISION}} &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT {{BUILT}} &nbsp;·&nbsp; SCALE NONE<br>
+REV {{REVISION}} &nbsp;·&nbsp; 5 SHEETS &nbsp;·&nbsp; BUILT {{BUILT}} &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
 <a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
-Cards animate as they draw themselves in; they degrade to their finished state where
-SMIL is unsupported.
+The cards draw themselves in when they load. Where SMIL isn't supported they simply
+arrive finished.
 </sub>
 </div>

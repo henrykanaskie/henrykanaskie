@@ -49,11 +49,11 @@ def normalize(cfg: dict) -> dict:
     """Flatten the two list-valued sections onto the top level.
 
     `field_notes` and `focus` are declared as [notes].field and [focus].areas
-    rather than as bare top-level arrays, because TOML binds a bare key to the
-    most recent table header — an array written after the last [[projects]]
-    block silently becomes a field of that project instead of a top-level key,
-    and the profile then renders with no notes and no explanation. Wrapping each
-    in its own table makes their position in the file irrelevant.
+    rather than as bare top-level arrays. TOML binds a bare key to the most
+    recent table header, so an array written after the last [[projects]] block
+    silently becomes a field of that project instead of a top-level key, and
+    the profile then renders with no notes and no explanation. Wrapping each in
+    its own table makes their position in the file irrelevant.
 
     Everything downstream still reads cfg["field_notes"] and cfg["focus"].
     """
@@ -106,7 +106,7 @@ def validate(cfg: dict) -> None:
         elif st:
             c = p.get("completion")
             if not isinstance(c, (int, float)) or not 0.0 <= c <= 1.0:
-                problems.append(f"{who}: completion {c!r} is not within 0.0–1.0")
+                problems.append(f"{who}: completion {c!r} is not within 0.0 to 1.0")
             elif not statuses[st]["floor"] <= c < ceilings[st]:
                 problems.append(
                     f"{who}: completion {c} falls outside the {st} band "
@@ -126,8 +126,8 @@ def validate(cfg: dict) -> None:
         cap = cards.summary_capacity()
         if len(p.get("summary", "")) > cap:
             problems.append(
-                f"{who}: summary is {len(p['summary'])} characters and the "
-                f"description column fits {cap} — it would be cut with an "
+                f"{who}: summary is {len(p['summary'])} characters. The "
+                f"description column fits {cap}, so it would be cut with an "
                 f"ellipsis on the sheet. Trim it by "
                 f"{len(p['summary']) - cap}.")
 
@@ -145,20 +145,20 @@ def validate(cfg: dict) -> None:
             if k in p:
                 problems.append(
                     f"{p.get('name', '<unnamed>')}: contains '{k}', which belongs "
-                    f"at the top level — move it above the [[projects]] blocks or "
-                    f"under its own table header")
+                    f"at the top level. Move it above the [[projects]] blocks or "
+                    f"give it its own table header")
     for k in STRAY:
         if k in cfg.get("telemetry", {}).get("listening", {}):
             problems.append(
-                f"[telemetry.listening] contains '{k}' — it needs its own table "
+                f"[telemetry.listening] contains '{k}'. It needs its own table "
                 f"header, or TOML binds it to the section above it")
 
     if not cfg.get("field_notes"):
         problems.append(
-            "no field notes found — expected a [notes] table with a `field` array")
+            "no field notes found. Expected a [notes] table with a `field` array")
     if not cfg.get("focus"):
         problems.append(
-            "no focus areas found — expected a [focus] table with an `areas` array")
+            "no focus areas found. Expected a [focus] table with an `areas` array")
 
     weighting = cfg.get("languages", {}).get("weighting", "equal")
     if weighting not in ("equal", "bytes"):
@@ -190,10 +190,10 @@ def picture(card: str, alt: str, stamp: str, width: str | None = None) -> str:
     """A light/dark image pair for one card.
 
     The ?v= stamp is not decoration. GitHub proxies README images through camo,
-    which caches aggressively — without a URL that changes when the content
-    does, a daily rebuild is invisible for hours and the whole point of building
-    daily is lost. The stamp is the build date, so the URL changes exactly as
-    often as the card does.
+    which caches aggressively. Without a URL that changes when the content does,
+    a daily rebuild stays invisible for hours and there is no point building it
+    daily. The stamp is the build date, so the URL changes exactly as often as
+    the card does.
     """
     w = f' width="{width}"' if width else ""
     return (
@@ -224,7 +224,7 @@ def bom_table(cfg: dict) -> str:
             f'<tr>\n'
             f'<td align="center"><code>{p["pn"]}</code></td>\n'
             f'<td align="center">{marks.get(p["status"], "")}</td>\n'
-            f'<td><details><summary><b>{p["name"]}</b> — {p["summary"]}</summary>'
+            f'<td><details><summary><b>{p["name"]}</b>: {p["summary"]}</summary>'
             f'<br>\n{" ".join(p["detail"].split())}\n{notes}<br><br>\n{link}\n'
             f'</details></td>\n'
             f'</tr>'
@@ -237,8 +237,8 @@ def notes_block(cfg: dict, data: dict, today: dt.date) -> str:
 
     Note 1 is fixed and note 2 rotates through field_notes by date, so the sheet
     reads differently day to day without anyone editing it. Indexing by ordinal
-    rather than at random means the same day always yields the same note, which
-    keeps the build reproducible — two runs on one day produce identical output
+    rather than at random means the same day always yields the same note. That
+    keeps the build reproducible: two runs on one day produce identical output
     and the workflow's "commit if changed" stays quiet.
     """
     pool = cfg["field_notes"]
@@ -330,7 +330,7 @@ def main() -> int:
     # from the real thing on the card. Stamp every sheet so an accidental commit
     # is obvious at a glance rather than three weeks later.
     if args.offline:
-        print("\n  *** OFFLINE BUILD — cards contain SAMPLE DATA and are\n"
+        print("\n  *** OFFLINE BUILD: cards contain SAMPLE DATA and are\n"
               "      stamped NOT FOR ISSUE. Do not commit this output.\n",
               file=sys.stderr)
 

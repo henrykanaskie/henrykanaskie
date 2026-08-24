@@ -7,7 +7,7 @@ How this profile is put together, and the handful of things you might want to ch
 ## The one-file control model
 
 `data/profile.toml` is the only file with facts in it. Your name, the project list,
-which telemetry channels are on, the palette — all of it lives there.
+which telemetry channels are on, the palette. All of it lives there.
 
 Everything else is output:
 
@@ -30,19 +30,19 @@ python3 scripts/build.py            # full build, hits the network for telemetry
 python3 scripts/build.py --offline  # skip every network call; uses SAMPLE data
 ```
 
-Pure standard library — `tomllib`, `urllib`, `json`. There is nothing to `pip install`,
+Pure standard library: `tomllib`, `urllib`, `json`. There is nothing to `pip install`,
 no virtualenv, no lockfile. Python 3.12 (3.11+ for `tomllib`).
 
 Use `--offline` when you are iterating on layout or wording. It is much faster and it
 does not spend your anonymous rate limit against the space APIs.
 
-> **`--offline` does not blank the telemetry — it invents it.** It substitutes a
+> **`--offline` does not blank the telemetry. It invents it.** It substitutes a
 > plausible language mix, crew count and ISS fix so the layout has something to
 > render. Those numbers look exactly as real as the real ones.
 >
 > Every card from an offline build is therefore stamped **NOT FOR ISSUE** in red,
 > and the build prints a warning. If you see that stamp on the profile, someone
-> committed an offline build — rerun `python3 scripts/build.py` without the flag
+> committed an offline build. Rerun `python3 scripts/build.py` without the flag
 > and commit that. Never commit `--offline` output.
 
 ### Running it in CI
@@ -57,7 +57,7 @@ and `README.md` if they changed. If nothing changed it exits clean and commits n
 `[bom] mark_last_push` draws a red drafting revision cloud around whichever project
 was pushed to most recently. It is **off**. The mark is real drafting practice and the
 data behind it is real, but red is the loudest thing on the sheet and it moves to a
-different row every day, so it reads as an alarm rather than a note — and the telemetry
+different row every day, so it reads as an alarm rather than a note. The telemetry
 sheet already says the same thing calmly under LAST CONTACT. Set it to `true` if you
 want it back.
 
@@ -66,7 +66,7 @@ want it back.
 ## Adding a project
 
 Projects are the bill of materials on the drawing. Add a `[[projects]]` block to
-`data/profile.toml` — order in the file is order on the sheet, kept descending by `completion`.
+`data/profile.toml`. Order in the file is order on the sheet, kept descending by `completion`.
 
 ```toml
 [[projects]]
@@ -88,7 +88,7 @@ repo       = "https://github.com/henrykanaskie/repo-name"
 | `name`       | Repository name.                                                   |
 | `lang`       | Must exist in `[palette.lang]` further down the file, or the build fails. |
 | `status`     | One of the `[[status]]` keys. See the band rule below.              |
-| `completion` | `0.0`–`1.0`.                                                        |
+| `completion` | `0.0` to `1.0`.                                                        |
 | `summary`    | One line. Shown collapsed.                                          |
 | `detail`     | The expanded paragraph.                                             |
 | `notes`      | Short, factual. Three maximum.                                      |
@@ -97,7 +97,7 @@ repo       = "https://github.com/henrykanaskie/repo-name"
 
 ### The status / completion band rule
 
-Status is not a label you set independently — it is a band of the completion figure.
+Status is not a label you set independently. It is a band of the completion figure.
 `build.py` asserts this and **fails the build** if you break it:
 
 ```
@@ -109,7 +109,7 @@ So a project at `completion = 0.30` cannot be `CONCEPT`, and one at `0.95` canno
 everything is somehow "in flight" forever.
 
 The bounds themselves are the `floor` values on the `[[status]]` blocks. Change a floor
-there and the check moves with it — you do not have to touch Python.
+there and the check moves with it. You never have to touch Python.
 
 Adding a language that is not in `[palette.lang]` yet? Add it there first, borrowing a
 pair from `spare` at the bottom of the palette section.
@@ -139,7 +139,7 @@ repository activity. The daily commit counts as activity, so in practice it keep
 alive.
 
 The workflow also fires on `workflow_dispatch` (the **Run workflow** button in the
-Actions tab) and on any push to `main` touching `data/profile.toml` or `scripts/**` —
+Actions tab) and on any push to `main` touching `data/profile.toml` or `scripts/**`,
 so editing the config regenerates the profile within a minute rather than tomorrow.
 
 ---
@@ -147,14 +147,14 @@ so editing the config regenerates the profile within a minute rather than tomorr
 ## The one optional secret: `LASTFM_API_KEY`
 
 This is the **only** secret in the repo, and it is optional. Everything works without
-it — the listening channel simply does not appear on the telemetry card.
+it. The listening channel simply does not appear on the telemetry card.
 
 **You have to do this yourself.** It is tied to your own Last.fm account, and repository
 secrets can only be set by the repo owner in the GitHub web UI. Nobody else can do it
 for you, and the key should never be committed to the repo.
 
 1. Sign in to Last.fm and go to <https://www.last.fm/api/account/create>.
-   Fill in an application name (anything — "profile card" is fine) and submit.
+   Fill in an application name; "profile card" is fine. Submit it.
    Copy the **API key** it gives you. Ignore the shared secret; this build only reads.
 
 2. In this repository on GitHub, go to
@@ -196,24 +196,24 @@ own upstream service, toggled in `[telemetry]` in `data/profile.toml`.
 | Push activity      | `repo_telemetry`   | GitHub REST API            | Built-in token      |
 | Now listening      | `[telemetry.listening] enabled` | Last.fm       | **Yes**, optional   |
 
-**thespacedevs (LL2)** — <https://ll.thespacedevs.com>. Powers both the next-orbital-launch
+**thespacedevs (LL2)**, <https://ll.thespacedevs.com>. Powers both the next-orbital-launch
 countdown and the humans-currently-in-space count. No account, no key. Anonymous access is
 rate limited to roughly **15 requests per hour per IP**, which is generous for one build a
 day but is exactly why you should use `--offline` while iterating locally. If you do get
 rate limited, the channel renders `NO DATA` and the build still succeeds.
 
-**wheretheiss.at** — <https://wheretheiss.at/w/developer>. Returns the ISS sub-satellite
+**wheretheiss.at**, <https://wheretheiss.at/w/developer>. Returns the ISS sub-satellite
 point (lat/lon). No key. The position is sampled once at build time and stamped with that
-timestamp on the card, because a static SVG obviously cannot track it live — the stamp is
-there so the reader knows the reading is a snapshot, not a lie.
+timestamp on the card. A static SVG cannot track it live, so the stamp is there to make
+clear the reading is a snapshot rather than a claim about right now.
 
-**GitHub API** — push activity over the recent window. In CI this uses the built-in
+**GitHub API**, for push activity over the recent window. In CI this uses the built-in
 `GITHUB_TOKEN`, which Actions provides automatically; there is nothing to set up. Running
 locally without a token falls back to unauthenticated access (60 requests/hour), which is
 usually enough for one build. If you hit that limit locally, export a personal access token
-as `GITHUB_TOKEN` — a classic token with no scopes at all is sufficient for public data.
+as `GITHUB_TOKEN`. A classic token with no scopes at all is enough for public data.
 
-**Last.fm** — optional, see the section above.
+**Last.fm**, optional. See the section above.
 
 ### Every channel degrades, none of them break the build
 
@@ -224,8 +224,8 @@ renders normally.
 
 That is why the workflow does *not* wrap the build in `continue-on-error`: transient API
 trouble is already absorbed by the script, so a non-zero exit from `build.py` means a real
-problem — a malformed TOML, a status band violation, a bug — and it should show a red X so
-you actually find out. See the comments in `daily.yml`.
+problem: a malformed TOML, a status band violation, a bug. It should show a red X so you
+actually find out. See the comments in `daily.yml`.
 
 ---
 
@@ -233,8 +233,8 @@ you actually find out. See the comments in `daily.yml`.
 
 The committed SVGs in `assets/` are the real artifact. `README.md` embeds them directly
 from this repository, and the website route at `henrykanaskie.com/api/cards/<card>` is a
-thin proxy that fetches the same committed files. There is exactly one renderer —
-`scripts/`, in Python — and nothing re-implements it.
+thin proxy that fetches the same committed files. There is exactly one renderer, the
+Python in `scripts/`, and nothing re-implements it.
 
 ---
 
@@ -245,7 +245,7 @@ transiently. Run `python3 scripts/build.py` locally and read the warning it prin
 channel.
 
 **The workflow is green but nothing changes.** Correct behaviour when the output is
-byte-identical to what is already committed — nothing on the card moved that day. Check the
+byte-identical to what is already committed, meaning nothing on the card moved that day. Check the
 run log for `No changes to assets/ or README.md`.
 
 **The workflow fails on the build step.** A real error. The log has the traceback. Most

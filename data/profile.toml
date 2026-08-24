@@ -17,32 +17,32 @@
 
 [identity]
 name       = "Henry Kanaskie"
-# The drawing's title block. Kept short — it is set in caps at a large size.
+# The drawing's title block. Keep it short. It is set in caps at a large size.
 title      = "MODELS / HARDWARE / THE BOUNDARY BETWEEN"
 tagline    = "Machine learning, quantitative research, and things that talk to hardware."
 website    = "https://henrykanaskie.com"
 github     = "henrykanaskie"
 # Sheet metadata. Bump `revision` by hand when you make a change worth marking;
 # it is the one number here that is deliberately not automated.
-revision   = "D"
+revision   = "E"
 drawn_by   = "H. KANASKIE"
 
 
 [about]
 # Prose for the top of the README. Written as a list so the line breaks in the
-# file don't become line breaks on the profile — these are joined with spaces.
+# file don't become line breaks on the profile. These are joined with spaces.
 body = [
-  "I build things that sit at the boundary between models and hardware.",
-  "A transformer written from first principles, an optimizer that picks real",
-  "capacitor networks, a habit tracker that renders your streaks as a living",
-  "neural graph. Most of my work starts as a question I couldn't answer by",
-  "reading, so I write the thing that answers it.",
+  "I work at the boundary between models and hardware. A transformer written",
+  "from first principles, an optimizer that picks capacitor values you can",
+  "actually buy, a habit tracker that draws your streaks as a neural graph.",
+  "Most of it starts as a question I couldn't answer by reading, so I write",
+  "the thing that answers it.",
 ]
 
 # The three lines under the prose. Bold with **, as in normal markdown.
 points = [
-  "Currently deepest in **quantitative research**: block bootstrapping, log-return modeling, correlation structure",
-  "Recently built a **GPT from scratch** to stop treating attention as a black box",
+  "Mostly on **quantitative research** right now: block bootstrapping, log returns, correlation structure",
+  "Just finished a **GPT from scratch**, largely to stop treating attention as a black box",
   "Happiest in a debugger, at the point where the theory stops matching the trace",
 ]
 
@@ -95,12 +95,13 @@ blurb = "scaffold and intent"
 #    name       repository name
 #    lang       must appear in [palette.lang] below
 #    status     one of the keys above
-#    completion 0.0–1.0, must fall inside that status's band
-#    summary    one line, shown collapsed. At most 81 characters — that is what
-#               the BOM description column holds, and the build fails with the
-#               exact overage rather than cutting it with an ellipsis.
+#    completion 0.0 to 1.0, and must fall inside that status's band
+#    summary    one line, shown collapsed. At most 81 characters, which is what
+#               the BOM description column holds. Go over and the build fails
+#               and tells you by how much, rather than cutting it with an
+#               ellipsis.
 #    detail     the expanded paragraph
-#    notes      tolerance callouts — short, factual, no more than three
+#    notes      tolerance callouts. Short, factual, no more than three
 #    repo       omit entirely for a private or unpushed project
 #    private    optional note explaining why there is no link
 
@@ -138,14 +139,14 @@ name       = "gpt-scratch"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "a working GPT from scratch — BPE, attention, training loop, sampling"
+summary    = "a working GPT from scratch: BPE, attention, training loop, sampling"
 detail     = """
 Gradient descent up to a GPT that trains and generates: BPE tokenizer, embeddings, \
 self-attention, transformer blocks, KV-cache and grouped-query attention, all written \
 by hand rather than pulled from a library. The submitted course files are left exactly \
 as graded; a separate runtime adapter works around four grading artifacts that would \
-otherwise make the model untrainable — a rounded forward pass with zero gradient, a \
-seed reset inside every forward and every init, and a causal mask pinned to the CPU."""
+otherwise stop it learning: a rounded forward pass with zero gradient, a seed reset \
+inside every forward and every init, and a causal mask pinned to the CPU."""
 notes      = ["Build GPT 10/10", "trains in ~9 min on an M2 Max", "KV-cache + GQA"]
 repo       = "https://github.com/henrykanaskie/gpt-scratch"
 
@@ -158,10 +159,10 @@ completion = 0.88
 summary    = "Sprite Room: your agents as pixel-art characters, dropping from the notch"
 detail     = """
 A macOS app that turns live Claude Code activity into a small pixel-art room of \
-working characters — each agent a character, each tool call something it's visibly \
-doing. Read-only by design: it never controls an agent and never shows prompt or \
-response content. The room is a lattice — every character confined to its own seat's \
-column — with six themed rooms behind a picker."""
+working characters. Each agent is a character, and each tool call is something it is \
+visibly doing. Read-only by design: it never controls an agent and never shows prompt or \
+response content. The room is a lattice, so every character stays inside its own \
+seat's column. Six themed rooms sit behind a picker."""
 notes      = ["M0 through M6 committed", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
 
@@ -175,8 +176,8 @@ summary    = "a Monte Carlo risk engine: the distribution of outcomes, not a for
 detail     = """
 A risk and planning tool rather than a predictor: given a set of holdings it reports \
 the distribution of outcomes, especially the ugly tail, and says nothing about what to \
-buy. Three return engines behind one frozen data contract — historical, block bootstrap, \
-and a Gaussian baseline kept only so the others can be measured against it. Log returns \
+buy. Three return engines sit behind one frozen data contract: historical, block \
+bootstrap, and a Gaussian baseline kept only so the others can be measured against it. Log returns \
 throughout, correlation drawn from joint historical sampling, and an explicit statement \
 of the model's blind spot."""
 notes      = ["3 return engines", "log returns throughout", "tail + drawdown metrics"]
@@ -251,7 +252,7 @@ mark_last_push = false
 #
 #  Real drawings carry a numbered notes block. This one is yours to write.
 #
-#  These are not jokes and they should not read as jokes — they are the part of
+#  These are not jokes and they should not read as jokes. They are the part of
 #  the sheet where a person is obviously behind the drawing. Write them the way
 #  you'd annotate your own work: flat, specific, true. One is chosen per day,
 #  rotating by date so the same note doesn't sit there for a week.
@@ -265,22 +266,21 @@ mark_last_push = false
 
 [notes]
 field = [
-  "The hardest bug this month was a race that only appeared under load, and the fix was four characters.",
-  "Most of these started as a question I couldn't answer by reading about it.",
-  "Every number on the me-tutor site is checked by an assertion, because generated physics is wrong just often enough to matter.",
-  "The shell taught me more about signals than any chapter on signals did.",
-  "A correlation that doesn't survive a block bootstrap was never there.",
+  "The GPT course files are exactly what I submitted, including the parts that can't train. The fix lives in a separate adapter so the submission stays honest.",
   "Cap_Match_Net exists because the ideal component values in the textbook aren't in anyone's parts bin.",
-  "I write the transformer by hand roughly once a year. It gets less mysterious each time.",
+  "Every number on the me-tutor site is checked by an assertion at build time, because generated physics is wrong just often enough to matter.",
+  "The shell taught me more about signals than any chapter on signals did.",
+  "The Gaussian baseline in the risk engine is only there so the other two engines have something to be measured against.",
+  "I write the transformer by hand about once a year. It gets less mysterious every time.",
   "The pixel-art agents are read-only on purpose. Watching is the whole feature.",
-  "Still convinced the interesting part is where the theory stops matching the trace.",
+  "A lot of Sprite Room's tests turned out to be about where a character is allowed to stand. I did not expect that to be the hard part.",
 ]
 
 
 # ─── TELEMETRY CHANNELS ──────────────────────────────────────────────────────
 #
 #  The daily band. Every channel degrades to a dashed "NO DATA" cell rather than
-#  failing the build — an unreachable API must never break the profile.
+#  failing the build. An unreachable API must never break the profile.
 
 [telemetry]
 # Next orbital launch worldwide, with a live countdown. thespacedevs, no key.
@@ -293,8 +293,8 @@ iss_track       = true
 repo_telemetry  = true
 
 [telemetry.listening]
-# OFF until you add the key. See SETUP.md — it's a two-minute job and the only
-# part of this build that needs a secret.
+# OFF until you add the key. See SETUP.md. It takes about two minutes and it is
+# the only part of this build that needs a secret.
 #
 #   provider = "lastfm", user = your Last.fm username,
 #   and a LASTFM_API_KEY repository secret.
@@ -321,8 +321,8 @@ areas = [
 #  isolation, so Python (#3572A5) and TypeScript (#3178c6) are the same blue and
 #  a stacked bar reads as one undifferentiated block, while C (#555555) is a
 #  muddy grey. These are categorical slots checked for separation against both
-#  sheet grounds — [light, dark] per language, the dark value stepped for the
-#  dark ground rather than lightened from the light one.
+#  sheet grounds. Each language gets [light, dark], and the dark value is stepped
+#  for the dark ground rather than lightened from the light one.
 
 [palette.lang]
 Python     = ["#2a78d6", "#3987e5"]
@@ -345,8 +345,8 @@ spare = [["#7a6ff0", "#9a92f5"], ["#00868b", "#2aa6ab"]]
 #            breakdown and those are averaged. Says what you reach for.
 #   "bytes"  one byte, one vote. Says where the code physically is.
 #
-# The gap is large — measured 2026-08-24, equal gives Python 64.7% / Swift 7.9%,
-# bytes gives Python 23.3% / Swift 49.4%, and C drops from 9.1% to 0.2%. The
+# The gap is large. Measured 2026-08-24, equal gives Python 64.7% and Swift 7.9%;
+# bytes gives Python 23.3% and Swift 49.4%, and C drops from 9.1% to 0.2%. The
 # composition card states which one is in force, so either is defensible.
 weighting = "equal"
 
