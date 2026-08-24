@@ -59,7 +59,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=20260824">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=20260824" alt="Daily telemetry. next launch Glonass-K1 No. 19; 11 people in space; ISS at -43.0 degrees latitude; last push to henrykanaskie.">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=20260824" alt="Daily telemetry. next launch Glonass-K1 No. 19; 11 people in space; ISS at -50.9 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <table>
@@ -94,7 +94,7 @@
 </picture>
 
 <sub>
-REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 23:51 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 23:56 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>

@@ -35,13 +35,13 @@ GROUNDS = {
     # ── vellum: ink on warm paper ────────────────────────────────────────────
     "light": dict(
         name="light", sheet="vellum",
-        ground="#fbf9f4",     # paper
+        ground="#ffffff",     # GitHub --bgColor-default, light
         ink="#16202b",        # primary linework and lettering
         soft="#5c6873",       # dimensions, secondary lettering
         faint="#8d8577",      # sheet furniture: zone letters, tick labels
-        rule="#c9c0b0",       # frame and table rules
-        grid="#e9e2d4",       # graph grid
-        fill="#efe9dc",       # unfilled track / hatch ground
+        rule="#cdc4b4",       # frame and table rules, warm on white
+        grid="#ece5d8",       # graph grid, warm on white
+        fill="#f2ece0",       # unfilled track / hatch ground
         accent="#1f6feb",     # the one saturated blue
         red="#c0392b",        # revision marks only
         green="#1a7f45",
@@ -50,13 +50,13 @@ GROUNDS = {
     # ── cyanotype: pale cyan on deep navy ───────────────────────────────────
     "dark": dict(
         name="dark", sheet="cyanotype",
-        ground="#0b141d",
+        ground="#0d1117",     # GitHub --bgColor-default, dark
         ink="#d7e6f2",
         soft="#8ba3b8",
         faint="#5d788f",
-        rule="#27415a",
-        grid="#152331",
-        fill="#152331",
+        rule="#28425c",
+        grid="#16242f",
+        fill="#161f2a",
         accent="#4da3ff",
         red="#ff6b5e",
         green="#3fb950",
@@ -213,7 +213,10 @@ def defs_hatch(idx: int, color: str, *, angle=45, gap=5, w=0.9) -> str:
             f'stroke-width="{w}"/></pattern>')
 
 
-def defs_grid(t, gap=8) -> str:
+GRID_PITCH = 8          # graph grid spacing, and the vertical quantum of a sheet
+
+
+def defs_grid(t, gap=GRID_PITCH) -> str:
     """The faint graph grid the whole sheet sits on."""
     return (f'<pattern id="grid" patternUnits="userSpaceOnUse" '
             f'width="{gap}" height="{gap}">'
@@ -259,20 +262,31 @@ def sheet(w, h, t, body, *, defs="", label=None, sheet_no=None, grid=True,
           zones=True, inset=12) -> str:
     """Wrap card content in the drawing frame.
 
-    The frame is a double border: an outer trim edge and an inner drawing
-    border with the zone strip between them. Four rectangles, and they do more
-    to make the card read as a drawing than anything else here.
+    The drawing border is a single inner rule with the zone strip outside it.
+    There is deliberately no outer border: the ground is GitHub's own page
+    colour, so an outline around the edge is the one mark that would still make
+    the sheet read as a box floating on a page rather than as part of one
+    continuous surface.
+
+    The grid bleeds to the edge for the same reason. It used to stop at the
+    inset, which drew a rectangle of graph paper inside a plain margin and gave
+    the sheet a visible boundary even without a stroke.
+
+    Height is rounded up to a whole number of grid squares so that stacked
+    sheets keep the grid in phase and the paper reads as continuous down the
+    page instead of jumping a few pixels at every seam.
     """
+    h = int(-(-float(h) // GRID_PITCH) * GRID_PITCH)
     d = defs_grid(t) + defs
     out = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" height="{h}" '
            f'viewBox="0 0 {w} {h}" font-family="{MONO}" role="img">'
            f"<defs>{d}</defs>")
 
-    out += (f'<rect x="0.5" y="0.5" width="{w-1}" height="{h-1}" rx="4" '
-            f'fill="{t["ground"]}" stroke="{t["rule"]}" stroke-width="1"/>')
+    out += (f'<rect x="0" y="0" width="{w}" height="{h}" '
+            f'fill="{t["ground"]}"/>')
     if grid:
-        out += (f'<rect x="{inset}" y="{inset}" width="{w-2*inset}" '
-                f'height="{h-2*inset}" fill="url(#grid)" opacity="0.85"/>')
+        out += (f'<rect x="0" y="0" width="{w}" height="{h}" '
+                f'fill="url(#grid)" opacity="0.85"/>')
     if zones:
         out += zone_marks(w, h, t, inset=inset)
     out += (f'<rect x="{inset}.5" y="{inset}.5" width="{w-2*inset-1}" '
