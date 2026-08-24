@@ -17,7 +17,6 @@ is no dependency that can break the build at 6am while nobody is looking.
 from __future__ import annotations
 
 import argparse
-import datetime as dt
 import re
 import sys
 import tomllib
@@ -232,27 +231,27 @@ def bom_table(cfg: dict) -> str:
     return ("<table>\n<tbody>\n" + "\n".join(rows) + "\n</tbody>\n</table>")
 
 
-def notes_block(cfg: dict, data: dict, today: dt.date) -> str:
-    """The drawing's numbered notes.
+def notes_block(cfg: dict, data: dict) -> str:
+    """The numbered notes, in markdown, for the written index.
 
-    Note 1 is fixed and note 2 rotates through field_notes by date, so the sheet
-    reads differently day to day without anyone editing it. Indexing by ordinal
-    rather than at random means the same day always yields the same note. That
-    keeps the build reproducible: two runs on one day produce identical output
-    and the workflow's "commit if changed" stays quiet.
+    The notes sheet draws these same notes. Both call cards.todays_note() rather
+    than each picking a note for itself, because two implementations of "which
+    note is today's" would eventually disagree and the sheet would then contradict
+    the text underneath it.
     """
-    pool = cfg["field_notes"]
-    note = pool[today.toordinal() % len(pool)]
+    note = cards.todays_note(cfg, data)
     lines = [
         "1. All figures are read from the GitHub API at build time. Status and "
         "completion are hand-set in "
         "[`data/profile.toml`](data/profile.toml) and reviewed, not inferred.",
-        f"2. {note}",
     ]
+    if note:
+        lines.append(f"2. {note}")
     if data.get("errors"):
         lines.append(
-            f"3. This build degraded {len(data['errors'])} telemetry "
-            f"channel(s); those cells read NO DATA rather than stale values.")
+            f"{len(lines) + 1}. This build degraded {len(data['errors'])} "
+            f"telemetry channel(s); those cells read NO DATA rather than "
+            f"showing stale values.")
     return "\n".join(lines)
 
 
@@ -267,8 +266,6 @@ def render_readme(cfg: dict, data: dict) -> str:
     focus = " · ".join(f"`{f}`" for f in cfg["focus"])
 
     subs = {
-        "NAME": ident["name"],
-        "TAGLINE": ident["tagline"],
         "WEBSITE": ident["website"],
         "GITHUB": ident["github"],
         "REVISION": ident["revision"],
@@ -276,10 +273,13 @@ def render_readme(cfg: dict, data: dict) -> str:
         "POINTS": points,
         "FOCUS": focus,
         "BOM_TABLE": bom_table(cfg),
-        "NOTES": notes_block(cfg, data, now.date()),
-        "STAMP": stamp,
+        "NOTES": notes_block(cfg, data),
         "BUILT": now.strftime("%Y-%m-%d %H:%M UTC"),
+        "SHEET_COUNT": len(cards.CARDS),
+        "WEBSITE_LABEL": ident["website"].split("//")[-1].rstrip("/"),
         "CARD_TITLEBLOCK": picture("titleblock", "Title block", stamp),
+        "CARD_GENERAL": picture("general", "General notes", stamp),
+        "CARD_NOTES": picture("notes", "Notes", stamp),
         "CARD_BOM": picture("bom", "Bill of materials", stamp),
         "CARD_TELEMETRY": picture("telemetry", "Daily telemetry", stamp),
         "CARD_COMPOSITION": picture("composition", "Language composition", stamp),

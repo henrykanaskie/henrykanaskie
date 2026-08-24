@@ -10,6 +10,20 @@
   ║      change the layout  ->  templates/README.md.tmpl                     ║
   ║      change the cards   ->  scripts/cards.py                             ║
   ╚══════════════════════════════════════════════════════════════════════════╝
+
+  LAYOUT NOTE
+
+  There are no markdown headings and no horizontal rules in this file, and that
+  is deliberate. Every sheet carries its own label inside the drawing frame, and
+  the frames already separate one sheet from the next. A GitHub `###` heading
+  set in the default UI font, sitting directly above a monospace drawing, was
+  the single thing making the page read as two documents stapled together.
+
+  The only prose left outside a card is the link row and the collapsed index.
+  That index is not decoration. An SVG served through <img> gives a screen
+  reader nothing but its alt text, and no link inside it is clickable. So every
+  word that appears on a sheet also appears there as selectable text with real
+  anchors.
 -->
 
 <div align="center">
@@ -19,17 +33,23 @@
   <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=20260824" alt="Title block">
 </picture>
 
-<em>Machine learning, quantitative research, and things that talk to hardware.</em>
+[`henrykanaskie.com`](https://henrykanaskie.com) &nbsp;·&nbsp; [`repositories`](https://github.com/henrykanaskie?tab=repositories) &nbsp;·&nbsp; [`how this is built`](SETUP.md) &nbsp;·&nbsp; [`the source of truth`](data/profile.toml)
 
-<a href="https://henrykanaskie.com"><img src="https://img.shields.io/badge/henrykanaskie.com-16202b?style=flat-square&logo=safari&logoColor=white&labelColor=16202b" alt="Website"></a>
-<a href="https://github.com/henrykanaskie?tab=repositories"><img src="https://img.shields.io/badge/repositories-16202b?style=flat-square&logo=github&logoColor=white&labelColor=16202b" alt="Repositories"></a>
-<img src="https://komarev.com/ghpvc/?username=henrykanaskie&style=flat-square&color=1f6feb&label=sheet+views" alt="Profile views">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-dark.svg?v=20260824">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-light.svg?v=20260824" alt="General notes">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-dark.svg?v=20260824">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-light.svg?v=20260824" alt="Bill of materials">
+</picture>
 
 </div>
 
----
-
-### `A1` &nbsp; GENERAL
+<details>
+<summary><sub><b>&nbsp;THE WRITTEN INDEX</b> &nbsp;&nbsp; every sheet above as selectable text, with links</sub></summary>
+<br>
 
 I work at the boundary between models and hardware. A transformer written from first principles, an optimizer that picks capacitor values you can actually buy, a habit tracker that draws your streaks as a neural graph. Most of it starts as a question I couldn't answer by reading, so I write the thing that answers it.
 
@@ -37,19 +57,11 @@ I work at the boundary between models and hardware. A transformer written from f
 - Just finished a **GPT from scratch**, largely to stop treating attention as a black box
 - Happiest in a debugger, at the point where the theory stops matching the trace
 
----
+**Focus:** `machine learning` · `transformers` · `quantitative research` · `time series` · `optimization` · `embedded C` · `signal processing` · `SwiftUI` · `agents` · `numerical methods`
 
-### `B1` &nbsp; BILL OF MATERIALS
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-dark.svg?v=20260824">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/bom-light.svg?v=20260824" alt="Bill of materials">
-</picture>
-
-<sub>Completion is drawn as a real dimension rather than a claimed percentage, and each bar is
-hatched in the part's own material. Designators are keyed by class: OPT solver, SYS systems,
-QNT quantitative, MDL model, APP application, TUL tool, EDU teaching. Expand a row for the
-full description.</sub>
+**Bill of materials.** Designators are keyed by class: `OPT` solver, `SYS` systems,
+`QNT` quantitative, `MDL` model built from scratch, `APP` application, `TUL` tool,
+`EDU` teaching.
 
 <table>
 <tbody>
@@ -137,22 +149,19 @@ Built on FastF1, currently a tire-degradation regression over stint data. Aimed 
 </tbody>
 </table>
 
----
+**Notes.**
 
-### `C1` &nbsp; TELEMETRY
+1. All figures are read from the GitHub API at build time. Status and completion are hand-set in [`data/profile.toml`](data/profile.toml) and reviewed, not inferred.
+2. The Gaussian baseline in the risk engine is only there so the other two engines have something to be measured against.
 
-<sub>Rebuilt every morning. Orbital data comes from <a href="https://thespacedevs.com">thespacedevs</a>
-and <a href="https://wheretheiss.at">wheretheiss.at</a>, push activity from the GitHub API. If a
-channel can't be reached it reads NO DATA instead of showing a stale figure.</sub>
+</details>
+
+<div align="center">
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=20260824">
   <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=20260824" alt="Daily telemetry">
 </picture>
-
----
-
-### `D1` &nbsp; MATERIALS AND ACTIVITY
 
 <table>
 <tr>
@@ -175,34 +184,25 @@ channel can't be reached it reads NO DATA instead of showing a stale figure.</su
 </tr>
 </table>
 
-<sub>Focus:</sub> `machine learning` · `transformers` · `quantitative research` · `time series` · `optimization` · `embedded C` · `signal processing` · `SwiftUI` · `agents` · `numerical methods`
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-dark.svg?v=20260824">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-light.svg?v=20260824" alt="Notes">
+</picture>
 
----
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/output/github-snake-dark.svg">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/output/github-snake.svg" alt="A snake eating the contribution graph">
+</picture>
 
-### `E1` &nbsp; NOTES
-
-1. All figures are read from the GitHub API at build time. Status and completion are hand-set in [`data/profile.toml`](data/profile.toml) and reviewed, not inferred.
-2. The Gaussian baseline in the risk engine is only there so the other two engines have something to be measured against.
-
----
-
-### `F1` &nbsp; CONTRIBUTION GRAPH
-
-<div align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/output/github-snake-dark.svg">
-    <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/output/github-snake.svg" alt="A snake eating the contribution graph">
-  </picture>
-</div>
-
----
-
-<div align="center">
 <sub>
-REV E &nbsp;·&nbsp; 5 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 15:12 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 20:22 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
-<a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
-The cards draw themselves in when they load. Where SMIL isn't supported they simply
-arrive finished.
+<a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt every morning.<br>
+The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
+
+<br><br>
+
+<img src="https://komarev.com/ghpvc/?username=henrykanaskie&style=flat-square&color=1f6feb&labelColor=16202b&label=sheet+views" alt="Sheet views">
+
 </div>

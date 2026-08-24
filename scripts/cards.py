@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The five sheets of the drawing set.
+"""The sheets of the drawing set.
 
 blueprint.py owns the look. Frame, grounds, rule weights, and motion all live
 there. This module owns the *layout*: what goes on each sheet and where. Nothing
@@ -7,8 +7,9 @@ here invents a colour or a border; if a card needs a mark that isn't a blueprint
 primitive, that is a sign the primitive is missing rather than a licence to draw
 it locally.
 
-    CARDS                       the five sheet names, in sheet order
+    CARDS                       the sheet names, in sheet order
     render(name, cfg, data, t)  -> a complete SVG document string
+    todays_note(cfg, data)      -> the day's field note, shared with build.py
 
 Three rules run through every card:
 
@@ -48,7 +49,19 @@ rule, dim, balloon, revcloud = bp.rule, bp.dim, bp.balloon, bp.revcloud
 fade, grow, draw_on = bp.fade, bp.grow, bp.draw_on
 sheet, field, defs_hatch = bp.sheet, bp.field, bp.defs_hatch
 
-CARDS = ["titleblock", "bom", "telemetry", "composition", "activity"]
+CARDS = ["titleblock", "general", "bom", "telemetry", "composition",
+         "activity", "notes"]
+
+
+def _sheet_no(name: str) -> str:
+    """`SH n / total`, derived from the card's own place in CARDS.
+
+    Written out by hand this goes wrong the moment a sheet is added or the set
+    is reordered, and a sheet numbered 3 of 5 in a set of seven is the kind of
+    error that makes a reader distrust every other figure on the drawing.
+    """
+    return f"SH {CARDS.index(name) + 1} / {len(CARDS)}"
+
 
 # ── shared metrics ───────────────────────────────────────────────────────────
 
@@ -86,6 +99,83 @@ def _fit(s, px, size, track=0.0) -> str:
     per = size * CW + track
     n = max(1, int((px - size * CW) / per))
     return s[:n].rstrip() + "…"
+
+
+def _chars_per_line(px, size, track=0.0) -> int:
+    """How many characters of a monospace run fit in `px`.
+
+    A run of k characters is k advances wide with the tracking between them,
+    so k*(size*CW + track) - track <= px. Solved for k.
+    """
+    per = size * CW + track
+    return max(1, int((px + track) / per)) if per > 0 else 1
+
+
+def _wrap_spans(s, px, size, track=0.0):
+    """Word-wrap `s` to `px`, as (start, end) index pairs into `s`.
+
+    Indices rather than strings because the caller may be carrying a parallel
+    per-character mask (which characters were bold) that has to stay aligned
+    with the text after wrapping.
+    """
+    n = _chars_per_line(px, size, track)
+    spans, i, L = [], 0, len(s)
+    while i < L:
+        while i < L and s[i] == " ":
+            i += 1                       # a wrapped line never opens on a space
+        if i >= L:
+            break
+        end = min(L, i + n)
+        if end < L and s[end] != " ":
+            brk = s.rfind(" ", i, end)
+            # No break point means one word is longer than the whole line, and
+            # the only options are a hard cut or an overflowing sheet.
+            if brk > i:
+                end = brk
+        j = end
+        while j > i and s[j - 1] == " ":
+            j -= 1
+        spans.append((i, j))
+        i = end
+    return spans
+
+
+def _wrap(s, px, size, track=0.0):
+    """Word-wrap `s` to `px`, as a list of lines."""
+    return [s[a:b] for a, b in _wrap_spans(s, px, size, track)]
+
+
+def _demark(s):
+    """Strip markdown `**bold**` markers, keeping track of what was inside.
+
+    Returns the plain text and a per-character flag saying whether that
+    character was emphasised. The markers must not survive to the sheet, and
+    neither must the emphasis be lost, so the two are separated here and put
+    back together as weighted runs at draw time.
+    """
+    plain, mask, bold, i = [], [], False, 0
+    s = str(s)
+    while i < len(s):
+        if s[i:i + 2] == "**":
+            bold = not bold
+            i += 2
+            continue
+        plain.append(s[i])
+        mask.append(bold)
+        i += 1
+    return "".join(plain), mask
+
+
+def _mask_runs(mask, a, b):
+    """Group mask[a:b] into (start, end, bold) runs of one weight each."""
+    runs, i = [], a
+    while i < b:
+        j = i
+        while j < b and mask[j] == mask[i]:
+            j += 1
+        runs.append((i, j, mask[i]))
+        i = j
+    return runs
 
 
 def _fit_size(s, px, size, track_ratio=0.10, floor=11) -> float:
@@ -141,6 +231,42 @@ def _grow_col(x, base, w, h, fill, delay) -> str:
          f'keySplines="0.22 1 0.36 1" keyTimes="0;1"/>')
     return (f'<rect x="{x:.2f}" y="{y:.1f}" width="{w:.2f}" height="{h:.1f}" '
             f'fill="{fill}">{a}{grow("height", h, delay)}</rect>')
+
+
+def _numbered_note(x, y, px, num, s, t, delay, *, size=10.5, lead=15.5,
+                   gutter=None, color="ink"):
+    """One numbered note, hung off its number. Returns (svg, y after the note).
+
+    Continuation lines indent past the number instead of running back to the
+    margin, which is how a numbered note is set on a real sheet and the only
+    way the reader can tell where note 2 stops and note 3 starts.
+
+    `s` may carry markdown bold markers. They are stripped and redrawn as
+    weighted runs laid end to end at measured x, so the emphasis survives and
+    the markers do not.
+    """
+    # Whitespace is collapsed before the markers are read, because SVG collapses
+    # runs of spaces inside a <text> as well, and a run measured with two spaces
+    # that draws with one puts every later run on the line out of position.
+    plain, mask = _demark(" ".join(str(s).split()))
+    g = _w(f"{num} ", size) if gutter is None else gutter
+    spans = _wrap_spans(plain, px - g, size)
+    body = text(x, y, num, t, size=size, color=color)
+    for k, (a, b) in enumerate(spans):
+        xx, yy = x + g, y + k * lead
+        for rs, re_, bold in _mask_runs(mask, a, b):
+            run = plain[rs:re_]
+            # A <text> drops its own leading space, so the space that follows a
+            # bold run would close the gap between the two words. The advance is
+            # measured on the full run and the space is spent as an offset
+            # instead, which keeps the runs abutting at the right distance.
+            drawn = run.strip(" ")
+            if drawn:
+                lead_px = (len(run) - len(run.lstrip(" "))) * size * CW
+                body += text(xx + lead_px, yy, drawn, t, size=size, color=color,
+                             weight=600 if bold else 400)
+            xx += _w(run, size)
+    return _g(delay, body), y + max(1, len(spans)) * lead
 
 
 # ── formatting ───────────────────────────────────────────────────────────────
@@ -235,9 +361,9 @@ def _status_map(cfg) -> dict:
     return {str(s.get("key")): (i, s) for i, s in enumerate(st)}
 
 
-# ── sheet 2 geometry, shared ─────────────────────────────────────────────────
+# ── bill of materials geometry, shared ────────────────────────────────────────────────
 #
-# The revision table on sheet 1 cites zones on sheet 2, so the two sheets have
+# The revision table on sheet 1 cites zones on the BOM sheet, so the two have
 # to agree about where a part sits. These constants are the single source of
 # that agreement. _bom_zone() derives the zone from the same numbers the BOM
 # actually lays itself out with, so the citation is true rather than plausible.
@@ -277,13 +403,19 @@ def _bom_height(n_rows: int) -> int:
     return BOM_BODY_Y + max(1, n_rows) * BOM_ROW_H + 54
 
 
-def _bom_zone(cfg, repo, sheet_no=2) -> str:
-    """Zone reference for a part on sheet 2, e.g. `2-C1`.
+def _bom_zone(cfg, repo, sheet_no=None) -> str:
+    """Zone reference for a part on the BOM sheet, e.g. `3-C1`.
 
     Recomputes blueprint.zone_marks' own division of the sheet (inset 12, pitch
     88) against the BOM's real height, so the letter is the zone the part is
     genuinely drawn in.
+
+    The sheet number comes from the BOM's own place in CARDS. A citation that
+    names the wrong sheet is worse than no citation, and adding a sheet ahead
+    of the BOM is exactly the edit that would break a literal.
     """
+    if sheet_no is None:
+        sheet_no = CARDS.index("bom") + 1
     projects = cfg.get("projects") or []
     idx = next((i for i, p in enumerate(projects)
                 if str(p.get("name", "")).casefold() == str(repo).casefold()),
@@ -416,7 +548,8 @@ def _titleblock(cfg, data, t):
     date = _datestr(data.get("generated_at")) or DASH
     fields = (("DRAWN BY", str(ident.get("drawn_by") or DASH), 2.2),
               ("REV", str(ident.get("revision") or DASH), 0.7),
-              ("SHEET", "1 OF %d" % len(CARDS), 1.0),
+              ("SHEET", "%d OF %d" % (CARDS.index("titleblock") + 1,
+                                      len(CARDS)), 1.0),
               ("DATE", date, 1.5),
               # A drawing with no scale says so. NONE is the correct answer for
               # a sheet whose subject has no physical size, not a missing value.
@@ -439,10 +572,113 @@ def _titleblock(cfg, data, t):
 
     H = strip_y + strip_h + 30            # clears the sheet number in the corner
     return sheet(W, H, t, out, label="TITLE BLOCK",
-                 sheet_no=f"SH 1 / {len(CARDS)}")
+                 sheet_no=_sheet_no("titleblock"))
 
 
-# ── sheet 2: bill of materials ───────────────────────────────────────────────
+# ── sheet 2: general notes ───────────────────────────────────────────────────
+
+# Focus tags are drawn in one muted colour rather than keyed to the language
+# palette. Those colours already mean something two sheets later, where a hatch
+# and a swatch identify a material; reusing them here, where "transformers" is
+# not a material and has no share of anything, would key the reader to a legend
+# that does not exist.
+FOCUS_SIZE = 7.4
+FOCUS_TRACK = 0.9
+FOCUS_PAD = 8           # each side of the tag lettering
+FOCUS_H = 17
+FOCUS_GAP = 7           # between tags on a row
+FOCUS_PITCH = 24        # row to row
+
+
+def _focus_strip(x, y, px, areas, t, delay):
+    """The focus areas as outlined tags, wrapping to as many rows as needed.
+
+    Returns (svg, y below the last row). Widths come from the monospace metric,
+    so a row is packed against a real measurement and cannot spill past `px`.
+    """
+    out, rows = "", [[]]
+    row_w = 0.0
+    for a in areas:
+        # A tag wider than the whole strip has nowhere to wrap to, so it is cut
+        # to the strip instead of hanging over the frame. Nothing in the config
+        # is close to this; it is here so nothing added later can break out.
+        s = _fit(str(a).upper(), px - 2 * FOCUS_PAD, FOCUS_SIZE, FOCUS_TRACK)
+        w = _w(s, FOCUS_SIZE, FOCUS_TRACK) + 2 * FOCUS_PAD
+        if rows[-1] and row_w + FOCUS_GAP + w > px:
+            rows.append([])
+            row_w = 0.0
+        rows[-1].append((s, w))
+        row_w += w + (FOCUS_GAP if len(rows[-1]) > 1 else 0)
+
+    i = 0
+    for r, row in enumerate(rows):
+        tx = x
+        for s, w in row:
+            d = delay + i * 0.04
+            out += _g(d, f'<rect x="{tx:.1f}" y="{y + r * FOCUS_PITCH:.1f}" '
+                         f'width="{w:.1f}" height="{FOCUS_H}" rx="2" '
+                         f'fill="none" stroke="{t["rule"]}" '
+                         f'stroke-width="0.9"/>')
+            out += _g(d, caps(tx + w / 2, y + r * FOCUS_PITCH + 11.5, s, t,
+                              size=FOCUS_SIZE, track=FOCUS_TRACK,
+                              anchor="middle", color="soft"))
+            tx += w + FOCUS_GAP
+            i += 1
+    return out, y + (len(rows) - 1) * FOCUS_PITCH + FOCUS_H
+
+
+def _general(cfg, data, t):
+    W = 900
+    x0, x1 = 26, 874
+    span = x1 - x0
+
+    about = cfg.get("about") or {}
+    # The body is wrapped in profile.toml for editing, not for the sheet, so the
+    # file's own line breaks are collapsed out before it is re-wrapped to the
+    # measured column width.
+    body = " ".join(" ".join(str(s) for s in (about.get("body") or [])).split())
+    points = [str(p) for p in (about.get("points") or []) if str(p).strip()]
+    areas = [str(a) for a in (cfg.get("focus") or []) if str(a).strip()]
+
+    out, y = "", 60
+    if body:
+        for i, line in enumerate(_wrap(body, span, 13)):
+            out += _g(D_LETTER + i * 0.05, text(x0, y, line, t, size=13))
+            y += 19
+        y += 6
+
+    if points:
+        if body:
+            out += _drawn_rule(x0, y, x1, y, t, D_RULE, w=0.8, dur=0.8)
+            y += 24
+        # One gutter for the whole block, sized to the widest number, so the
+        # notes hang off a single margin instead of stepping right at note 10.
+        gutter = _w(f"{len(points)}. ", 10.5)
+        for i, p in enumerate(points):
+            svg, y = _numbered_note(x0, y, span, f"{i + 1}.", p, t,
+                                    D_DATA + i * 0.08, gutter=gutter)
+            out += svg
+            y += 8
+        y += 6
+
+    if areas:
+        out += _drawn_rule(x0, y, x1, y, t, D_RULE + 0.08, w=0.8, dur=0.8)
+        y += 20
+        out += _g(D_LETTER + 0.2, caps(x0, y, "FOCUS", t, size=7, track=1.1))
+        y += 12
+        svg, y = _focus_strip(x0, y, span, areas, t, D_DATA + 0.3)
+        out += svg
+
+    if not (body or points or areas):
+        out += _nodata(x0, 60, span, 46, t, label="NO GENERAL NOTES")
+        y = 106
+
+    H = int(y + 34)                       # clears the sheet number in the corner
+    return sheet(W, H, t, out, label="GENERAL NOTES",
+                 sheet_no=_sheet_no("general"))
+
+
+# ── sheet 3: bill of materials ───────────────────────────────────────────────
 
 def _bom(cfg, data, t):
     projects = list(cfg.get("projects") or [])
@@ -478,7 +714,7 @@ def _bom(cfg, data, t):
         out += _nodata(BOM_X0, BOM_BODY_Y + 10, BOM_X1 - BOM_X0,
                        BOM_ROW_H - 16, t, label="NO PARTS LISTED")
         return sheet(BOM_W, H, t, out, defs=defs, label="BILL OF MATERIALS",
-                     sheet_no=f"SH 2 / {len(CARDS)}")
+                     sheet_no=_sheet_no("bom"))
 
     changed = _repo_name((data.get("last_push") or {}).get("repo")).casefold()
     cloud = ""
@@ -599,10 +835,10 @@ def _bom(cfg, data, t):
     out += _g(D_LETTER + 0.4, legend)
 
     return sheet(BOM_W, H, t, out, defs=defs, label="BILL OF MATERIALS",
-                 sheet_no=f"SH 2 / {len(CARDS)}")
+                 sheet_no=_sheet_no("bom"))
 
 
-# ── sheet 3: telemetry ───────────────────────────────────────────────────────
+# ── sheet 4: telemetry ───────────────────────────────────────────────────────
 
 ISS_INCL = 51.64        # ISS orbital inclination, degrees
 
@@ -920,10 +1156,10 @@ def _telemetry(cfg, data, t):
     out += _g(D_LETTER + 0.5, caps(x0, H - 22, f"GENERATED {stamp} UTC", t,
                                    size=6.8, track=1.0))
     return sheet(W, H, t, out, label="DAILY TELEMETRY",
-                 sheet_no=f"SH 3 / {len(CARDS)}")
+                 sheet_no=_sheet_no("telemetry"))
 
 
-# ── sheet 4: material composition ────────────────────────────────────────────
+# ── sheet 5: material composition ────────────────────────────────────────────
 
 # The two narrow sheets sit side by side in the README, so both are floored at a
 # common height. Content can still push either one taller; this only stops them
@@ -1028,10 +1264,10 @@ def _composition(cfg, data, t):
 
     H = max(SIDE_MIN_H, int(foot_y + 28))
     return sheet(W, H, t, out, defs=defs, label="MATERIAL COMPOSITION",
-                 sheet_no=f"SH 4 / {len(CARDS)}")
+                 sheet_no=_sheet_no("composition"))
 
 
-# ── sheet 5: push activity ───────────────────────────────────────────────────
+# ── sheet 6: push activity ───────────────────────────────────────────────────
 
 def _activity(cfg, data, t):
     W = 440
@@ -1114,17 +1350,88 @@ def _activity(cfg, data, t):
 
     H = max(SIDE_MIN_H, int(fy + 40))
     return sheet(W, H, t, out, label="PUSH ACTIVITY / 30 D",
-                 sheet_no=f"SH 5 / {len(CARDS)}")
+                 sheet_no=_sheet_no("activity"))
+
+
+# ── sheet 7: notes ───────────────────────────────────────────────────────────
+
+# Note 1 never changes. It is the sheet's own provenance statement: which
+# figures are measured, and which are a person's judgement written down by hand.
+NOTE_PROVENANCE = (
+    "All figures are read from the GitHub API at build time. Status and "
+    "completion are hand-set in data/profile.toml and reviewed, not inferred.")
+
+
+def todays_note(cfg: dict, data: dict) -> str:
+    """The day's field note, or "" when no notes are configured.
+
+    Exported so build.py can put the same note in the README without keeping a
+    second copy of the selection rule.
+
+    The index is the date's ordinal, never a random draw. Two builds on the same
+    day must produce identical bytes, otherwise the workflow's "commit if
+    changed" step commits a new note every run and the history fills with diffs
+    that say nothing.
+    """
+    pool = [str(s) for s in ((cfg or {}).get("field_notes") or [])
+            if str(s).strip()]
+    if not pool:
+        return ""
+    now = (data or {}).get("generated_at")
+    # A payload that round-tripped through JSON carries a string, which has no
+    # ordinal. Falling back to the first note keeps the sheet reproducible.
+    ordinal = now.date().toordinal() if hasattr(now, "date") else 0
+    return pool[ordinal % len(pool)]
+
+
+def _notes(cfg, data, t):
+    W = 900
+    x0, x1 = 26, 874
+    span = x1 - x0
+
+    items = [NOTE_PROVENANCE]
+    note = todays_note(cfg, data)
+    if note:
+        items.append(note)
+    errors = list((data or {}).get("errors") or [])
+    if errors:
+        n = len(errors)
+        items.append(
+            f"This build degraded {n} telemetry channel"
+            f"{'s' if n != 1 else ''}; those cells read NO DATA rather than "
+            f"showing stale values.")
+
+    # Numbered straight through whatever is present. A notes block that skips
+    # from 1 to 3 reads as a note someone deleted.
+    gutter = _w(f"{len(items)}. ", 11)
+    out, y = "", 62
+    for i, item in enumerate(items):
+        svg, y = _numbered_note(x0, y, span, f"{i + 1}.", item, t,
+                                D_DATA + i * 0.10, size=11, lead=16.5,
+                                gutter=gutter)
+        out += svg
+        y += 12
+
+    y += 4
+    out += _drawn_rule(x0, y, x1, y, t, D_RULE, w=0.8, dur=0.8)
+
+    stamp = _datestr((data or {}).get("generated_at"), "%Y-%m-%d %H:%M") or DASH
+    out += _g(D_LETTER + 0.4, caps(x0, y + 18, f"GENERATED {stamp} UTC", t,
+                                   size=6.8, track=1.0))
+    H = int(y + 44)
+    return sheet(W, H, t, out, label="NOTES", sheet_no=_sheet_no("notes"))
 
 
 # ── entry point ──────────────────────────────────────────────────────────────
 
 _RENDERERS = {
     "titleblock": _titleblock,
+    "general": _general,
     "bom": _bom,
     "telemetry": _telemetry,
     "composition": _composition,
     "activity": _activity,
+    "notes": _notes,
 }
 
 

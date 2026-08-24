@@ -17,8 +17,18 @@ Everything else is output:
 | `assets/<card>-dark.svg`            | `scripts/build.py`  | `data/profile.toml` |
 | `README.md`                         | `scripts/build.py`  | `data/profile.toml` |
 
-Five cards: `titleblock`, `bom`, `telemetry`, `composition`, `activity`. Each in a
-light and a dark variant, ten SVGs total.
+Seven sheets, in this order: `titleblock`, `general`, `bom`, `telemetry`,
+`composition`, `activity`, `notes`. Each is drawn in a light and a dark variant, so
+fourteen SVGs. Sheet numbers come from that order, so adding or reordering a card in
+`CARDS` renumbers every sheet automatically.
+
+The README has no markdown headings and no horizontal rules. Each sheet carries its own
+label inside the drawing frame, so a GitHub heading in the default UI font above a
+monospace drawing made the page read as two documents. The only prose outside a card is
+the link row and the collapsed written index. That index exists because an SVG served
+through `<img>` gives a screen reader nothing but alt text and none of its links are
+clickable, so every word on every sheet also appears there as real text with real
+anchors. If you add a card, add its words there too.
 
 **Do not hand-edit `README.md` or anything in `assets/`.** The next build overwrites
 them and your edit is gone. Edit the TOML.
