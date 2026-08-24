@@ -72,7 +72,7 @@ Job control, I/O redirection, and signal handling, including the parts that only
 <tr>
 <td align="center"><code>0x03</code></td>
 <td align="center">▲</td>
-<td><details><summary><b>animAgent</b> — Sprite Room: your agents rendered as pixel-art characters, dropping from the notch</summary><br>
+<td><details><summary><b>animAgent</b> — Sprite Room: your agents as pixel-art characters, dropping from the notch</summary><br>
 A macOS app that turns live Claude Code activity into a small pixel-art room of working characters — each agent a character, each tool call something it's visibly doing. Read-only by design: it never controls an agent and never shows prompt or response content.
 <br><sub>M5 of M6 · 396 / 396 tests pass · art pipeline not integrated</sub><br><br>
 <a href="https://github.com/henrykanaskie/animAgent">view the repository&nbsp;&rarr;</a>
@@ -181,7 +181,6 @@ channel that cannot be reached reads NO DATA rather than showing a stale figure.
 
 1. All figures are read from the GitHub API at build time. Status and completion are hand-set in [`data/profile.toml`](data/profile.toml) and reviewed, not inferred.
 2. The pixel-art agents are read-only on purpose. Watching is the whole feature.
-3. This build degraded 4 telemetry channel(s); those cells read NO DATA rather than stale values.
 
 ---
 
@@ -198,7 +197,7 @@ channel that cannot be reached reads NO DATA rather than showing a stale figure.
 
 <div align="center">
 <sub>
-REV D &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT 2026-08-24 08:03 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV D &nbsp;·&nbsp; SHEET 1 OF 1 &nbsp;·&nbsp; BUILT 2026-08-24 08:10 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
 <a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
 Cards animate as they draw themselves in; they degrade to their finished state where
