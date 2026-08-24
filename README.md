@@ -199,7 +199,7 @@ channel can't be reached it reads NO DATA instead of showing a stale figure.</su
 
 <div align="center">
 <sub>
-REV E &nbsp;·&nbsp; 5 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 15:10 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 5 SHEETS &nbsp;·&nbsp; BUILT 2026-08-24 15:12 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <a href="data/profile.toml"><code>data/profile.toml</code></a> by
 <a href="scripts/build.py"><code>scripts/build.py</code></a>, rebuilt daily at 06:00 Pacific.<br>
 The cards draw themselves in when they load. Where SMIL isn't supported they simply
