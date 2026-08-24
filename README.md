@@ -59,7 +59,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=20260824">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=20260824" alt="Daily telemetry. next launch Glonass-K1 No. 19; 11 people in space; ISS at -42.5 degrees latitude; last push to henrykanaskie.">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=20260824" alt="Daily telemetry. next launch Glonass-K1 No. 19; 11 people in space; ISS at -43.0 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <table>
