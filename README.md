@@ -64,10 +64,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=c90d211107">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=6b10990737">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=f159b4c034">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=abb48c1b53" alt="Daily telemetry. ISS at 40.5 degrees latitude; last push to henrykanaskie.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=48d2be3465">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=20ec83e786">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=22a31914b5">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=f5e5fc87eb" alt="Daily telemetry. ISS at 41.2 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <picture>
@@ -78,17 +78,17 @@
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=fa7dbb02ac">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=8311415d0a">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=68e2ce330f">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=a33922db9e" alt="Push activity, 91 pushes over the last 30 days.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=3e79712bc2">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=cf233577a9">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=6e2f1e2dd6">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=f018246162" alt="Push activity, 91 pushes over the last 30 days.">
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-narrow-dark.svg?v=bd623288fa">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-narrow-light.svg?v=f1ca5abf9d">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-dark.svg?v=3a33c12ae2">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-light.svg?v=8422b4f09c" alt="Notes. I write the transformer by hand about once a year. It gets less mysterious every time.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-narrow-dark.svg?v=08567dd8cc">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-narrow-light.svg?v=90c09ceb2d">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-dark.svg?v=9ac5f96a93">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-light.svg?v=e11526bc24" alt="Notes. I write the transformer by hand about once a year. It gets less mysterious every time.">
 </picture>
 
 <picture>
@@ -97,7 +97,7 @@
 </picture>
 
 <sub>
-REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-25 00:36 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-25 00:37 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
