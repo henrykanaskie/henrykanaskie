@@ -64,10 +64,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=f2a1c0e321">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=618418e749">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=68b292938f">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=b2ee2d75ba" alt="Daily telemetry. next launch Unknown Payload; 11 people in space; ISS at -17.4 degrees latitude; last push to henrykanaskie.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=30b9a53a3b">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=e457b2d5f8">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=eaac6bd18a">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=72ab2ee010" alt="Daily telemetry. next launch Unknown Payload; 11 people in space; ISS at -20.4 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <picture>
@@ -78,10 +78,10 @@
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=1a39e940ac">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=a5e9056476">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=04cf0d26b4">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=d13f5eb51c" alt="Push activity, 91 pushes over the last 30 days.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=23e6fcee73">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=7c0e7609ff">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=bc53f4bf79">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=62ca5fb075" alt="Push activity, 91 pushes over the last 30 days.">
 </picture>
 
 <picture>
@@ -90,7 +90,7 @@
 </picture>
 
 <sub>
-REV E &nbsp;·&nbsp; 6 SHEETS &nbsp;·&nbsp; BUILT 2026-08-25 02:47 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 6 SHEETS &nbsp;·&nbsp; BUILT 2026-08-25 02:48 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
