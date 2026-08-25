@@ -1663,6 +1663,31 @@ def row_width(specs: list, label: str) -> float:
         chip_width(lab, accent=bool(acc)) for _s, lab, _sh, _h, acc in specs)
 
 
+# ── narrow sheets ────────────────────────────────────────────────────────────
+#
+# A sheet is 900 wide and GitHub's README column on a 375pt phone is 293, so a
+# phone scales the whole drawing to a third of its size and the body lettering
+# lands around 5px. Legible on paper, not on a phone.
+#
+# So each sheet has a second layout drawn at NARROW_W, reflowed rather than
+# scaled: columns become stacked blocks, panels become rows. Served by the same
+# max-width <picture> query as the chips.
+#
+# NARROW_W is 300 because the phone column is 293. Slightly over means a phone
+# scales it by 0.98 rather than upscaling a smaller drawing into blur, and a
+# 320pt phone still only takes it to 0.82.
+#
+# A card with no narrow layout falls back to its wide one. That is a real
+# fallback, not a placeholder: it keeps the set renderable while the layouts are
+# written one at a time.
+
+NARROW_W = 300
+NARROW_INSET = 8
+
+
+_NARROW_RENDERERS: dict = {}
+
+
 _RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
@@ -1674,15 +1699,37 @@ _RENDERERS = {
 }
 
 
-def render(name: str, cfg: dict, data: dict, t: dict) -> str:
+def render(name: str, cfg: dict, data: dict, t: dict, *,
+           narrow: bool = False) -> str:
     """Render one card as a complete SVG document.
 
     `name` is one of CARDS, `cfg` the parsed profile.toml, `data` the payload
     from sources.py (any value may be None or empty), and `t` one of
-    blueprint.GROUNDS.
+    blueprint.GROUNDS. `narrow` asks for the phone layout, falling back to the
+    wide one where no phone layout exists yet.
     """
-    try:
-        fn = _RENDERERS[name]
-    except KeyError:
+    if name not in _RENDERERS:
         raise ValueError(f"unknown card {name!r}; expected one of {CARDS}")
-    return fn(cfg or {}, data or {}, t)
+    fn = _NARROW_RENDERERS.get(name) if narrow else None
+    return (fn or _RENDERERS[name])(cfg or {}, data or {}, t)
+
+
+def has_narrow(name: str) -> bool:
+    """Whether `name` has its own phone layout rather than falling back."""
+    return name in _NARROW_RENDERERS
+
+
+# The phone layouts live in their own modules. They are a second full set of
+# layouts, not a tweak of these, and putting them here would have doubled the
+# length of the longest file in the repo.
+#
+# They do `import cards` and reach helpers through the module at call time
+# rather than `from cards import ...` at import time, because this import runs
+# while cards is still being defined and a from-import would bind names that do
+# not exist yet.
+for _mod in ("narrow", "narrow_bom"):
+    try:
+        _m = __import__(_mod)
+    except ModuleNotFoundError:
+        continue                      # layout not written yet; wide is the fallback
+    _NARROW_RENDERERS.update(getattr(_m, "RENDERERS", {}))

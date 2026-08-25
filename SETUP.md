@@ -241,6 +241,26 @@ actually find out. See the comments in `daily.yml`.
 
 ## Where the cards are served from
 
+### Two layouts per sheet
+
+A sheet is 900px wide and GitHub's README column on a 375pt phone is 293, so a phone
+was scaling the whole drawing to a third of its size and the body lettering landed
+around 5px. Each sheet therefore has a second layout drawn at 300px and REFLOWED
+rather than scaled: table columns become stacked blocks, side-by-side panels become
+rows. `<picture>` picks between them with the same `max-width: 500px` query the chips
+use, so there are four files per sheet: light and dark, wide and narrow.
+
+The phone layouts live in `scripts/narrow.py` and `scripts/narrow_bom.py` rather than
+in `cards.py`. They are a second full set of layouts, not a variation, and folding them
+into `cards.py` would have doubled the length of the longest file in the repo. Both
+modules export a `RENDERERS` dict that `cards.py` merges at the bottom of the file. A
+sheet with no phone layout registered falls back to its wide one, so the set always
+renders.
+
+If you add a sheet, add its phone layout too, or accept that phones will scale it.
+
+### Links
+
 Every link on the page is a chip: a small SVG wrapped in an anchor, because an
 `<img>` is inert and GitHub's sanitiser strips inline `<svg>`, `<object>` and
 `<map>`. Each chip ships in four variants, picked by `<picture>`: light and dark, wide and

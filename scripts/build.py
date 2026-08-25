@@ -218,15 +218,26 @@ def asset_url(stem: str, vers: dict) -> str:
 
 
 def picture(card: str, alt: str, vers: dict, width: str | None = None) -> str:
-    """A light/dark image pair for one card, each versioned independently."""
+    """Four variants of one sheet: light and dark, wide and phone.
+
+    Order matters. The browser takes the first <source> whose media matches, so
+    the narrow pair has to come before the wide pair or a phone in dark mode
+    would match the wide dark source and never reach its own layout.
+    """
     w = f' width="{width}"' if width else ""
-    return (
-        '<picture>\n'
-        f'  <source media="(prefers-color-scheme: dark)" '
-        f'srcset="{asset_url(card + "-dark", vers)}">\n'
-        f'  <img src="{asset_url(card + "-light", vers)}" alt="{alt}"{w}>\n'
-        '</picture>'
-    )
+    brk = cards.CHIP_BREAK
+    out = "<picture>\n"
+    if cards.has_narrow(card):
+        out += (f'  <source media="(max-width: {brk}px) and '
+                f'(prefers-color-scheme: dark)" '
+                f'srcset="{asset_url(card + "-narrow-dark", vers)}">\n'
+                f'  <source media="(max-width: {brk}px)" '
+                f'srcset="{asset_url(card + "-narrow-light", vers)}">\n')
+    out += (f'  <source media="(prefers-color-scheme: dark)" '
+            f'srcset="{asset_url(card + "-dark", vers)}">\n'
+            f'  <img src="{asset_url(card + "-light", vers)}" alt="{alt}"{w}>\n'
+            '</picture>')
+    return out
 
 
 def chip_row(specs: list, vers: dict, label: str, slug: str) -> str:
@@ -399,8 +410,12 @@ def main() -> int:
     written = 0
     vers: dict[str, str] = {}
     for name in cards.CARDS:
-        for ground, t in blueprint.GROUNDS.items():
-            svg = cards.render(name, cfg, data, t)
+        variants = [("", False)]
+        if cards.has_narrow(name):
+            variants.append(("-narrow", True))
+        for suffix, narrow in variants:
+          for ground, t in blueprint.GROUNDS.items():
+            svg = cards.render(name, cfg, data, t, narrow=narrow)
             if args.offline:
                 # Injected here rather than inside each card so no renderer can
                 # forget it, and so the stamp lands over finished content.
@@ -410,10 +425,10 @@ def main() -> int:
             # Parse before writing. A malformed card renders as a broken image
             # on the profile, which is strictly worse than yesterday's card.
             xml.dom.minidom.parseString(svg)
-            vers[f"{name}-{ground}"] = _version(svg)
-            (ASSETS / f"{name}-{ground}.svg").write_text(svg)
+            vers[f"{name}{suffix}-{ground}"] = _version(svg)
+            (ASSETS / f"{name}{suffix}-{ground}.svg").write_text(svg)
             written += 1
-            print(f"  wrote {name}-{ground}.svg  {len(svg):>6,} B")
+            print(f"  wrote {name}{suffix}-{ground}.svg  {len(svg):>6,} B")
 
     blank = cards.blank_rail(blueprint.GROUNDS["light"])
     xml.dom.minidom.parseString(blank)
