@@ -58,8 +58,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=3e1fbaedab">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=f242101045" alt="Daily telemetry. ISS at -23.6 degrees latitude; last push to henrykanaskie.">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=8673c84711">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=ac0b8d5586" alt="Daily telemetry. ISS at -22.9 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <table>
@@ -75,8 +75,8 @@
 <td width="50%" valign="top">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=9901bf6345">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=5135729aa0" alt="Push activity, 91 pushes over the last 30 days.">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=077dd75223">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=96bc606250" alt="Push activity, 91 pushes over the last 30 days.">
 </picture>
 
 </td>
