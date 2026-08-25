@@ -1179,15 +1179,20 @@ def _telemetry(cfg, data, t):
 
 # ── sheet 5: material composition ────────────────────────────────────────────
 
-# The two narrow sheets sit side by side in the README, so both are floored at a
-# common height. Content can still push either one taller; this only stops them
-# from being *needlessly* mismatched on a normal day.
+# These two used to be 440 wide and sat side by side in a markdown table. GitHub
+# keeps a two column table at two columns on a phone, so each of them landed in
+# half of an already narrow column and rendered at 119px, which was worse than
+# what the phone layouts were written to fix. The table is gone and both sheets
+# are full width like the rest of the set.
+#
+# The floor stays: it stops the pair looking needlessly mismatched when one has
+# little to show.
 SIDE_MIN_H = 248
 
 
 def _composition(cfg, data, t):
-    W = 440
-    x0, x1 = 26, 414
+    W = 900
+    x0, x1 = 26, 874
     langs = list(data.get("languages") or [])
     lcfg = cfg.get("languages") or {}
     try:
@@ -1288,8 +1293,8 @@ def _composition(cfg, data, t):
 # ── sheet 6: push activity ───────────────────────────────────────────────────
 
 def _activity(cfg, data, t):
-    W = 440
-    x0, x1 = 26, 414
+    W = 900
+    x0, x1 = 26, 874
     px0, px1 = 62, x1                     # left gutter carries the axis labels
     pty, pby = 62, 178                    # plot top / baseline
     act = list(data.get("activity") or [])
