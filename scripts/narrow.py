@@ -238,43 +238,6 @@ def _general(cfg, data, t):
 
 # ── sheet 7: notes ───────────────────────────────────────────────────────────
 
-def _notes(cfg, data, t):
-    items = [cards.NOTE_PROVENANCE]
-    note = cards.todays_note(cfg, data)
-    if note:
-        items.append(note)
-    errors = list((data or {}).get("errors") or [])
-    if errors:
-        n = len(errors)
-        items.append(
-            f"This build degraded {n} telemetry channel"
-            f"{'s' if n != 1 else ''}; those cells read NO DATA rather than "
-            f"showing stale values.")
-
-    # Numbered straight through whatever is present, as on the wide sheet: a
-    # notes block that skips from 1 to 3 reads as a note someone deleted.
-    gutter = cards._w(f"{len(items)}. ", 9.5)
-    out, y = "", 48
-    for i, item in enumerate(items):
-        svg, y = cards._numbered_note(X0, y, SPAN, f"{i + 1}.", item, t,
-                                      cards.D_DATA + i * 0.10, size=9.5,
-                                      lead=13.5, gutter=gutter)
-        out += svg
-        y += 11
-
-    y += 3
-    out += cards._drawn_rule(X0, y, X1, y, t, cards.D_RULE, w=0.8, dur=0.8)
-
-    stamp = cards._datestr((data or {}).get("generated_at"),
-                           "%Y-%m-%d %H:%M") or cards.DASH
-    out += cards._g(cards.D_LETTER + 0.4,
-                    bp.caps(X0, y + 16, f"GENERATED {stamp} UTC", t, size=6.6,
-                            track=0.9))
-    H = int(y + 40)
-    return _sheet("notes", H, t, out, label="NOTES")
-
-
-# ── sheet 5: material composition ────────────────────────────────────────────
 
 def _composition(cfg, data, t):
     langs = list(data.get("languages") or [])
@@ -468,7 +431,6 @@ def _activity(cfg, data, t):
 RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
-    "notes": _notes,
     "composition": _composition,
     "activity": _activity,
 }

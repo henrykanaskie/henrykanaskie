@@ -252,8 +252,9 @@ mark_last_push = false
 #
 #  Real drawings carry a numbered notes block. This one is yours to write.
 #
-#  These are not jokes and they should not read as jokes. They are the part of
-#  the sheet where a person is obviously behind the drawing. Write them the way
+#  One of these is drawn at the foot of the GENERAL NOTES sheet each day, under
+#  a FIELD NOTE label. They are not jokes and should not read as jokes. They are
+#  the part of the drawing where a person is obviously behind it. Write them the way
 #  you'd annotate your own work: flat, specific, true. One is chosen per day,
 #  rotating by date so the same note doesn't sit there for a week.
 #

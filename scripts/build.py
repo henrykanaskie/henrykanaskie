@@ -321,8 +321,6 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
     if card == "activity":
         total = sum(c for _d, c in (data.get("activity") or []))
         return f"Push activity, {total} pushes over the last 30 days."
-    if card == "notes":
-        return "Notes. " + (cards.todays_note(cfg, data) or "No notes.")
     ident = cfg.get("identity", {})
     return (f'Title block. {ident.get("name")}. {ident.get("title")}. '
             f'{ident.get("tagline")} Revision {ident.get("revision")}.')
@@ -351,7 +349,6 @@ def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
                                vers, REPO_LABEL, "repos"),
         "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), vers),
         "CARD_GENERAL": picture("general", card_alt("general", cfg, data), vers),
-        "CARD_NOTES": picture("notes", card_alt("notes", cfg, data), vers),
         "CARD_BOM": picture("bom", card_alt("bom", cfg, data), vers),
         "CARD_TELEMETRY": picture("telemetry", card_alt("telemetry", cfg, data), vers),
         "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), vers),

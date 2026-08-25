@@ -17,9 +17,9 @@ Everything else is output:
 | `assets/<card>-dark.svg`            | `scripts/build.py`  | `data/profile.toml` |
 | `README.md`                         | `scripts/build.py`  | `data/profile.toml` |
 
-Seven sheets, in this order: `titleblock`, `general`, `bom`, `telemetry`,
-`composition`, `activity`, `notes`. Each is drawn in a light and a dark variant, so
-fourteen SVGs. Sheet numbers come from that order, so adding or reordering a card in
+Six sheets, in this order: `titleblock`, `general`, `bom`, `telemetry`,
+`composition`, `activity`. Each is drawn in a light and a dark variant, and in a wide
+and a narrow layout. Sheet numbers come from that order, so adding or reordering a card in
 `CARDS` renumbers every sheet automatically.
 
 The README has no markdown headings and no horizontal rules. Each sheet carries its own

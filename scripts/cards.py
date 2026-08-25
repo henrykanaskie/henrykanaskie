@@ -50,7 +50,7 @@ fade, grow, draw_on = bp.fade, bp.grow, bp.draw_on
 sheet, field, defs_hatch = bp.sheet, bp.field, bp.defs_hatch
 
 CARDS = ["titleblock", "general", "bom", "telemetry", "composition",
-         "activity", "notes"]
+         "activity"]
 
 
 def _sheet_no(name: str) -> str:
@@ -433,6 +433,28 @@ def _bom_zone(cfg, repo, sheet_no=None) -> str:
     return f"{sheet_no}-{chr(65 + j)}{k + 1}"
 
 
+def todays_note(cfg: dict, data: dict) -> str:
+    """The day's field note, or "" when no notes are configured.
+
+    Exported so build.py can put the same note in the README without keeping a
+    second copy of the selection rule.
+
+    The index is the date's ordinal, never a random draw. Two builds on the same
+    day must produce identical bytes, otherwise the workflow's "commit if
+    changed" step commits a new note every run and the history fills with diffs
+    that say nothing.
+    """
+    pool = [str(s) for s in ((cfg or {}).get("field_notes") or [])
+            if str(s).strip()]
+    if not pool:
+        return ""
+    now = (data or {}).get("generated_at")
+    # A payload that round-tripped through JSON carries a string, which has no
+    # ordinal. Falling back to the first note keeps the sheet reproducible.
+    ordinal = now.date().toordinal() if hasattr(now, "date") else 0
+    return pool[ordinal % len(pool)]
+
+
 # ── sheet 1: title block ─────────────────────────────────────────────────────
 
 def _rev_rows(cfg, data, n=3):
@@ -669,7 +691,24 @@ def _general(cfg, data, t):
         svg, y = _focus_strip(x0, y, span, areas, t, D_DATA + 0.3)
         out += svg
 
-    if not (body or points or areas):
+    # The day's field note. It used to have a sheet of its own at the bottom of
+    # the page; the sheet is gone and the note is not, because a rotating line in
+    # the owner's own voice is the one thing on this drawing that says a person
+    # is behind it. Set apart from the points above by a rule so it reads as an
+    # annotation rather than a fourth point.
+    note = todays_note(cfg, data)
+    if note:
+        if body or points or areas:
+            out += _drawn_rule(x0, y, x1, y, t, D_RULE + 0.12, w=0.8, dur=0.8)
+            y += 20
+        out += _g(D_LETTER + 0.3, caps(x0, y, "FIELD NOTE", t, size=7, track=1.1))
+        y += 14
+        for i, line in enumerate(_wrap(note, span, 10.5)):
+            out += _g(D_DATA + 0.4 + i * 0.05,
+                      text(x0, y, line, t, size=10.5, color="soft"))
+            y += 15
+
+    if not (body or points or areas or note):
         out += _nodata(x0, 60, span, 46, t, label="NO GENERAL NOTES")
         y = 106
 
@@ -1376,74 +1415,6 @@ def _activity(cfg, data, t):
                  sheet_no=_sheet_no("activity"))
 
 
-# ── sheet 7: notes ───────────────────────────────────────────────────────────
-
-# Note 1 never changes. It is the sheet's own provenance statement: which
-# figures are measured, and which are a person's judgement written down by hand.
-NOTE_PROVENANCE = (
-    "All figures are read from the GitHub API at build time. Status and "
-    "completion are hand-set in data/profile.toml and reviewed, not inferred.")
-
-
-def todays_note(cfg: dict, data: dict) -> str:
-    """The day's field note, or "" when no notes are configured.
-
-    Exported so build.py can put the same note in the README without keeping a
-    second copy of the selection rule.
-
-    The index is the date's ordinal, never a random draw. Two builds on the same
-    day must produce identical bytes, otherwise the workflow's "commit if
-    changed" step commits a new note every run and the history fills with diffs
-    that say nothing.
-    """
-    pool = [str(s) for s in ((cfg or {}).get("field_notes") or [])
-            if str(s).strip()]
-    if not pool:
-        return ""
-    now = (data or {}).get("generated_at")
-    # A payload that round-tripped through JSON carries a string, which has no
-    # ordinal. Falling back to the first note keeps the sheet reproducible.
-    ordinal = now.date().toordinal() if hasattr(now, "date") else 0
-    return pool[ordinal % len(pool)]
-
-
-def _notes(cfg, data, t):
-    W = 900
-    x0, x1 = 26, 874
-    span = x1 - x0
-
-    items = [NOTE_PROVENANCE]
-    note = todays_note(cfg, data)
-    if note:
-        items.append(note)
-    errors = list((data or {}).get("errors") or [])
-    if errors:
-        n = len(errors)
-        items.append(
-            f"This build degraded {n} telemetry channel"
-            f"{'s' if n != 1 else ''}; those cells read NO DATA rather than "
-            f"showing stale values.")
-
-    # Numbered straight through whatever is present. A notes block that skips
-    # from 1 to 3 reads as a note someone deleted.
-    gutter = _w(f"{len(items)}. ", 11)
-    out, y = "", 62
-    for i, item in enumerate(items):
-        svg, y = _numbered_note(x0, y, span, f"{i + 1}.", item, t,
-                                D_DATA + i * 0.10, size=11, lead=16.5,
-                                gutter=gutter)
-        out += svg
-        y += 12
-
-    y += 4
-    out += _drawn_rule(x0, y, x1, y, t, D_RULE, w=0.8, dur=0.8)
-
-    stamp = _datestr((data or {}).get("generated_at"), "%Y-%m-%d %H:%M") or DASH
-    out += _g(D_LETTER + 0.4, caps(x0, y + 18, f"GENERATED {stamp} UTC", t,
-                                   size=6.8, track=1.0))
-    H = int(y + 44)
-    return sheet(W, H, t, out, label="NOTES", sheet_no=_sheet_no("notes"))
-
 
 # ── entry point ──────────────────────────────────────────────────────────────
 
@@ -1700,7 +1671,6 @@ _RENDERERS = {
     "telemetry": _telemetry,
     "composition": _composition,
     "activity": _activity,
-    "notes": _notes,
 }
 
 

@@ -19,9 +19,18 @@ jobs:
         id: snake
         with:
           github_user_name: henrykanaskie
+          # Colours taken from blueprint.py's two grounds so the contribution
+          # grid reads as part of the drawing rather than as GitHub's own widget
+          # parked underneath it. color_dots wants exactly five: index 0 is a day
+          # with no contributions, then the four levels.
+          #
+          # The empty dot is the sheet's grid colour, so an empty week looks like
+          # graph paper, and the ramp climbs to the accent blue each ground
+          # already uses. The snake itself is the ink colour, because it is the
+          # thing being drawn and the dots are the data it moves over.
           outputs: |
-            dist/github-snake.svg
-            dist/github-snake-dark.svg?palette=github-dark
+            dist/github-snake.svg?color_snake=#16202b&color_dots=#ece5d8,#bcd3f2,#8fb6e8,#5c93dd,#1f6feb
+            dist/github-snake-dark.svg?color_snake=#d7e6f2&color_dots=#16242f,#234563,#2f6494,#3d84c6,#4da3ff
 
       - name: Publish to output branch
         uses: crazy-max/ghaction-github-pages@v4
