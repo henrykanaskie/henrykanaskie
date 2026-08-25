@@ -58,8 +58,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=42791b268d">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=37e0a69d1b" alt="Daily telemetry. 11 people in space; ISS at -51.2 degrees latitude; last push to henrykanaskie.">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=41f41ca96d">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=13fe993f51" alt="Daily telemetry. next launch Glonass-K1 No. 19; 11 people in space; ISS at -51.1 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <table>
@@ -84,8 +84,8 @@
 </table>
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-dark.svg?v=4e67d63670">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-light.svg?v=a2bc2c0cde" alt="Notes. I write the transformer by hand about once a year. It gets less mysterious every time.">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-dark.svg?v=e7e3a029c2">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/notes-light.svg?v=73c660887f" alt="Notes. I write the transformer by hand about once a year. It gets less mysterious every time.">
 </picture>
 
 <picture>
@@ -94,7 +94,7 @@
 </picture>
 
 <sub>
-REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-25 00:00 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV E &nbsp;·&nbsp; 7 SHEETS &nbsp;·&nbsp; BUILT 2026-08-25 00:01 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
