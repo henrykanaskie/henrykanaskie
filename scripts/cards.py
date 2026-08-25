@@ -1446,6 +1446,18 @@ CHIP_GAP = 5        # half-gap per side, so neighbours sit CHIP_GAP * 2 apart
 CHIP_TEXT = 9.5
 CHIP_TRACK = 1.1
 
+# A phone gets a different chip. The full row is 680 to 739 wide and GitHub's
+# README column on a 375pt phone is 293, so full width chips wrap one or two to
+# a line at whatever width each label happens to be, which reads as debris
+# rather than a row. The compact chip drops the label to its designator, drops
+# the arrow, and is a FIXED width, so what wraps is a grid of equal tiles.
+# <picture> takes a max-width media query and GitHub's sanitiser keeps it, which
+# is the only reason any of this is possible.
+CHIP_NARROW_TEXT = 10
+CHIP_BREAK = 500      # px; below this the compact chips are served
+PHONE_COL = 293       # README column on a 375pt phone, measured
+NARROW_MIN, NARROW_MAX = 68, 104
+
 
 def chip_width(label: str, *, accent: bool = False) -> float:
     """Total advance of a chip, padding and arrow included."""
@@ -1453,12 +1465,16 @@ def chip_width(label: str, *, accent: bool = False) -> float:
     return CHIP_GAP * 2 + 13 + w + 15 + (5 if accent else 0)
 
 
-def chip(label: str, t: dict, *, accent: str | None = None) -> str:
+def chip(label: str, t: dict, *, accent: str | None = None,
+         compact: bool = False, width: int = 72) -> str:
     """One clickable-looking tag, drawn to match the sheets.
 
     `accent` is a colour for the left edge bar, used by the repository chips so
-    a part's chip carries the same material colour as its BOM row.
+    a part's chip carries the same material colour as its BOM row. `compact`
+    draws the fixed width phone variant: centred label, no arrow.
     """
+    if compact:
+        return _chip_compact(str(label).upper(), t, accent=accent, width=width)
     label = str(label).upper()
     bar = 5 if accent else 0
     inner_x = CHIP_GAP + bar
@@ -1486,6 +1502,71 @@ def chip(label: str, t: dict, *, accent: str | None = None) -> str:
             f'font-family="{bp.MONO}" role="img">{body}</svg>')
 
 
+def narrow_width(count: int, col: int = PHONE_COL) -> int:
+    """Tile width that makes `count` chips wrap into balanced rows.
+
+    One width cannot suit every row: four chips want a width that fits four
+    across, five want one that fits three and then two, because five across
+    would be unreadably small and four across leaves a single tile stranded on
+    its own line. So each row picks its own width.
+
+    Scores by how full the LAST row is, since that is the one that looks wrong
+    when it holds one tile out of five. Ties go to the wider tile.
+    """
+    best, best_score = NARROW_MIN, (-1, 0)
+    for w in range(NARROW_MAX, NARROW_MIN - 1, -1):
+        per = max(1, col // w)
+        rest = count % per
+        # A full last row scores as `per`; otherwise score what is on it.
+        score = (per if rest == 0 else rest, w)
+        if score > best_score:
+            best, best_score = w, score
+    return best
+
+
+def _chip_compact(label: str, t: dict, *, accent: str | None = None,
+                  width: int = 72) -> str:
+    """The phone chip: one fixed width tile, label centred, no arrow.
+
+    Equal widths are the whole point. Ragged widths wrapping at a random column
+    is what looked broken; a grid of identical tiles reads as intended even when
+    the last row is short.
+    """
+    w, bar = int(width), (4 if accent else 0)
+    y0, h = 1.0, CHIP_H - 2
+    inner = CHIP_GAP + bar
+    avail = w - CHIP_GAP * 2 - bar - 8
+    size = CHIP_NARROW_TEXT
+    while size > 6 and _w(label, size) > avail:
+        size -= 0.5
+
+    body = (f'<rect x="{CHIP_GAP}" y="{y0}" width="{w - CHIP_GAP * 2}" '
+            f'height="{h}" rx="2" fill="{t["ground"]}" stroke="{t["rule"]}" '
+            f'stroke-width="1"/>')
+    if accent:
+        body += (f'<clipPath id="cn"><rect x="{CHIP_GAP}" y="{y0}" '
+                 f'width="{w - CHIP_GAP * 2}" height="{h}" rx="2"/></clipPath>'
+                 f'<rect x="{CHIP_GAP}" y="{y0}" width="{bar}" height="{h}" '
+                 f'fill="{accent}" clip-path="url(#cn)"/>')
+    body += caps(inner + (w - CHIP_GAP * 2 - bar) / 2, CHIP_H / 2 + 3.2, label, t,
+                 size=size, track=0.4, color="ink", anchor="middle")
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" '
+            f'height="{CHIP_H}" viewBox="0 0 {w} {CHIP_H}" '
+            f'font-family="{bp.MONO}" role="img">{body}</svg>')
+
+
+def blank_rail(t: dict) -> str:
+    """A one pixel transparent rail, served to phones.
+
+    The rail is a label and a leader, which is furniture worth having on a wide
+    row and pure obstruction on a narrow one: it would take a whole tile slot
+    and push the grid out of alignment. There is no way to drop an element with
+    a media query, so the phone gets a rail that is effectively not there.
+    """
+    return ('<svg xmlns="http://www.w3.org/2000/svg" width="1" '
+            f'height="{CHIP_H}" viewBox="0 0 1 {CHIP_H}" role="presentation"/>')
+
+
 def link_chips(cfg: dict) -> list:
     """The chips under the title block: where to go from here."""
     ident = cfg.get("identity") or {}
@@ -1493,12 +1574,13 @@ def link_chips(cfg: dict) -> list:
     user = str(ident.get("github") or "")
     out = []
     if site:
-        out.append(("site", site.split("//")[-1].rstrip("/"), site, None))
+        out.append(("site", site.split("//")[-1].rstrip("/"), "SITE", site, None))
     if user:
-        out.append(("repos", "repositories",
+        out.append(("repos", "repositories", "REPOS",
                     f"https://github.com/{user}?tab=repositories", None))
-    out.append(("setup", "how this is built", "SETUP.md", None))
-    out.append(("source", "the source of truth", "data/profile.toml", None))
+    out.append(("setup", "how this is built", "SETUP", "SETUP.md", None))
+    out.append(("source", "the source of truth", "CONFIG", "data/profile.toml",
+                None))
     return out
 
 
@@ -1515,8 +1597,8 @@ def repo_chips(cfg: dict, t: dict) -> list:
         if not repo:
             continue
         out.append((str(pr.get("pn") or pr.get("name")).lower().replace("/", "-"),
-                    str(pr.get("name")), repo,
-                    _lang_color(cfg, pr.get("lang"), t)))
+                    str(pr.get("name")), str(pr.get("pn") or pr.get("name")),
+                    repo, _lang_color(cfg, pr.get("lang"), t)))
     return out
 
 
@@ -1574,7 +1656,7 @@ def rail_width(label: str) -> float:
 def row_width(specs: list, label: str) -> float:
     """Total advance of a chip row, for checking it clears the README column."""
     return rail_width(label) + sum(
-        chip_width(lab, accent=bool(acc)) for _s, lab, _h, acc in specs)
+        chip_width(lab, accent=bool(acc)) for _s, lab, _sh, _h, acc in specs)
 
 
 _RENDERERS = {

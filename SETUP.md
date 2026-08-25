@@ -241,6 +241,15 @@ actually find out. See the comments in `daily.yml`.
 
 ## Where the cards are served from
 
+Every link on the page is a chip: a small SVG wrapped in an anchor, because an
+`<img>` is inert and GitHub's sanitiser strips inline `<svg>`, `<object>` and
+`<map>`. Each chip ships in four variants, picked by `<picture>`: light and dark,
+wide and narrow. Below 500px a phone gets the narrow variant, which drops the label
+to its designator and is a fixed width so the chips wrap as a grid of equal tiles
+instead of a ragged line. That width is computed per row so the last row comes out
+as full as possible: four chips get a width that fits four across, five get one
+that fits three and then two.
+
 Every asset URL in `README.md` carries a `?v=` that is a hash of that file's own
 bytes. README images are cached hard, so without it a rebuild stays invisible. It
 used to be the build date, which was wrong the moment it mattered: iterating on the

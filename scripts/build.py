@@ -239,16 +239,25 @@ def chip_row(specs: list, vers: dict, label: str, slug: str) -> str:
     """
     parts = []
     lead = cards.rail_width(label)
+    brk = cards.CHIP_BREAK
     if lead:
         parts.append(
-            f'<picture><source media="(prefers-color-scheme: dark)" '
+            f'<picture>'
+            f'<source media="(max-width: {brk}px)" '
+            f'srcset="{asset_url("rail-blank", vers)}">'
+            f'<source media="(prefers-color-scheme: dark)" '
             f'srcset="{asset_url(f"rail-{slug}-dark", vers)}">'
             f'<img src="{asset_url(f"rail-{slug}-light", vers)}" alt="">'
             f'</picture>')
-    for slug_, label_, href, _accent in specs:
+    for slug_, label_, _short, href, _accent in specs:
         parts.append(
             f'<a href="{esc_attr(href)}">'
             f'<picture>'
+            f'<source media="(max-width: {brk}px) and '
+            f'(prefers-color-scheme: dark)" '
+            f'srcset="{asset_url(f"chip-{slug_}-narrow-dark", vers)}">'
+            f'<source media="(max-width: {brk}px)" '
+            f'srcset="{asset_url(f"chip-{slug_}-narrow-light", vers)}">'
             f'<source media="(prefers-color-scheme: dark)" '
             f'srcset="{asset_url(f"chip-{slug_}-dark", vers)}">'
             f'<img src="{asset_url(f"chip-{slug_}-light", vers)}" '
@@ -406,18 +415,31 @@ def main() -> int:
             written += 1
             print(f"  wrote {name}-{ground}.svg  {len(svg):>6,} B")
 
+    blank = cards.blank_rail(blueprint.GROUNDS["light"])
+    xml.dom.minidom.parseString(blank)
+    vers["rail-blank"] = _version(blank)
+    (ASSETS / "rail-blank.svg").write_text(blank)
+    written += 1
+
     # Chips are per link rather than per card, and there is one file per chip
     # per ground. They are small, and it is the only construct GitHub leaves
     # intact that can both carry a link and look like part of the drawing.
     for ground, t in blueprint.GROUNDS.items():
-        specs = (cards.link_chips(cfg)
-                 + cards.repo_chips(cfg, t))
-        for slug, label, _href, accent in specs:
-            svg = cards.chip(label, t, accent=accent)
-            xml.dom.minidom.parseString(svg)
-            vers[f"chip-{slug}-{ground}"] = _version(svg)
-            (ASSETS / f"chip-{slug}-{ground}.svg").write_text(svg)
-            written += 1
+        # The narrow width is computed PER ROW, not across both rows together.
+        # Four chips want a width that fits four across; five want one that fits
+        # three then two. Sizing them from the combined list of nine gives both
+        # rows the five-chip answer and costs the four-chip row its single line.
+        for rspecs in (cards.link_chips(cfg), cards.repo_chips(cfg, t)):
+            nw = cards.narrow_width(len(rspecs))
+            for slug, label, short, _href, accent in rspecs:
+                for suffix, text_, compact in ((f"{ground}", label, False),
+                                               (f"narrow-{ground}", short, True)):
+                    svg = cards.chip(text_, t, accent=accent, compact=compact,
+                                     width=nw)
+                    xml.dom.minidom.parseString(svg)
+                    vers[f"chip-{slug}-{suffix}"] = _version(svg)
+                    (ASSETS / f"chip-{slug}-{suffix}.svg").write_text(svg)
+                    written += 1
         for row, rlabel, rspecs in (
                 ("links", LINK_LABEL, cards.link_chips(cfg)),
                 ("repos", REPO_LABEL, cards.repo_chips(cfg, t))):
