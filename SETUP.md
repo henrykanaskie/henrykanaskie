@@ -241,6 +241,12 @@ actually find out. See the comments in `daily.yml`.
 
 ## Where the cards are served from
 
+Every asset URL in `README.md` carries a `?v=` that is a hash of that file's own
+bytes. README images are cached hard, so without it a rebuild stays invisible. It
+used to be the build date, which was wrong the moment it mattered: iterating on the
+design changed the cards twenty-one times in one day while every URL still read
+`v=20260824`. A content hash changes when the bytes change and not otherwise.
+
 The committed SVGs in `assets/` are the real artifact. `README.md` embeds them directly
 from this repository, and the website route at `henrykanaskie.com/api/cards/<card>` is a
 thin proxy that fetches the same committed files. There is exactly one renderer, the

@@ -17,6 +17,7 @@ is no dependency that can break the build at 6am while nobody is looking.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 import tomllib
@@ -179,6 +180,11 @@ def validate(cfg: dict) -> None:
             % (len(problems), "\n  - ".join(problems)))
 
 
+def _version(svg: str) -> str:
+    """Short content hash used as the cache-busting query on an asset URL."""
+    return hashlib.sha256(svg.encode()).hexdigest()[:10]
+
+
 def _viewport(svg: str) -> tuple[float, float]:
     """Width and height of a rendered card, read back off its own root element.
 
@@ -194,26 +200,36 @@ def _viewport(svg: str) -> tuple[float, float]:
 
 # ── README ───────────────────────────────────────────────────────────────────
 
-def picture(card: str, alt: str, stamp: str, width: str | None = None) -> str:
-    """A light/dark image pair for one card.
+def asset_url(stem: str, vers: dict) -> str:
+    """URL for one written asset, versioned by the hash of its own bytes.
 
-    The ?v= stamp is not decoration. GitHub proxies README images through camo,
-    which caches aggressively. Without a URL that changes when the content does,
-    a daily rebuild stays invisible for hours and there is no point building it
-    daily. The stamp is the build date, so the URL changes exactly as often as
-    the card does.
+    The ?v= is not decoration. README images are cached hard, so without a URL
+    that changes when the content does, a rebuild stays invisible for hours.
+
+    This used to be the build date, and that was wrong at exactly the moment it
+    mattered: iterating on the design changed the cards twenty-one times in one
+    day while every URL still said v=20260824, so anyone who had loaded the page
+    that morning kept seeing the first version. A content hash changes when, and
+    only when, the bytes change. It is also stable across a rebuild that
+    produces identical output, which keeps the workflow's "commit if changed"
+    quiet on a day nothing moved.
     """
+    return f"{RAW}/{stem}.svg?v={vers.get(stem, '0')}"
+
+
+def picture(card: str, alt: str, vers: dict, width: str | None = None) -> str:
+    """A light/dark image pair for one card, each versioned independently."""
     w = f' width="{width}"' if width else ""
     return (
         '<picture>\n'
         f'  <source media="(prefers-color-scheme: dark)" '
-        f'srcset="{RAW}/{card}-dark.svg?v={stamp}">\n'
-        f'  <img src="{RAW}/{card}-light.svg?v={stamp}" alt="{alt}"{w}>\n'
+        f'srcset="{asset_url(card + "-dark", vers)}">\n'
+        f'  <img src="{asset_url(card + "-light", vers)}" alt="{alt}"{w}>\n'
         '</picture>'
     )
 
 
-def chip_row(specs: list, stamp: str, label: str, slug: str) -> str:
+def chip_row(specs: list, vers: dict, label: str, slug: str) -> str:
     """A row of anchored chips, as one line of markdown with no gaps.
 
     The chips MUST be emitted with no whitespace between them. A newline or a
@@ -226,16 +242,16 @@ def chip_row(specs: list, stamp: str, label: str, slug: str) -> str:
     if lead:
         parts.append(
             f'<picture><source media="(prefers-color-scheme: dark)" '
-            f'srcset="{RAW}/rail-{slug}-dark.svg?v={stamp}">'
-            f'<img src="{RAW}/rail-{slug}-light.svg?v={stamp}" alt="">'
+            f'srcset="{asset_url(f"rail-{slug}-dark", vers)}">'
+            f'<img src="{asset_url(f"rail-{slug}-light", vers)}" alt="">'
             f'</picture>')
     for slug_, label_, href, _accent in specs:
         parts.append(
             f'<a href="{esc_attr(href)}">'
             f'<picture>'
             f'<source media="(prefers-color-scheme: dark)" '
-            f'srcset="{RAW}/chip-{slug_}-dark.svg?v={stamp}">'
-            f'<img src="{RAW}/chip-{slug_}-light.svg?v={stamp}" '
+            f'srcset="{asset_url(f"chip-{slug_}-dark", vers)}">'
+            f'<img src="{asset_url(f"chip-{slug_}-light", vers)}" '
             f'alt="{esc_attr(label_)}">'
             f'</picture></a>')
     return "".join(parts)
@@ -292,10 +308,10 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
             f'{ident.get("tagline")} Revision {ident.get("revision")}.')
 
 
-def render_readme(cfg: dict, data: dict) -> str:
+def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
     tmpl = TEMPLATE.read_text()
     now = data["generated_at"]
-    stamp = now.strftime("%Y%m%d")
+    vers = vers or {}
 
     ident = cfg["identity"]
     about = " ".join(" ".join(cfg["about"]["body"]).split())
@@ -309,17 +325,17 @@ def render_readme(cfg: dict, data: dict) -> str:
         "BUILT": now.strftime("%Y-%m-%d %H:%M UTC"),
         "SHEET_COUNT": len(cards.CARDS),
         "WEBSITE_LABEL": ident["website"].split("//")[-1].rstrip("/"),
-        "LINK_CHIPS": chip_row(cards.link_chips(cfg), stamp,
+        "LINK_CHIPS": chip_row(cards.link_chips(cfg), vers,
                                LINK_LABEL, "links"),
         "REPO_CHIPS": chip_row(cards.repo_chips(cfg, blueprint.GROUNDS["light"]),
-                               stamp, REPO_LABEL, "repos"),
-        "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), stamp),
-        "CARD_GENERAL": picture("general", card_alt("general", cfg, data), stamp),
-        "CARD_NOTES": picture("notes", card_alt("notes", cfg, data), stamp),
-        "CARD_BOM": picture("bom", card_alt("bom", cfg, data), stamp),
-        "CARD_TELEMETRY": picture("telemetry", card_alt("telemetry", cfg, data), stamp),
-        "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), stamp),
-        "CARD_ACTIVITY": picture("activity", card_alt("activity", cfg, data), stamp),
+                               vers, REPO_LABEL, "repos"),
+        "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), vers),
+        "CARD_GENERAL": picture("general", card_alt("general", cfg, data), vers),
+        "CARD_NOTES": picture("notes", card_alt("notes", cfg, data), vers),
+        "CARD_BOM": picture("bom", card_alt("bom", cfg, data), vers),
+        "CARD_TELEMETRY": picture("telemetry", card_alt("telemetry", cfg, data), vers),
+        "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), vers),
+        "CARD_ACTIVITY": picture("activity", card_alt("activity", cfg, data), vers),
     }
 
     out = tmpl
@@ -372,6 +388,7 @@ def main() -> int:
 
     ASSETS.mkdir(exist_ok=True)
     written = 0
+    vers: dict[str, str] = {}
     for name in cards.CARDS:
         for ground, t in blueprint.GROUNDS.items():
             svg = cards.render(name, cfg, data, t)
@@ -384,6 +401,7 @@ def main() -> int:
             # Parse before writing. A malformed card renders as a broken image
             # on the profile, which is strictly worse than yesterday's card.
             xml.dom.minidom.parseString(svg)
+            vers[f"{name}-{ground}"] = _version(svg)
             (ASSETS / f"{name}-{ground}.svg").write_text(svg)
             written += 1
             print(f"  wrote {name}-{ground}.svg  {len(svg):>6,} B")
@@ -397,6 +415,7 @@ def main() -> int:
         for slug, label, _href, accent in specs:
             svg = cards.chip(label, t, accent=accent)
             xml.dom.minidom.parseString(svg)
+            vers[f"chip-{slug}-{ground}"] = _version(svg)
             (ASSETS / f"chip-{slug}-{ground}.svg").write_text(svg)
             written += 1
         for row, rlabel, rspecs in (
@@ -404,6 +423,7 @@ def main() -> int:
                 ("repos", REPO_LABEL, cards.repo_chips(cfg, t))):
             svg = cards.chip_rail(cards.rail_width(rlabel), t, label=rlabel)
             xml.dom.minidom.parseString(svg)
+            vers[f"rail-{row}-{ground}"] = _version(svg)
             (ASSETS / f"rail-{row}-{ground}.svg").write_text(svg)
             written += 1
             # The README column is 846 CSS pixels on a desktop profile. A row
@@ -415,7 +435,7 @@ def main() -> int:
                       f"wrap below {total:.0f}px of column", file=sys.stderr)
     print(f"  wrote {written - len(cards.CARDS) * 2} chips")
 
-    README.write_text(render_readme(cfg, data))
+    README.write_text(render_readme(cfg, data, vers))
     print(f"wrote {written} cards and README.md")
     return 0
 
