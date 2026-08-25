@@ -689,6 +689,13 @@ def _bom(cfg, data, t):
     # One hatch per distinct material, angle by first appearance. The completion
     # bar reuses its row's material hatch, so a part's progress is literally
     # drawn in the stuff the part is made of.
+    #
+    # A finished part is the exception: its bar is green. Completion is the one
+    # figure on the sheet a reader scans for, and "done" is worth being able to
+    # see without reading the status column. The hatch keeps the material's own
+    # angle and only changes colour, so the row still says what it is made of.
+    # Green is taken from the ground table, which is the same green the status
+    # mark already uses, so the two agree rather than being two greens.
     langs, defs = [], ""
     for p in projects:
         lang = str(p.get("lang") or "")
@@ -696,8 +703,11 @@ def _bom(cfg, data, t):
             langs.append(lang)
     for i, lang in enumerate(langs):
         c = _lang_color(cfg, lang, t, spare_at=i)
-        defs += defs_hatch(i, c, angle=HATCH_ANGLES[i % len(HATCH_ANGLES)],
-                           gap=4.5, w=1.0)
+        angle = HATCH_ANGLES[i % len(HATCH_ANGLES)]
+        defs += defs_hatch(i, c, angle=angle, gap=4.5, w=1.0)
+        defs += defs_hatch(f"g{i}", t["green"], angle=angle, gap=4.5, w=1.0)
+    # For a finished part with no material recorded at all.
+    defs += defs_hatch("gx", t["green"], angle=45, gap=4.5, w=1.0)
 
     out = ""
     heads = ((COL_ITEM, "ITEM", "middle"), (COL_PN, "DES", "start"),
@@ -790,9 +800,17 @@ def _bom(cfg, data, t):
                   f'height="7" fill="{t["fill"]}" stroke="{t["rule"]}" '
                   f'stroke-width="0.7"/>')
         if frac > 0:
-            fillref = f"url(#h{hi})" if hi is not None else t["accent"]
-            stroke = _lang_color(cfg, lang, t, spare_at=hi or 0) if lang \
-                else t["accent"]
+            # rank 0 is the top of the configured status vocabulary, whatever it
+            # is called, so renaming QUALIFIED does not quietly turn the green
+            # off.
+            done = rank == 0
+            if done:
+                fillref = f"url(#hg{hi})" if hi is not None else "url(#hgx)"
+                stroke = t["green"]
+            else:
+                fillref = f"url(#h{hi})" if hi is not None else t["accent"]
+                stroke = _lang_color(cfg, lang, t, spare_at=hi or 0) if lang \
+                    else t["accent"]
             out += _grow_bar(COL_COMP0, ty + 31, span * frac, 7, fillref,
                              d + 0.3, stroke=stroke, sw=0.7)
 
@@ -1447,16 +1465,23 @@ CHIP_TEXT = 9.5
 CHIP_TRACK = 1.1
 
 # A phone gets a different chip. The full row is 680 to 739 wide and GitHub's
-# README column on a 375pt phone is 293, so full width chips wrap one or two to
-# a line at whatever width each label happens to be, which reads as debris
-# rather than a row. The compact chip drops the label to its designator, drops
-# the arrow, and is a FIXED width, so what wraps is a grid of equal tiles.
+# README column on a 375pt phone is 293, so desktop chips wrap one or two to a
+# line at whatever width each label happens to be, which reads as debris.
+#
+# The phone chip keeps the full label and takes the whole column instead, one
+# per line. Equal-width tiles were tried first and the labels had to shrink to
+# their designators to fit, which cost the reader the repository name for the
+# sake of a grid. The longest name is ML_QUANTITATIVE_RESEARCH: any tile wide
+# enough to hold it is already most of a 293px column, so one per line is what
+# the content was going to force anyway. Stacked full-width rows also read as a
+# parts list, which is what this is.
+#
 # <picture> takes a max-width media query and GitHub's sanitiser keeps it, which
 # is the only reason any of this is possible.
-CHIP_NARROW_TEXT = 10
+CHIP_NARROW_TEXT = 10.5
 CHIP_BREAK = 500      # px; below this the compact chips are served
 PHONE_COL = 293       # README column on a 375pt phone, measured
-NARROW_MIN, NARROW_MAX = 68, 104
+CHIP_NARROW_W = 280   # inside PHONE_COL, and scales down on a smaller one
 
 
 def chip_width(label: str, *, accent: bool = False) -> float:
@@ -1466,7 +1491,7 @@ def chip_width(label: str, *, accent: bool = False) -> float:
 
 
 def chip(label: str, t: dict, *, accent: str | None = None,
-         compact: bool = False, width: int = 72) -> str:
+         compact: bool = False, width: int = CHIP_NARROW_W) -> str:
     """One clickable-looking tag, drawn to match the sheets.
 
     `accent` is a colour for the left edge bar, used by the repository chips so
@@ -1502,43 +1527,20 @@ def chip(label: str, t: dict, *, accent: str | None = None,
             f'font-family="{bp.MONO}" role="img">{body}</svg>')
 
 
-def narrow_width(count: int, col: int = PHONE_COL) -> int:
-    """Tile width that makes `count` chips wrap into balanced rows.
-
-    One width cannot suit every row: four chips want a width that fits four
-    across, five want one that fits three and then two, because five across
-    would be unreadably small and four across leaves a single tile stranded on
-    its own line. So each row picks its own width.
-
-    Scores by how full the LAST row is, since that is the one that looks wrong
-    when it holds one tile out of five. Ties go to the wider tile.
-    """
-    best, best_score = NARROW_MIN, (-1, 0)
-    for w in range(NARROW_MAX, NARROW_MIN - 1, -1):
-        per = max(1, col // w)
-        rest = count % per
-        # A full last row scores as `per`; otherwise score what is on it.
-        score = (per if rest == 0 else rest, w)
-        if score > best_score:
-            best, best_score = w, score
-    return best
-
-
 def _chip_compact(label: str, t: dict, *, accent: str | None = None,
-                  width: int = 72) -> str:
-    """The phone chip: one fixed width tile, label centred, no arrow.
+                  width: int = CHIP_NARROW_W) -> str:
+    """The phone chip: one full-column row, full label, arrow at the right.
 
-    Equal widths are the whole point. Ragged widths wrapping at a random column
-    is what looked broken; a grid of identical tiles reads as intended even when
-    the last row is short.
+    Left aligned rather than centred, because stacked rows of centred text read
+    as a poster and stacked rows of left aligned text read as a list.
     """
-    w, bar = int(width), (4 if accent else 0)
+    w, bar = int(width), (5 if accent else 0)
     y0, h = 1.0, CHIP_H - 2
     inner = CHIP_GAP + bar
-    avail = w - CHIP_GAP * 2 - bar - 8
+    right = w - CHIP_GAP
     size = CHIP_NARROW_TEXT
-    while size > 6 and _w(label, size) > avail:
-        size -= 0.5
+    avail = right - (inner + 9) - 18
+    label = _fit(label, avail, size, 0.6)
 
     body = (f'<rect x="{CHIP_GAP}" y="{y0}" width="{w - CHIP_GAP * 2}" '
             f'height="{h}" rx="2" fill="{t["ground"]}" stroke="{t["rule"]}" '
@@ -1548,8 +1550,10 @@ def _chip_compact(label: str, t: dict, *, accent: str | None = None,
                  f'width="{w - CHIP_GAP * 2}" height="{h}" rx="2"/></clipPath>'
                  f'<rect x="{CHIP_GAP}" y="{y0}" width="{bar}" height="{h}" '
                  f'fill="{accent}" clip-path="url(#cn)"/>')
-    body += caps(inner + (w - CHIP_GAP * 2 - bar) / 2, CHIP_H / 2 + 3.2, label, t,
-                 size=size, track=0.4, color="ink", anchor="middle")
+    body += caps(inner + 9, CHIP_H / 2 + 3.4, label, t, size=size, track=0.6,
+                 color="ink")
+    body += text(right - 9, CHIP_H / 2 + 3.6, "\u2192", t, size=10.5,
+                 color="accent", anchor="end")
     return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w}" '
             f'height="{CHIP_H}" viewBox="0 0 {w} {CHIP_H}" '
             f'font-family="{bp.MONO}" role="img">{body}</svg>')

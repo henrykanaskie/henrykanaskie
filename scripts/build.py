@@ -430,12 +430,13 @@ def main() -> int:
         # three then two. Sizing them from the combined list of nine gives both
         # rows the five-chip answer and costs the four-chip row its single line.
         for rspecs in (cards.link_chips(cfg), cards.repo_chips(cfg, t)):
-            nw = cards.narrow_width(len(rspecs))
-            for slug, label, short, _href, accent in rspecs:
-                for suffix, text_, compact in ((f"{ground}", label, False),
-                                               (f"narrow-{ground}", short, True)):
-                    svg = cards.chip(text_, t, accent=accent, compact=compact,
-                                     width=nw)
+            for slug, label, _short, _href, accent in rspecs:
+                # The phone chip keeps the full label. Shortening it to the
+                # designator bought a tidy grid at the cost of telling the
+                # reader which repository they were about to open.
+                for suffix, compact in ((f"{ground}", False),
+                                        (f"narrow-{ground}", True)):
+                    svg = cards.chip(label, t, accent=accent, compact=compact)
                     xml.dom.minidom.parseString(svg)
                     vers[f"chip-{slug}-{suffix}"] = _version(svg)
                     (ASSETS / f"chip-{slug}-{suffix}.svg").write_text(svg)

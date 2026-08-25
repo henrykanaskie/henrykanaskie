@@ -243,12 +243,17 @@ actually find out. See the comments in `daily.yml`.
 
 Every link on the page is a chip: a small SVG wrapped in an anchor, because an
 `<img>` is inert and GitHub's sanitiser strips inline `<svg>`, `<object>` and
-`<map>`. Each chip ships in four variants, picked by `<picture>`: light and dark,
-wide and narrow. Below 500px a phone gets the narrow variant, which drops the label
-to its designator and is a fixed width so the chips wrap as a grid of equal tiles
-instead of a ragged line. That width is computed per row so the last row comes out
-as full as possible: four chips get a width that fits four across, five get one
-that fits three and then two.
+`<map>`. Each chip ships in four variants, picked by `<picture>`: light and dark, wide and
+narrow. Below 500px a phone gets the narrow variant, which keeps the full label and
+takes the whole column, one chip per line. The longest name is
+`ML_QUANTITATIVE_RESEARCH`, so any tile wide enough to hold it is already most of a
+phone column; one per line is what the content forces anyway, and stacked rows read
+as a parts list.
+
+On the bill of materials, a part at the top of the status vocabulary draws its
+completion bar in green instead of its material colour, so "done" is visible without
+reading the status column. It follows the status *rank*, not the name, so renaming
+`QUALIFIED` does not turn it off. The MATL swatch still shows the language.
 
 Every asset URL in `README.md` carries a `?v=` that is a hash of that file's own
 bytes. README images are cached hard, so without it a rebuild stays invisible. It
