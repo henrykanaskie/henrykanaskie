@@ -19,12 +19,12 @@
 name       = "Henry Kanaskie"
 # The drawing's title block. Keep it short. It is set in caps at a large size.
 title      = "MODELS / HARDWARE / THE BOUNDARY BETWEEN"
-tagline    = "Machine learning, quantitative research, and things that talk to hardware."
+tagline    = "Machine learning and things that talk to hardware."
 website    = "https://henrykanaskie.com"
 github     = "henrykanaskie"
 # Sheet metadata. Bump `revision` by hand when you make a change worth marking;
 # it is the one number here that is deliberately not automated.
-revision   = "F"
+revision   = "G"
 drawn_by   = "H. KANASKIE"
 
 
@@ -138,7 +138,7 @@ pn         = "MDL-02"
 name       = "floralytics"
 lang       = "Python"
 status     = "QUALIFIED"
-completion = 0.95
+completion = 1.00
 summary    = "Oregon bee-plant records, factored into a ranked planting list for a place"
 detail     = """
 An interactive map over the Oregon Bee Atlas, written with five others for the Oregon \
@@ -155,7 +155,7 @@ pn         = "APP-03"
 name       = "acclimate"
 lang       = "Python"
 status     = "QUALIFIED"
-completion = 0.92
+completion = 1.00
 summary    = "paste a repository URL, read back an answer that cites its own source lines"
 detail     = """
 A codebase onboarding assistant, built at BeaverHacks 2026. It clones a public \
@@ -282,8 +282,8 @@ user     = ""
 
 [focus]
 areas = [
-  "machine learning", "transformers", "quantitative research", "time series",
-  "optimization", "embedded C", "signal processing", "SwiftUI", "agents",
+  "machine learning", "transformers", "time series", "optimization",
+  "embedded C", "signal processing", "SwiftUI", "agents",
   "numerical methods",
 ]
 
