@@ -24,7 +24,7 @@ website    = "https://henrykanaskie.com"
 github     = "henrykanaskie"
 # Sheet metadata. Bump `revision` by hand when you make a change worth marking;
 # it is the one number here that is deliberately not automated.
-revision   = "E"
+revision   = "F"
 drawn_by   = "H. KANASKIE"
 
 
@@ -41,8 +41,8 @@ body = [
 
 # The three lines under the prose. Bold with **, as in normal markdown.
 points = [
-  "Mostly on **quantitative research** right now: block bootstrapping, log returns, correlation structure",
-  "Just finished a **GPT from scratch**, largely to stop treating attention as a black box",
+  "Mostly on **retrieval over code** right now: AST-aware chunking, embeddings, citations that hold up",
+  "Just finished **Floralytics**, which factors Oregon's bee-plant records into habitat advice",
   "Happiest in a debugger, at the point where the theory stops matching the trace",
 ]
 
@@ -134,21 +134,38 @@ notes      = ["POSIX job control", "SIGTSTP / SIGINT handled"]
 repo       = "https://github.com/henrykanaskie/small-shell"
 
 [[projects]]
-pn         = "MDL-01"
-name       = "gpt-scratch"
+pn         = "MDL-02"
+name       = "floralytics"
 lang       = "Python"
 status     = "QUALIFIED"
-completion = 1.00
-summary    = "a working GPT from scratch: BPE, attention, training loop, sampling"
+completion = 0.95
+summary    = "Oregon bee-plant records, factored into a ranked planting list for a place"
 detail     = """
-Gradient descent up to a GPT that trains and generates: BPE tokenizer, embeddings, \
-self-attention, transformer blocks, KV-cache and grouped-query attention, all written \
-by hand rather than pulled from a library. The submitted course files are left exactly \
-as graded; a separate runtime adapter works around four grading artifacts that would \
-otherwise stop it learning: a rounded forward pass with zero gradient, a seed reset \
-inside every forward and every init, and a causal mask pinned to the CPU."""
-notes      = ["Build GPT 10/10", "trains in ~9 min on an M2 Max", "KV-cache + GQA"]
-repo       = "https://github.com/henrykanaskie/gpt-scratch"
+An interactive map over the Oregon Bee Atlas, written with five others for the Oregon \
+Bee Project. Observed bee-plant visits become a sparse interaction matrix and a truncated \
+SVD fills what nobody recorded, so a county or ecoregion returns a ranked list of plants \
+worth putting in the ground rather than only the visits someone happened to write down. \
+React front end over a FastAPI backend, downloadable PDF reports, and request guardrails \
+so a small host survives a room full of people opening it at once."""
+notes      = ["truncated SVD over the Bee Atlas", "React + FastAPI", "six authors"]
+repo       = "https://github.com/Kellen-Sullivan/bee-plant-data-exploration"
+
+[[projects]]
+pn         = "APP-03"
+name       = "acclimate"
+lang       = "Python"
+status     = "QUALIFIED"
+completion = 0.92
+summary    = "paste a repository URL, read back an answer that cites its own source lines"
+detail     = """
+A codebase onboarding assistant, built at BeaverHacks 2026. It clones a public \
+repository, splits the code by function and class with tree-sitter rather than by line \
+count, embeds it into a local ChromaDB, and answers questions with citations that open \
+the exact lines behind them. Four ways in: question and answer, an animated walkthrough \
+over a generated component diagram, a multi-tool agent that searches symbols and traces \
+dependencies, and a view of everything that depends on one file."""
+notes      = ["AST-aware chunking", "every claim cites its lines", "BeaverHacks 2026"]
+repo       = "https://github.com/henrykanaskie/beaverhacks26"
 
 [[projects]]
 pn         = "APP-01"
@@ -165,23 +182,6 @@ response content. The room is a lattice, so every character stays inside its own
 seat's column. Six themed rooms sit behind a picker."""
 notes      = ["M0 through M6 committed", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
-
-[[projects]]
-pn         = "QNT-01"
-name       = "ML_quantitative_research"
-lang       = "Python"
-status     = "FLIGHT"
-completion = 0.72
-summary    = "a Monte Carlo risk engine: the distribution of outcomes, not a forecast"
-detail     = """
-A risk and planning tool rather than a predictor: given a set of holdings it reports \
-the distribution of outcomes, especially the ugly tail, and says nothing about what to \
-buy. Three return engines sit behind one frozen data contract: historical, block \
-bootstrap, and a Gaussian baseline kept only so the others can be measured against it. Log returns \
-throughout, correlation drawn from joint historical sampling, and an explicit statement \
-of the model's blind spot."""
-notes      = ["3 return engines", "log returns throughout", "tail + drawdown metrics"]
-repo       = "https://github.com/henrykanaskie/ML_quantitative_research"
 
 [[projects]]
 pn         = "APP-02"
@@ -211,34 +211,6 @@ a fixed schema, and LaTeX comes out. CLI and web front ends over one shared stor
 notes      = ["schema-bound output"]
 private    = "code is local, the repository is still empty"
 
-[[projects]]
-pn         = "EDU-01"
-name       = "me-tutor"
-lang       = "Python"
-status     = "BREADBOARD"
-completion = 0.25
-summary    = "agents writing a mechanical engineering curriculum, verified at build time"
-detail     = """
-An agent pipeline that writes a mechanical-engineering curriculum and builds a \
-static site around it. Every numerical claim has a matching assertion executed at \
-build time, because generated physics is confidently wrong at a low but non-zero \
-rate."""
-notes      = ["3 of ~27 modules", "every number asserted"]
-private    = "private repository"
-
-[[projects]]
-pn         = "QNT-02"
-name       = "pitwall"
-lang       = "Python"
-status     = "CONCEPT"
-completion = 0.18
-summary    = "Formula 1 tire degradation, regressed over FastF1 stint telemetry"
-detail     = """
-Built on FastF1, currently a tire-degradation regression over stint data. Aimed at \
-the strategy question of when a set of tires stops paying for itself."""
-notes      = ["FastF1 stint data", "frontend not populated"]
-private    = "private repository"
-
 [bom]
 # Draw a red drafting revision cloud around whichever project was pushed to most
 # recently. It is real drawing practice and the data behind it is real, but red is
@@ -267,11 +239,11 @@ mark_last_push = false
 
 [notes]
 field = [
-  "The GPT course files are exactly what I submitted, including the parts that can't train. The fix lives in a separate adapter so the submission stays honest.",
+  "The bee-plant matrix is mostly empty. That is the whole reason the SVD is there: an unrecorded visit is not the same as an absent relationship.",
   "Cap_Match_Net exists because the ideal component values in the textbook aren't in anyone's parts bin.",
-  "Every number on the me-tutor site is checked by an assertion at build time, because generated physics is wrong just often enough to matter.",
+  "AccliMate cites the lines it answered from, because an onboarding tool you cannot check is just a confident stranger.",
   "The shell taught me more about signals than any chapter on signals did.",
-  "The Gaussian baseline in the risk engine is only there so the other two engines have something to be measured against.",
+  "The Bee Atlas is a record of where people went looking, not only of what was there. The recommender has to be read with that in mind.",
   "I write the transformer by hand about once a year. It gets less mysterious every time.",
   "The pixel-art agents are read-only on purpose. Watching is the whole feature.",
   "A lot of Sprite Room's tests turned out to be about where a character is allowed to stand. I did not expect that to be the hard part.",
