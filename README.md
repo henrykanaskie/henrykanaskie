@@ -35,10 +35,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=0adc9ba496">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=478f5c5176">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=4ea7982232">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=02322d6f48" alt="Title block. Henry Kanaskie. MODELS / HARDWARE / THE BOUNDARY BETWEEN. Machine learning and things that talk to hardware. Revision G.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=58dfaa59ec">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=1514f4804b">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=588a11cf91">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=94beafde83" alt="Title block. Henry Kanaskie. MODELS / HARDWARE / THE BOUNDARY BETWEEN. Machine learning and things that talk to hardware. Revision G.">
 </picture>
 
 <picture><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-blank.svg?v=9059e608fe"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-dark.svg?v=97d92cb020"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-light.svg?v=6a349416aa" alt=""></picture><a href="https://henrykanaskie.com"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-dark.svg?v=20c4c5c1c8"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-light.svg?v=b2cea950d1"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-dark.svg?v=5956186fbb"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-light.svg?v=2f0fec82c8" alt="henrykanaskie.com"></picture></a><a href="https://github.com/henrykanaskie?tab=repositories"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-dark.svg?v=97c99b5425"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-light.svg?v=937b74f8ca"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-dark.svg?v=13d5c8f635"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-light.svg?v=98b2e93e34" alt="repositories"></picture></a><a href="SETUP.md"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-dark.svg?v=459a84d22c"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-light.svg?v=b716ad92ac"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-dark.svg?v=e823c0f080"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-light.svg?v=78b2aece65" alt="how this is built"></picture></a><a href="data/profile.toml"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-dark.svg?v=26f5efe254"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-light.svg?v=410f0eba46"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-dark.svg?v=4ddaae53c8"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-light.svg?v=bb53ba5025" alt="the source of truth"></picture></a>
@@ -64,10 +64,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=335ea70ca0">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=a364d7b0ae">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=d64bcc2b89">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=5dd33e35a8" alt="Daily telemetry. next launch Demo Flight; 11 people in space; ISS at -45.8 degrees latitude; last push to neetcode-submissions.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=7b3153dc97">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=910a8cf84b">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=17760678ac">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=0b3b5151e5" alt="Daily telemetry. next launch Demo Flight; 11 people in space; ISS at 51.5 degrees latitude; last push to henrykanaskie.">
 </picture>
 
 <picture>
@@ -78,10 +78,10 @@
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=5123e1cc96">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=a6d657a537">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=c61a0c891f">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=71636915ab" alt="Push activity, 89 pushes over the last 30 days.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=b59b491c88">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=4fa932c205">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=a7f1262ff6">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=92cea70329" alt="Push activity, 88 pushes over the last 30 days.">
 </picture>
 
 <picture>
@@ -90,7 +90,7 @@
 </picture>
 
 <sub>
-REV G &nbsp;·&nbsp; 6 SHEETS &nbsp;·&nbsp; BUILT 2026-08-31 17:05 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV G &nbsp;·&nbsp; 6 SHEETS &nbsp;·&nbsp; BUILT 2026-08-31 19:20 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
