@@ -171,8 +171,8 @@ repo       = "https://github.com/henrykanaskie/beaverhacks26"
 pn         = "APP-01"
 name       = "animAgent"
 lang       = "Swift"
-status     = "FLIGHT"
-completion = 0.88
+status     = "QUALIFIED"
+completion = 1.0
 summary    = "Sprite Room: your agents as pixel-art characters, dropping from the notch"
 detail     = """
 A macOS app that turns live Claude Code activity into a small pixel-art room of \
