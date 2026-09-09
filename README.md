@@ -35,10 +35,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=52d2366225">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=5bf651648d">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=dc6849d5fa">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=929b999b4a" alt="Title block. Henry Kanaskie. MODELS / HARDWARE / THE BOUNDARY BETWEEN. Machine learning and things that talk to hardware. Revision G.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=602ba24d5a">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=16a815321f">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=4ce283aff5">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=7a05700c0c" alt="Title block. Henry Kanaskie. MODELS / HARDWARE / THE BOUNDARY BETWEEN. Machine learning and things that talk to hardware. Revision G.">
 </picture>
 
 <picture><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-blank.svg?v=9059e608fe"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-dark.svg?v=97d92cb020"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-light.svg?v=6a349416aa" alt=""></picture><a href="https://henrykanaskie.com"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-dark.svg?v=20c4c5c1c8"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-light.svg?v=b2cea950d1"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-dark.svg?v=5956186fbb"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-light.svg?v=2f0fec82c8" alt="henrykanaskie.com"></picture></a><a href="https://github.com/henrykanaskie?tab=repositories"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-dark.svg?v=97c99b5425"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-light.svg?v=937b74f8ca"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-dark.svg?v=13d5c8f635"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-light.svg?v=98b2e93e34" alt="repositories"></picture></a><a href="SETUP.md"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-dark.svg?v=459a84d22c"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-light.svg?v=b716ad92ac"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-dark.svg?v=e823c0f080"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-light.svg?v=78b2aece65" alt="how this is built"></picture></a><a href="data/profile.toml"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-dark.svg?v=26f5efe254"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-light.svg?v=410f0eba46"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-dark.svg?v=4ddaae53c8"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-light.svg?v=bb53ba5025" alt="the source of truth"></picture></a>
@@ -46,8 +46,8 @@
 <picture>
   <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-narrow-dark.svg?v=ca43ce30ee">
   <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-narrow-light.svg?v=980a2a95bd">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-dark.svg?v=6a549c7bab">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-light.svg?v=0c302e4f47" alt="I work at the boundary between models and hardware. A transformer written from first principles, an optimizer that picks capacitor values you can actually buy, a habit tracker that draws your streaks as a neural graph. Most of it starts as a question I couldn't answer by reading, so I write the thing that answers it. Mostly on retrieval over code right now: AST-aware chunking, embeddings, citations that hold up. Just finished Floralytics, which factors Oregon's bee-plant records into habitat advice. Happiest in a debugger, at the point where the theory stops matching the trace. Focus areas: machine learning, transformers, time series, optimization, embedded C, signal processing, SwiftUI, agents, numerical methods.">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-dark.svg?v=8f8f0c9b22">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/general-light.svg?v=32a994783b" alt="I work at the boundary between models and hardware. A transformer written from first principles, an optimizer that picks capacitor values you can actually buy, a habit tracker that draws your streaks as a neural graph. Most of it starts as a question I couldn't answer by reading, so I write the thing that answers it. Mostly on retrieval over code right now: AST-aware chunking, embeddings, citations that hold up. Just finished Floralytics, which factors Oregon's bee-plant records into habitat advice. Happiest in a debugger, at the point where the theory stops matching the trace. Focus areas: machine learning, transformers, time series, optimization, embedded C, signal processing, SwiftUI, agents, numerical methods.">
 </picture>
 
 <picture>
@@ -64,24 +64,24 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=f0082a52a1">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=3708e7a5e0">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=db5e9855d6">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=0dc6af2201" alt="Daily telemetry. next launch Unknown Payload; 11 people in space; ISS at -51.7 degrees latitude; last push to nfl_predictor.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-dark.svg?v=e2c895c5be">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-narrow-light.svg?v=a6800475a3">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-dark.svg?v=8c8685fdda">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/telemetry-light.svg?v=df1e28e42f" alt="Daily telemetry. next launch Unknown Payload; 11 people in space; ISS at 51.2 degrees latitude; last push to aggregateAnalytics.">
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-narrow-dark.svg?v=2d20a1a985">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-narrow-light.svg?v=a4d55f7dd4">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-dark.svg?v=628a0383af">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-light.svg?v=2b7786abaa" alt="Language composition: Python 68%, JavaScript 9%, C 8%, TypeScript 8%, Swift 7%, Shell 0%.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-narrow-dark.svg?v=a0b056f1b2">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-narrow-light.svg?v=7220759926">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-dark.svg?v=e3269ba4d6">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/composition-light.svg?v=b54e20a2a7" alt="Language composition: Python 65%, TypeScript 11%, JavaScript 9%, C 8%, Swift 7%, Shell 0%.">
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=1836bfd74d">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=2cde7fa4a8">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=56cbc37099">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=9e3e331365" alt="Push activity, 80 pushes over the last 30 days.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-dark.svg?v=73cffdb79c">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-narrow-light.svg?v=40b24dd38e">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-dark.svg?v=085bdb0eb9">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/activity-light.svg?v=1bbfae2050" alt="Push activity, 83 pushes over the last 30 days.">
 </picture>
 
 <picture>
@@ -90,7 +90,7 @@
 </picture>
 
 <sub>
-REV G &nbsp;·&nbsp; 6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-08 16:58 UTC &nbsp;·&nbsp; SCALE NONE<br>
+REV G &nbsp;·&nbsp; 6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-09 16:57 UTC &nbsp;·&nbsp; SCALE NONE<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
