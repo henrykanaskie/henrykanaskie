@@ -12,8 +12,8 @@ dropped rather than squeezed to four characters.
                   lines, field strip down to one column
     _general      the same prose, notes, and focus tags, rewrapped
     _composition  bar full width, legend down to one column
-    _timeline     the same window and the same bars, each project's name moved
-                  above its bar so the plot keeps the whole measure
+    _assemblies   the four sections stacked instead of set side by side,
+                  each layer keeping the full measure
     _toolbox      each tool as a stacked block instead of a three column row
 
 The usable measure is 264px: NARROW_W less the frame inset on both sides less a
@@ -313,173 +313,87 @@ def _composition(cfg, data, t):
                   label="MATERIAL COMPOSITION")
 
 
-# ── sheet 4: project timeline ────────────────────────────────────────────────
+# ── sheet 4: typical assemblies ──────────────────────────────────────────────
 #
-# The wide sheet sets the project name in a 196px gutter beside its bar. There
-# is no 196px gutter here, so the name moves ABOVE its own bar and every bar
-# gets the full measure. That keeps the one thing this sheet is for, which is
-# comparing when things happened to each other, at full resolution: shrinking
-# the plot to make room for a label beside it would have left each bar 68px and
-# eighteen months of history unreadable.
+# The wide sheet sets the four assemblies side by side, which is most of the
+# point: you see at a glance that there are four shapes and not ten. Four
+# columns will not fit in 264px, so they stack, and the comparison becomes
+# vertical rather than horizontal. Every layer keeps its own full width, which
+# is what the wide sheet has to ration.
 
-TL_ROW_H = 27           # name and dates on one line, then the bar
+ASM_LINE = 11.5
+ASM_LAYER_SIZE = 8.0
 
 
-def _timeline(cfg, data, t):
-    import datetime as _dt
-
-    today = (data.get("generated_at") or _dt.datetime.now(_dt.timezone.utc)).date()
-    rows = cards._timeline_rows(cfg, data)
-    first, last = cards._timeline_window(rows, cfg, today)
-    total_days = max(1, (last - first).days)
-
-    def px(d):
-        frac = (d - first).days / total_days
-        return X0 + max(0.0, min(1.0, frac)) * SPAN
-
-    axis_y = 46
-    body_y = axis_y + 20
-    plot_b = body_y + len(rows) * TL_ROW_H
+def _assemblies(cfg, data, t):
+    rows = cards._asm_rows(cfg)
+    if not rows:
+        return _sheet("assemblies", 160, t,
+                      cards._nodata(X0, 46, SPAN, 70, t,
+                                    label="NO ASSEMBLIES LISTED"),
+                      label="TYPICAL ASSEMBLIES")
 
     defs = ""
-    for i, (p, *_rest) in enumerate(rows):
-        defs += bp.defs_hatch(
-            i, cards._lang_color(cfg, p.get("lang"), t, spare_at=i),
-            angle=cards.HATCH_ANGLES[i % len(cards.HATCH_ANGLES)], gap=4.5,
-            w=1.2)
+    for i, _row in enumerate(rows):
+        defs += bp.defs_hatch(i, t["rule"],
+                              angle=cards.HATCH_ANGLES[i % len(cards.HATCH_ANGLES)],
+                              gap=6, w=0.7)
 
-    out = ""
-    out += cards._drawn_rule(X0, axis_y, X1, axis_y, t, cards.D_RULE, w=1.1,
-                             color="rule")
+    out, y = "", 50
+    for c, (asm, parts) in enumerate(rows):
+        d = cards.D_DATA + c * 0.08
+        out += cards._g(cards.D_LETTER + c * 0.05,
+                        bp.caps(X0, y, cards._fit(str(asm.get("name") or cards.DASH),
+                                                  SPAN, 7.6, 1.0),
+                                t, size=7.6, track=1.0, color="ink"))
+        out += cards._drawn_rule(X0, y + 6, X1, y + 6, t,
+                                 cards.D_RULE + c * 0.04, w=1.3, color="rule")
+        y += 14
 
-    # Only the year boundaries are lettered. The wide sheet names a month every
-    # third tick; at 264px those collide, and the year is the only mark a
-    # reader navigates a two-year window by anyway. The exception is the first
-    # tick, which carries its own year: without it a window opening in February
-    # 2025 letters nothing at all until January 2026, and a reader has no way
-    # to date the left half of the sheet.
-    labelled = False
-    for m in cards._month_starts(first, last):
-        mx = px(m)
-        if mx < X0 - 0.5 or mx > X1 + 0.5:
-            continue
-        if m.month == 1:
-            out += cards._g(cards.D_RULE + 0.1,
-                            bp.rule(mx, axis_y - 4, mx, axis_y, t, w=1.0))
-            out += cards._g(cards.D_RULE + 0.18,
-                            bp.rule(mx, axis_y, mx, plot_b + 4, t,
-                                    color="grid", w=1.0))
-            out += cards._g(cards.D_LETTER,
-                            bp.caps(mx, axis_y - 8, m.strftime("%Y"), t,
-                                    size=6.6, track=0.8, anchor="middle",
-                                    color="soft"))
-            labelled = True
-        elif m.month % 3 == 1:
-            out += cards._g(cards.D_RULE + 0.1,
-                            bp.rule(mx, axis_y - 2.5, mx, axis_y, t, w=0.8))
-            if not labelled:
-                out += cards._g(cards.D_LETTER,
-                                bp.caps(mx, axis_y - 8, m.strftime("%b %Y"), t,
-                                        size=6.6, track=0.8, anchor="middle",
-                                        color="soft"))
-                labelled = True
+        for i, layer in enumerate([str(s) for s in (asm.get("layers") or [])]):
+            wrapped = cards._wrap(layer, SPAN - 18, ASM_LAYER_SIZE)
+            h = 22 + (len(wrapped) - 1) * ASM_LINE
+            edge = t["accent"] if i == 0 else t["rule"]
+            out += cards._g(d + i * 0.05,
+                            f'<rect x="{X0:.1f}" y="{y:.1f}" width="{SPAN:.1f}" '
+                            f'height="{h:.1f}" '
+                            f'fill="{"none" if i else f"url(#h{c})"}" '
+                            f'stroke="{edge}" '
+                            f'stroke-width="{1.4 if i == 0 else 0.9}">'
+                            + bp.fade(d + i * 0.05) + '</rect>')
+            ty = y + (h - (len(wrapped) - 1) * ASM_LINE) / 2 + 2.8
+            for k, line in enumerate(wrapped):
+                out += cards._g(d + i * 0.05 + 0.06,
+                                bp.text(X0 + 9, ty + k * ASM_LINE, line, t,
+                                        size=ASM_LAYER_SIZE,
+                                        color="ink" if i == 0 else "soft"))
+            y += h
+        y += 8
 
-    tx = px(today)
-    out += cards._g(cards.D_DATA + 0.1,
-                    bp.rule(tx, axis_y, tx, plot_b + 4, t, color="accent",
-                            w=1.0, dash="3 3", opacity=0.85))
+        for k, part in enumerate(parts):
+            py = y + k * 12
+            out += cards._g(d + 0.3 + k * 0.03,
+                            bp.rule(X0 + 2, py - 3.2, X0 + 8, py - 3.2, t,
+                                    w=0.8, color="rule", opacity=0.8))
+            label = f'{part.get("pn") or cards.DASH}  {part.get("name") or ""}'
+            out += cards._g(d + 0.3 + k * 0.03,
+                            bp.text(X0 + 12, py, cards._fit(label.strip(),
+                                                            SPAN - 12, 7.8),
+                                    t, size=7.8, color="soft"))
+        y += len(parts) * 12 + 20
 
-    live_rows = 0
-    for i, (p, start, end, milestone, live) in enumerate(rows):
-        ry = body_y + i * TL_ROW_H
-        d = cards.D_DATA + i * 0.07
-        color = cards._lang_color(cfg, p.get("lang"), t, spare_at=i)
-
-        # Designator, name, dates and commit count all on the line above the
-        # bar. The dates went UNDER the bar first, which put them nearer the
-        # next project's name than their own and made every row look like it
-        # was labelled with the span belonging to the row above. There is room
-        # for all four on one line at this measure, so they go on one line.
-        n = p.get("commits")
-        nlabel = f"{int(n):,}" if isinstance(n, int) and n else cards.DASH
-        nw = cards._w(nlabel, 7.4) + 10
-        span = cards._span_label(start, end)
-        sw = (cards._w(span, cards.TL_SPAN_SIZE) + 8) if span else 0
-        out += cards._g(cards.D_LETTER + i * 0.03,
-                        bp.caps(X0, ry, p.get("pn") or cards.DASH, t, size=6.6,
-                                track=0.8))
-        out += cards._g(cards.D_LETTER + i * 0.03,
-                        bp.text(X0 + 42, ry,
-                                cards._fit(str(p.get("name") or cards.DASH),
-                                           SPAN - 42 - nw - sw, 8.2), t,
-                                size=8.2))
-        if span:
-            out += cards._g(d + 0.05,
-                            bp.text(X1 - nw, ry, span, t,
-                                    size=cards.TL_SPAN_SIZE, color="faint",
-                                    anchor="end"))
-        out += cards._g(d + 0.14,
-                        bp.text(X1, ry, nlabel, t, size=7.4, anchor="end",
-                                color="soft" if n else "faint"))
-
-        by = ry + 5
-        bh = 8
-        if start is None:
-            out += cards._nodata(X0, by, SPAN, bh + 2, t, delay=d,
-                                 label="NO DATES")
-            continue
-        if live:
-            live_rows += 1
-
-        bx, ex = px(start), px(end)
-        if milestone:
-            r = bh * 0.72
-            bx = min(X1 - r, max(X0 + r, bx))
-            cy = by + bh / 2
-            out += cards._g(d, f'<path d="M{bx:.1f} {cy-r:.1f} '
-                               f'L{bx+r:.1f} {cy:.1f} L{bx:.1f} {cy+r:.1f} '
-                               f'L{bx-r:.1f} {cy:.1f} Z" fill="{color}" '
-                               f'stroke="{color}" stroke-width="1"/>')
-        else:
-            bw = max(cards.TL_MIN_BAR, ex - bx)
-            out += cards._g(d, cards._grow_bar(bx, by, bw, bh, f"url(#h{i})",
-                                               d, stroke=color, sw=1.0))
-            if str(p.get("status") or "").upper() == "QUALIFIED":
-                out += cards._g(d + 0.1,
-                                bp.rule(bx + bw, by - 1.5, bx + bw, by + bh + 1.5,
-                                        t, color="rule", w=1.3))
-            else:
-                out += cards._g(d + 0.1,
-                                f'<path d="M{bx+bw+1.5:.1f} {by:.1f} '
-                                f'L{bx+bw+5.5:.1f} {by+bh/2:.1f} '
-                                f'L{bx+bw+1.5:.1f} {by+bh:.1f}" fill="none" '
-                                f'stroke="{color}" stroke-width="1.3" '
-                                f'opacity="0.9"/>')
-
-    fy = plot_b + 18
-    out += cards._g(cards.D_DATA + 0.1,
-                    bp.caps(min(X1, max(X0 + 16, tx)), fy, "TODAY", t,
-                            size=6.4, track=0.9, anchor="middle",
-                            color="accent"))
-    fy += 18
-    stale = sum(1 for r in rows if r[1] and not r[4])
-    for i, line in enumerate(cards._wrap(
-            "First commit to most recent. "
-            f"{live_rows} refreshed from GitHub, {stale} from the config.",
-            SPAN, 6.9)):
-        out += cards._g(cards.D_LETTER + 0.4,
-                        bp.text(X0, fy + i * 10, line, t, size=6.9,
-                                color="faint"))
-        fy_last = fy + i * 10
-    if any(r[3] for r in rows):
-        out += cards._g(cards.D_LETTER + 0.45,
-                        bp.text(X0, fy_last + 11,
-                                "◆ whole history pushed in one day", t,
-                                size=6.9, color="faint"))
-        fy_last += 11
-
-    return _sheet("timeline", fy_last + 26, t, out, defs=defs,
-                  label="PROJECT TIMELINE")
+    projects = cfg.get("projects") or []
+    bare = [p for p in projects if not (p.get("deps") or [])]
+    if projects:
+        for i, line in enumerate(cards._wrap(
+                f"{len(bare)} of {len(projects)} install nothing at all: no "
+                "package manager, no lock file, no build step", SPAN, 7.4)):
+            out += cards._g(cards.D_DATA + 0.6,
+                            bp.text(X0, y + i * 10.5, line, t, size=7.4,
+                                    color="ink" if bare else "faint"))
+            y += 10.5
+    return _sheet("assemblies", y + 24, t, out, defs=defs,
+                  label="TYPICAL ASSEMBLIES")
 
 
 # ── sheet 6: toolbox ─────────────────────────────────────────────────────────
@@ -562,6 +476,6 @@ RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
     "composition": _composition,
-    "timeline": _timeline,
+    "assemblies": _assemblies,
     "toolbox": _toolbox,
 }

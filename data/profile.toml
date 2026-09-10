@@ -116,18 +116,16 @@ blurb = "scaffold and intent"
 #    notes      tolerance callouts. Short, factual, no more than three
 #    repo       omit entirely for a private or unpushed project
 #    private    optional note explaining why there is no link
-#    started    date of the FIRST commit, and `last` the most recent one. These
-#               drive the timeline sheet. They are read off real git history, not
-#               estimated: see the comment on [timeline] below for where each
-#               one came from and why the build still trusts the file over the
-#               API for some of them.
-#    commits    commits in the repository's history, as measured on the same day
-#               as `last`. Drawn as the bar's weight on the timeline.
+#    deps       third-party runtime dependencies, by name. An EMPTY list is a
+#               claim, not a blank: it says this installs nothing at all, and
+#               six of the ten parts here really do. The assemblies sheet counts
+#               them, so a lazy [] is a lie the sheet will repeat.
 
 [[projects]]
 pn         = "OPT-01"
 name       = "Cap_Match_Net"
 lang       = "Python"
+deps       = ["OR-Tools"]
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "picks matching-network capacitors from values you can actually buy"
@@ -139,14 +137,12 @@ the ideal values a textbook hands you and nobody stocks. It replaced matching \
 the network by hand, which is the part of the job it was actually meant to fix."""
 notes      = ["OR-Tools CP-SAT", "E12 series parts only"]
 repo       = "https://github.com/henrykanaskie/Cap_Match_Net"
-started    = 2026-02-02
-last       = 2026-02-02
-commits    = 2
 
 [[projects]]
 pn         = "SYS-01"
 name       = "small-shell"
 lang       = "C"
+deps       = []
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "a Unix shell in C: job control, redirection, and the signal handling"
@@ -158,14 +154,12 @@ the project that taught me what a process group is, which no amount of reading \
 about process groups had managed to do."""
 notes      = ["POSIX job control", "SIGTSTP / SIGINT handled"]
 repo       = "https://github.com/henrykanaskie/small-shell"
-started    = 2025-02-21
-last       = 2025-02-21
-commits    = 3
 
 [[projects]]
 pn         = "MDL-02"
 name       = "floralytics"
 lang       = "Python"
+deps       = ["React", "FastAPI", "NumPy"]
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Oregon bee-plant records turned into a ranked planting list for a county"
@@ -179,14 +173,12 @@ end over a FastAPI backend, with PDF reports and enough rate limiting that a \
 small host survives a room full of people opening it at once."""
 notes      = ["truncated SVD over the Bee Atlas", "React + FastAPI", "six authors"]
 repo       = "https://github.com/Kellen-Sullivan/bee-plant-data-exploration"
-started    = 2025-10-08
-last       = 2026-05-29
-commits    = 313
 
 [[projects]]
 pn         = "APP-03"
 name       = "accliMate"
 lang       = "Python"
+deps       = ["tree-sitter", "ChromaDB", "FastAPI", "PyTorch"]
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "paste a repo URL, get answers that cite the exact lines they came from"
@@ -200,14 +192,12 @@ diagram, an agent that searches symbols and traces dependencies, and a view of \
 everything that depends on one file."""
 notes      = ["AST-aware chunking", "every answer cites its lines", "BeaverHacks 2026"]
 repo       = "https://github.com/henrykanaskie/accliMate"
-started    = 2026-05-02
-last       = 2026-05-03
-commits    = 88
 
 [[projects]]
 pn         = "APP-01"
 name       = "animAgent"
 lang       = "Swift"
+deps       = []
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "a macOS app that draws the agents you have running as pixel-art characters"
@@ -220,14 +210,12 @@ each character stays in its own seat's column instead of drifting into its \
 neighbour. Six themed rooms sit behind a picker."""
 notes      = ["read-only by design", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
-started    = 2026-08-07
-last       = 2026-08-27
-commits    = 186
 
 [[projects]]
 pn         = "TUL-02"
 name       = "groupStat"
 lang       = "Python"
+deps       = []
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "ranks a group chat eight ways by the tapbacks people actually left"
@@ -240,14 +228,12 @@ localhost, with no outbound requests of any kind. Message text stays off by \
 default, because counting reactions never needed to read what anyone said."""
 notes      = ["reads a copy, never the live database", "message bodies off by default"]
 private    = "private repository"
-started    = 2026-08-15
-last       = 2026-09-01
-commits    = 48
 
 [[projects]]
 pn         = "TUL-03"
 name       = "Ground-Control"
 lang       = "JavaScript"
+deps       = []
 status     = "FLIGHT"
 completion = 0.90
 summary    = "one dashboard over every repo on my disk, and a place to work from"
@@ -260,14 +246,12 @@ out the folders that turned out to be nothing. Node standard library, no \
 install step, wrapped in a 1.9 MB Swift app rather than 150 MB of Electron."""
 notes      = ["no dependencies, no build step", "native app shell, not Electron"]
 repo       = "https://github.com/henrykanaskie/Ground-Control"
-started    = 2026-08-24
-last       = 2026-09-07
-commits    = 41
 
 [[projects]]
 pn         = "TUL-04"
 name       = "orchestrate"
 lang       = "JavaScript"
+deps       = []
 status     = "FLIGHT"
 completion = 0.90
 summary    = "runs a team of coding agents at a project as a real dependency graph"
@@ -280,14 +264,12 @@ CLI, so it costs a subscription rather than an API key, and it binds to \
 127.0.0.1 until you deliberately open it up."""
 notes      = ["dependency graph, not a queue", "local CLI, no API key"]
 private    = "private repository"
-started    = 2026-08-18
-last       = 2026-09-07
-commits    = 128
 
 [[projects]]
 pn         = "APP-02"
 name       = "GrowthApp"
 lang       = "Swift"
+deps       = []
 status     = "FLIGHT"
 completion = 0.62
 summary    = "a SwiftUI habit tracker that draws each streak as a filament of a graph"
@@ -299,14 +281,12 @@ Group store. Themes and board layout are real settings, and every choice a \
 reader makes survives a relaunch."""
 notes      = ["full WidgetKit suite", "shared App Group store", "no sync yet"]
 private    = "private repository"
-started    = 2026-07-25
-last       = 2026-08-25
-commits    = 1
 
 [[projects]]
 pn         = "QNT-01"
 name       = "aggregateAnalytics"
 lang       = "Python"
+deps       = ["polars", "scikit-learn", "nflreadpy"]
 status     = "FLIGHT"
 completion = 0.60
 summary    = "an Elo model for NFL games that logs every prediction before kickoff"
@@ -319,9 +299,6 @@ research dashboard sits over the same data. Not published yet, and the scoring \
 function is the next thing to write."""
 notes      = ["predictions committed pre-kickoff", "111 tests", "walk-forward, not backfit"]
 repo       = "https://github.com/henrykanaskie/aggregateAnalytics"
-started    = 2026-08-31
-last       = 2026-09-09
-commits    = 100
 
 [bom]
 # Draw a red drafting revision cloud around whichever project was pushed to most
@@ -370,39 +347,62 @@ field = [
 #  There used to be a daily telemetry sheet on this profile carrying the next
 #  orbital launch, how many people were in space, and the ISS ground track. All
 #  three were real, live, and correctly attributed, and none of them were about
-#  me or anything I made. They came off the drawing set. What replaced them is
-#  the timeline sheet, which is drawn from the commit history of the parts on
-#  the bill of materials.
+#  me or anything I made. They came off the drawing set, and so did the launch,
+#  crew and ISS channels that fed them.
 
 [sources]
 github = true
 
 
-# ─── TIMELINE ────────────────────────────────────────────────────────────────
+# ─── ASSEMBLIES ──────────────────────────────────────────────────────────────
 #
-#  The timeline sheet draws each part of the bill of materials as a bar running
-#  from its first commit to its most recent one.
+#  What shape each project actually takes, drawn on the assemblies sheet as a
+#  stack of layers read top to bottom: from the thing you touch down to where it
+#  lands on disk.
 #
-#  `started`, `last` and `commits` on each project are the authority, and they
-#  are read off real git history rather than estimated. For a project with a
-#  public repository the build refreshes `last` from the live push time, so an
-#  active bar keeps growing without an edit here. A private project has no live
-#  source, so the file's date is the one that gets drawn and it is only as
-#  current as the last time it was updated by hand.
+#  "TYPICAL" is the drafting word and it is the right one. A typical detail on a
+#  real drawing is one section that stands for every instance marked TYP; it is
+#  not a claim that all of them are identical to the millimetre. These stacks
+#  are the same: groupStat's server is Python and Ground-Control's is Node, and
+#  the assembly is the same assembly.
 #
-#  A project whose whole history landed on one day draws as a milestone diamond
-#  rather than a hairline bar. Cap_Match_Net and small-shell are both like this:
-#  the work happened over months in a lab and a course, and then went to GitHub
-#  in a single push. A bar one day wide would be a true statement about the
-#  repository and a false one about the work, so it gets the mark a drawing uses
-#  for a thing with a date and no duration.
+#  This sheet replaced a project timeline, which plotted each project from its
+#  first commit to its last. It was accurate and it was not worth a sheet: six
+#  of ten projects were built inside five weeks against a window of two years,
+#  so most of the drawing was empty and the bars that mattered were five pixels
+#  wide. When the work all happens at once, the interesting axis is not time.
+#
+#    name    the assembly, in caps. Short: it is a column head.
+#    layers  top to bottom, outermost first. Three or four; five is too many to
+#            read at a column width.
+#    on      the parts built this way. Every part on the bill of materials must
+#            appear in exactly one assembly, and the build fails otherwise. A
+#            project quietly missing from this sheet would be the one thing a
+#            reader could not detect by looking.
 
-[timeline]
-# Months of history to draw. Older parts are clamped to the left edge with an
-# open end, the way a Gantt chart shows a task that starts before the window.
-months = 14
-# Refresh `last` from the live GitHub push time where the repository is public.
-follow_pushes = true
+[[assemblies]]
+name   = "RUNS IN A TERMINAL"
+layers = ["a command, or a prompt", "solver, model, or raw syscalls",
+          "files on disk, or nothing at all"]
+on     = ["Cap_Match_Net", "small-shell", "aggregateAnalytics"]
+
+[[assemblies]]
+name   = "LOCAL SERVER, NATIVE WINDOW"
+layers = ["a WKWebView in a Swift app", "HTTP on 127.0.0.1, and nowhere else",
+          "a standard-library server", "plain files on disk"]
+on     = ["groupStat", "Ground-Control", "orchestrate"]
+
+[[assemblies]]
+name   = "NATIVE APP"
+layers = ["SwiftUI, and SpriteKit where it moves", "app state, one source of it",
+          "one shared store on disk"]
+on     = ["animAgent", "GrowthApp"]
+
+[[assemblies]]
+name   = "WEB SERVICE"
+layers = ["React, or a page it serves itself", "a JSON API over HTTP",
+          "a model or an index", "the dataset underneath"]
+on     = ["floralytics", "accliMate"]
 
 
 # ─── TOOLBOX ─────────────────────────────────────────────────────────────────

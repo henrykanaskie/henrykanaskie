@@ -17,7 +17,7 @@ Everything else is output:
 | `assets/<card>-dark.svg`            | `scripts/build.py`  | `data/profile.toml` |
 | `README.md`                         | `scripts/build.py`  | `data/profile.toml` |
 
-Six sheets, in this order: `titleblock`, `general`, `bom`, `timeline`,
+Six sheets, in this order: `titleblock`, `general`, `bom`, `assemblies`,
 `composition`, `toolbox`. Each is drawn in a light and a dark variant, and in a wide
 and a narrow layout. Sheet numbers come from that order, so adding or reordering a card in
 `CARDS` renumbers every sheet automatically.
@@ -29,8 +29,8 @@ are the two chip rows.
 
 An SVG served through `<img>` gives a screen reader nothing but its alt text, so the
 alt text is written to carry the sheet's content rather than to name the picture: the
-bill of materials reads out its parts and their status, the timeline reads out each
-project's dates and commit count. `card_alt()` in `build.py` is where that lives. If
+bill of materials reads out its parts and their status, the assemblies sheet reads out
+each stack and what is built that way. `card_alt()` in `build.py` is where that lives. If
 you add a sheet, give it a branch there.
 
 **Do not hand-edit `README.md` or anything in `assets/`.** The next build overwrites
@@ -52,9 +52,9 @@ does not spend your unauthenticated GitHub rate limit.
 
 > **`--offline` does not blank the live figures. It invents them.** It substitutes a
 > plausible language mix and a set of recent commits so the layout has something to
-> render. Those look exactly as real as the real ones. (The timeline is the exception:
-> its sample push times are read from each project's own `last` date in the config, so
-> that one sheet is honest offline.)
+> render. Those look exactly as real as the real ones. The bill of materials, the
+> assemblies and the toolbox are all drawn straight from the config, so those three
+> sheets are the same offline as online.
 >
 > Every card from an offline build is therefore stamped **NOT FOR ISSUE** in red,
 > and the build prints a warning. If you see that stamp on the profile, someone
@@ -96,19 +96,10 @@ detail     = """
 The expanded paragraph. What it is, and the actual interesting problem in it."""
 notes      = ["tolerance callout", "another one", "at most three"]
 repo       = "https://github.com/henrykanaskie/repo-name"
-started    = 2026-08-31
-last       = 2026-09-09
-commits    = 100
+deps       = ["polars", "scikit-learn"]
 ```
 
-The three date fields are what the timeline sheet draws. Read them off the repository
-rather than estimating:
-
-```sh
-git log --reverse --format=%aI | head -1   # started
-git log -1 --format=%aI                    # last
-git rev-list --count HEAD                  # commits
-```
+Then add it to an assembly, or the build fails. See below.
 
 | Field        | Notes                                                              |
 | ------------ | ------------------------------------------------------------------ |
@@ -122,9 +113,7 @@ git rev-list --count HEAD                  # commits
 | `notes`      | Short, factual. Three maximum.                                      |
 | `repo`       | **Omit entirely** for a private or unpushed project.                |
 | `private`    | Optional. One line explaining why there is no link.                 |
-| `started`    | Date of the first commit. Required: without it the project has no bar on the timeline. |
-| `last`       | Date of the most recent commit. Refreshed from the live push time when `repo` is set. |
-| `commits`    | Commit count, as measured on the same day as `last`.                |
+| `deps`       | Third-party runtime dependencies, by name. Required, and `[]` is a claim rather than a blank: it says this installs nothing, and the assemblies sheet counts those. |
 
 ### The status / completion band rule
 
@@ -206,43 +195,54 @@ exist without it.
 
 ---
 
-## The timeline sheet
+## The assemblies sheet
 
-Each part of the bill of materials becomes a bar running from its first commit to its
-most recent one. Two settings, both in `[timeline]`:
+Every part of the bill of materials belongs to exactly one assembly, and the sheet
+draws each assembly as a stack of layers read top to bottom: from the thing you touch
+down to where it lands on disk.
 
 ```toml
-[timeline]
-months        = 14      # minimum window, in months
-follow_pushes = true    # refresh the end of a bar from the live push time
+[[assemblies]]
+name   = "LOCAL SERVER, NATIVE WINDOW"
+layers = ["a WKWebView in a Swift app", "HTTP on 127.0.0.1, and nowhere else",
+          "a standard-library server", "plain files on disk"]
+on     = ["groupStat", "Ground-Control", "orchestrate"]
 ```
 
-`months` is a **floor**, not a lookback. The window is fitted to the data and then
-widened to whole months, so nothing ever falls off the left edge; `months` only stops
-a profile with three weeks of history drawing a three-week-wide chart. A fixed lookback
-was the first version and it was wrong in the way that mattered: the two oldest parts
-fell outside it and had to be clamped to the edge with an open end, which draws a
-finished project as though it were still running off the side of the sheet.
+| Field    | Notes                                                                  |
+| -------- | ---------------------------------------------------------------------- |
+| `name`   | The assembly, in caps. It is a column head, so keep it short.           |
+| `layers` | Outermost first. Three or four. Five is the most a column at this width can letter, and the build rejects more. |
+| `on`     | The parts built this way.                                              |
 
-`follow_pushes` extends the right-hand end of a bar to the live GitHub push time where
-the project has a public `repo`. It only ever extends, never retracts, so a repository
-whose push time reads earlier than the recorded last commit means the config is ahead
-of the API rather than that work was undone. A row is only refreshable if this account
-owns the repository and it is public: private projects and projects living in somebody
-else's repository are drawn from the file, and the sheet's own footer says how many
-rows are which.
+**Every part must appear in exactly one assembly.** The build fails on a part that is
+in none and on a part that is in two. That check is the important one: a project
+quietly missing from this sheet is the single error a reader cannot detect by looking,
+because the sheet has no idea it is incomplete.
 
-**A project whose whole history landed on one day draws as a milestone diamond, not a
-bar.** `Cap_Match_Net` and `small-shell` are both like this: the work happened over
-months in a lab and a course and then went to GitHub in a single push. A bar one day
-wide would be a true statement about the repository and a false one about the work, so
-it gets the mark a drawing uses for a thing with a date and no duration.
+"TYPICAL" is the drafting word and it is meant literally. A typical detail on a real
+drawing is one section that stands for every instance marked TYP; it does not claim
+they are identical. groupStat's server is Python and Ground-Control's is Node, and the
+assembly is the same assembly.
 
-Bars have a five-pixel minimum width. Most of this work happened inside a couple of
-weeks against a window closer to two years, and a truthful bar for a fortnight is about
-four pixels. Every row also letters its exact date span next to its name, which is
-where the precision actually lives, and the commit column beside it is not scaled at
-all.
+The footer counts `deps` across the bill of materials and reads out how many parts
+install nothing at all. It is counted rather than typed, so it cannot drift away from
+the parts it describes. That is also why `deps = []` has to be written out on a project
+rather than left off: an absent list and an empty one are different claims and the
+sheet cannot tell them apart.
+
+### What was here before
+
+A project timeline, drawing each part from its first commit to its most recent. It was
+accurate and it was not worth a sheet. Six of ten projects were built inside five weeks
+against a window of two years, so most of the drawing was empty space and the bars that
+mattered were five pixels wide. Lettering each row's exact dates next to it made the
+sheet readable, but a chart that needs its own numbers written beside it is a chart
+doing no work.
+
+When the work all happens at once, time is not the interesting axis. What these
+projects have in common is how they are put together, and that turned out to be four
+shapes rather than ten.
 
 ---
 
@@ -366,13 +366,12 @@ Python in `scripts/`, and nothing re-implements it.
 transiently. Run `python3 scripts/build.py` locally and read the warning it prints for that
 channel.
 
-**A timeline row draws a dashed NO DATES span.** That project has no `started` date in
-`data/profile.toml`. `--check` catches it before a build, and prints the `git log`
-incantation that gets you the date.
+**The build fails saying a part is in no assembly.** You added a `[[projects]]` block
+without adding its name to an `[[assemblies]]` entry. Every part belongs to exactly one.
 
-**The toolbox build fails naming a project.** A `[[tools]]` entry cites a name that is
-not on the bill of materials, usually a case difference. The error prints every name
-it does know.
+**The build fails naming a project.** A `[[tools]]` or `[[assemblies]]` entry cites a
+name that is not on the bill of materials, usually a case difference. The error prints
+every name it does know.
 
 **The workflow is green but nothing changes.** Correct behaviour when the output is
 byte-identical to what is already committed, meaning nothing on the card moved that day. Check the

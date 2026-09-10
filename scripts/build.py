@@ -181,27 +181,53 @@ def validate(cfg: dict) -> None:
                 f"[identity] has no '{key}'. It is a field in the title block "
                 f"strip and nothing else can supply it")
 
-    # Timeline dates. A project with no `started` draws as a voided span on the
-    # timeline sheet, which is a hole in a drawing rather than a fact about the
-    # project, so it fails here instead.
+    # `deps` is what the assemblies sheet counts to say how many of these
+    # install nothing. An absent list and an empty one are different claims and
+    # the sheet cannot tell them apart, so an absent one fails here.
     for p in cfg.get("projects", []):
         who = p.get("name", "<unnamed>")
-        started, last = _date(p.get("started")), _date(p.get("last"))
-        if p.get("started") is not None and started is None:
-            problems.append(f"{who}: 'started' is not a date")
-        if p.get("last") is not None and last is None:
-            problems.append(f"{who}: 'last' is not a date")
-        if started is None:
+        if "deps" not in p:
             problems.append(
-                f"{who}: no 'started' date, so it has no bar on the timeline "
-                f"sheet. Read it off the repository: "
-                f"git log --reverse --format=%aI | head -1")
-        elif last is not None and last < started:
+                f"{who}: no 'deps'. An empty list is the claim that it installs "
+                f"nothing, and the assemblies sheet counts those, so it has to "
+                f"be written down rather than left out")
+        elif not isinstance(p["deps"], list):
+            problems.append(f"{who}: 'deps' is {p['deps']!r}, expected a list")
+
+    # Every part must appear on the assemblies sheet exactly once. A project
+    # quietly missing from it is the one error a reader could not detect by
+    # looking at the sheet, because the sheet has no idea it is incomplete.
+    known = {str(p.get("name", "")) for p in cfg.get("projects", [])}
+    placed = {}
+    for asm in cfg.get("assemblies", []):
+        who = asm.get("name", "<unnamed>")
+        if not str(asm.get("name") or "").strip():
+            problems.append("an [[assemblies]] entry has no 'name'")
+        layers = asm.get("layers") or []
+        if not layers:
+            problems.append(f"assembly {who!r}: no 'layers' to draw")
+        elif len(layers) > 5:
             problems.append(
-                f"{who}: 'last' ({last}) is before 'started' ({started})")
-        n = p.get("commits")
-        if n is not None and (not isinstance(n, int) or n < 0):
-            problems.append(f"{who}: 'commits' is {n!r}, expected a count")
+                f"assembly {who!r}: {len(layers)} layers. Five is the most a "
+                f"column at this width can letter")
+        for on in asm.get("on", []) or []:
+            if str(on) not in known:
+                problems.append(
+                    f"assembly {who!r}: cites '{on}', which is not a part on "
+                    f"the bill of materials. Known parts: "
+                    f"{', '.join(sorted(known))}")
+            elif str(on) in placed:
+                problems.append(
+                    f"'{on}' is in two assemblies, {placed[str(on)]!r} and "
+                    f"{who!r}. A part is built one way")
+            else:
+                placed[str(on)] = who
+    if cfg.get("assemblies"):
+        for missing in sorted(known - set(placed)):
+            problems.append(
+                f"{missing}: on the bill of materials but in no assembly, so "
+                f"it would be missing from sheet "
+                f"{cards.CARDS.index('assemblies') + 1} with nothing to show it")
 
     # The toolbox sheet cites parts of the bill of materials by name. A typo
     # there draws a citation to a part that does not exist, which is the one
@@ -422,20 +448,20 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
                         for x in cfg.get("about", {}).get("points", []))
         foc = ", ".join(cfg.get("focus", []))
         return f"{body} {pts}. Focus areas: {foc}."
-    if card == "timeline":
+    if card == "assemblies":
         bits = []
-        for p in cfg.get("projects", []):
-            started, last = _date(p.get("started")), _date(p.get("last"))
-            if not started:
-                continue
-            when = (started.strftime("%B %Y") if last in (None, started)
-                    else f'{started.strftime("%B %Y")} to '
-                         f'{last.strftime("%B %Y")}')
-            n = p.get("commits")
-            bits.append(f'{p["name"]}, {when}'
-                        + (f", {n} commits" if n else ""))
-        return ("Project timeline, first commit to most recent. "
-                + ("; ".join(bits) + "." if bits else "No dates."))
+        for asm, parts in cards._asm_rows(cfg):
+            layers = ", then ".join(str(x) for x in (asm.get("layers") or []))
+            names = ", ".join(str(p.get("name")) for p in parts)
+            bits.append(f'{asm.get("name")}: {layers}'
+                        + (f". Built this way: {names}" if names else ""))
+        projects = cfg.get("projects", [])
+        bare = sum(1 for p in projects if not (p.get("deps") or []))
+        tail = (f" {bare} of {len(projects)} install nothing at all."
+                if projects else "")
+        return ("Typical assemblies, each read from what you touch down to "
+                "where it lands. " + ("; ".join(bits) + "." if bits else
+                                      "None listed.") + tail)
     if card == "composition":
         langs = ", ".join(f"{n} {100*v:.0f}%" for n, v in
                           (data.get("languages") or [])[:6])
@@ -477,7 +503,7 @@ def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
         "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), vers),
         "CARD_GENERAL": picture("general", card_alt("general", cfg, data), vers),
         "CARD_BOM": picture("bom", card_alt("bom", cfg, data), vers),
-        "CARD_TIMELINE": picture("timeline", card_alt("timeline", cfg, data), vers),
+        "CARD_ASSEMBLIES": picture("assemblies", card_alt("assemblies", cfg, data), vers),
         "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), vers),
         "CARD_TOOLBOX": picture("toolbox", card_alt("toolbox", cfg, data), vers),
     }

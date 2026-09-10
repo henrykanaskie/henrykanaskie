@@ -157,9 +157,8 @@ def _tracked(cfg):
     """Every project on the bill of materials that has a public repository.
 
     Returns a list of (project name, "owner/repo"). Projects with no `repo` are
-    private or unpushed and cannot be looked up, so they are simply absent: the
-    timeline falls back to the dates written in profile.toml for those, and the
-    revision table never mentions them.
+    private or unpushed and cannot be looked up, so they are simply absent, and
+    the revision table never mentions them.
     """
     out = []
     for project in cfg.get("projects") or []:
@@ -282,12 +281,12 @@ def _fetch_last_push(user, cache):
 def _fetch_pushed_at(user, cache):
     """When each visible repository was last pushed to, keyed by lowercase name.
 
-    The timeline uses this to extend an active project's bar to its real most
-    recent commit without anyone editing profile.toml. Reuses the cached
-    repository list, so it costs no additional request.
+    Only used to decide which three projects the revision table asks about, so
+    that choosing them costs nothing. Reuses the cached repository list, so this
+    costs no additional request either.
 
-    Private repositories are not in this list. That is not a failure: a private
-    project's bar is drawn from the dates in the config, and the sheet says so.
+    Private repositories are not in this list. That is not a failure: they have
+    no public commit to put in the table in the first place.
     """
     out = {}
     for repo in _gh(f"/users/{user}/repos?per_page=100", cache):
@@ -362,20 +361,11 @@ def _sample(cfg, now):
     the sample never drifts into looking stale.
     """
     tracked = _tracked(cfg)
-    # Push times come from each project's own recorded last commit rather than
-    # from a spread of days off `now`. Inventing them put a bar on the timeline
-    # running to today for a project finished eighteen months ago, so the one
-    # sheet an offline build exists to let you lay out was the one sheet it
-    # drew wrongly.
-    by_name = {str(p.get("name") or ""): p for p in (cfg.get("projects") or [])}
-    pushed = {}
-    for name, slug in tracked:
-        last = (by_name.get(name) or {}).get("last")
-        if isinstance(last, dt.datetime):
-            last = last.date()
-        if isinstance(last, dt.date):
-            pushed[slug.split("/")[-1].lower()] = dt.datetime(
-                last.year, last.month, last.day, tzinfo=dt.timezone.utc)
+    # Only the ordering of the revision table depends on these, so a spread of
+    # days off `now` is enough: it puts the projects in bill-of-materials order,
+    # which is a defensible order for a sample.
+    pushed = {slug.split("/")[-1].lower(): now - dt.timedelta(days=i)
+              for i, (_n, slug) in enumerate(tracked)}
     revisions = [
         {"repo": name, "message": msg, "at": now - dt.timedelta(hours=3 + 20 * i)}
         for i, ((name, _slug), msg) in enumerate(zip(tracked[:REVISIONS], (

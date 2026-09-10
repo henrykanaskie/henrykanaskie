@@ -37,7 +37,6 @@ long repository names into fixed columns works without a rendering pass.
 
 from __future__ import annotations
 
-import datetime as dt
 import math
 
 try:                                    # scripts/ on sys.path (build.py's case)
@@ -50,7 +49,7 @@ rule, dim, balloon, revcloud = bp.rule, bp.dim, bp.balloon, bp.revcloud
 fade, grow, draw_on = bp.fade, bp.grow, bp.draw_on
 sheet, field, defs_hatch = bp.sheet, bp.field, bp.defs_hatch
 
-CARDS = ["titleblock", "general", "bom", "timeline", "composition",
+CARDS = ["titleblock", "general", "bom", "assemblies", "composition",
          "toolbox"]
 
 
@@ -886,330 +885,177 @@ def _bom(cfg, data, t):
                  sheet_no=_sheet_no("bom"))
 
 
-# ── sheet 4: project timeline ────────────────────────────────────────────────
+# ── sheet 4: typical assemblies ──────────────────────────────────────────────
 #
-# Every part on the bill of materials drawn as a bar from its first commit to
-# its most recent one. This replaced a daily telemetry sheet carrying the next
-# orbital launch, the crew count in space, and the ISS ground track. Those were
-# real, live figures and they were about somebody else's work, which is the
-# whole reason they came off: a drawing set about these projects should spend
-# its fourth sheet on these projects.
+# The shape each project takes, as a stack of layers read top to bottom: from
+# the thing you touch down to where it lands on disk. It is drawn the way a wall
+# section is drawn, because that is the same drawing: a cut through a thing to
+# show what it is made of.
 #
-# Dates come from `started` / `last` / `commits` in profile.toml, read off real
-# git history rather than estimated. Where a project has a public repository the
-# build refreshes the end of its bar from the live push time, so an active bar
-# grows without an edit. A private project has no live source and is drawn from
-# the file, which the sheet says in its own footer rather than leaving the
-# reader to assume both kinds of row are equally fresh.
+# TYPICAL is the drafting word and it is meant literally. A typical detail is
+# one section that stands for every instance marked TYP. It does not claim they
+# are identical: groupStat's server is Python and Ground-Control's is Node, and
+# the assembly is the same assembly.
+#
+# This replaced a project timeline. That sheet was accurate and it was not worth
+# a sheet: six of ten projects were built inside five weeks against a window of
+# two years, so most of the drawing was empty and the bars that mattered were
+# five pixels wide. When the work all happens at once, time is not the
+# interesting axis. What these have in common is how they are put together, and
+# that turns out to be four shapes rather than ten.
 
-TL_ROW_H = 30           # one project row: name line, then the span under it
-TL_BAR_H = 9
-TL_GUTTER = 196         # left column: designator, name, and the dates
-TL_COMMITS = 62         # right column: commit count
-TL_MIN_MONTHS = 6       # a window narrower than this is not a chart
-TL_MIN_BAR = 5.0        # the width at which a bar still reads as one
-
-# Every row letters its own date span in the gutter, under the project name,
-# and that is not redundancy with the bar beside it. Six of these ten projects
-# were built inside five weeks, against a window close to two years, so their
-# bars come out a few pixels long and sit on top of each other at the right-hand
-# edge whatever the scale does. The bar answers "when, relative to the others".
-# The lettered span answers "when, exactly", which at this density is the only
-# place that answer can live. Dimensioning the thing you drew is also just what
-# a drawing does.
-TL_SPAN_SIZE = 7.0
+ASM_GAP = 18            # between columns
+ASM_LAYER_PAD = 13      # above and below a layer's lettering
+ASM_LINE = 11.5         # lettering leading inside a layer
+ASM_LAYER_SIZE = 7.6
+ASM_MIN_LAYER = 30      # a layer thinner than this reads as a rule, not a layer
 
 
-def _month_starts(first, last):
-    """Every month boundary from `first`'s month through `last`'s, inclusive."""
-    out, y, m = [], first.year, first.month
-    while (y, m) <= (last.year, last.month):
-        out.append(dt.date(y, m, 1))
-        m += 1
-        if m > 12:
-            y, m = y + 1, 1
+def _asm_rows(cfg):
+    """(assembly, parts) for each assembly, parts resolved to project dicts.
+
+    An `on` entry that names nothing is dropped here rather than lettered as a
+    designator with no part behind it. build.py rejects that case outright, so
+    reaching this is a config that skipped validation.
+    """
+    by_name = {str(p.get("name") or ""): p for p in (cfg.get("projects") or [])}
+    out = []
+    for asm in cfg.get("assemblies") or []:
+        parts = [by_name[str(n)] for n in (asm.get("on") or [])
+                 if str(n) in by_name]
+        out.append((asm, parts))
     return out
 
 
-def _add_months(d, n):
-    """`d` shifted by n months, snapped to the first of that month."""
-    total = (d.year * 12 + d.month - 1) + n
-    return dt.date(total // 12, total % 12 + 1, 1)
-
-
-def _as_date(v):
-    """A TOML date, a datetime, or an ISO string, as a plain date. Else None."""
-    if v is None:
-        return None
-    if isinstance(v, dt.datetime):
-        return v.date()
-    if isinstance(v, dt.date):
-        return v
-    try:
-        return dt.date.fromisoformat(str(v)[:10])
-    except ValueError:
-        return None
-
-
-def _span_label(start, end):
-    """A project's dates as one short run, or "" when it has none.
-
-    A span inside one year drops the repeated year off the end: "2026-08-07 →
-    08-27" rather than spelling 2026 twice in a 150px gutter.
-    """
-    if start is None:
-        return ""
-    if end is None or end == start:
-        return start.isoformat()
-    tail = end.strftime("%m-%d") if end.year == start.year else end.isoformat()
-    return f"{start.isoformat()} → {tail}"
-
-
-def _timeline_rows(cfg, data):
-    """One row per project: (project, start, end, is_milestone, live).
-
-    `live` records whether the end of the bar came from the API or from the
-    config, because the footer says how many rows are which. A project missing
-    `started` yields a row with no dates, which draws as a voided span rather
-    than being silently dropped: a part on the BOM that is not on the timeline
-    would read as an oversight in the drawing, and it is one.
-    """
-    follow = bool((cfg.get("timeline") or {}).get("follow_pushes", True))
-    pushed = {str(k).lower(): v for k, v in (data.get("pushed_at") or {}).items()}
-
-    rows = []
-    for p in cfg.get("projects") or []:
-        start = _as_date(p.get("started"))
-        end = _as_date(p.get("last")) or start
-        live = False
-        if follow and p.get("repo"):
-            slug = str(p["repo"]).rstrip("/").rsplit("/", 1)[-1].lower()
-            at = pushed.get(slug)
-            fresh = _as_date(at)
-            # Only ever extends. A repository whose push time reads earlier
-            # than the recorded last commit means the config is ahead of the
-            # API, not that work was undone, so the later of the two wins.
-            if fresh and (end is None or fresh > end):
-                end, live = fresh, True
-            elif fresh:
-                live = True
-        if start is None:
-            rows.append((p, None, None, False, False))
-            continue
-        if end is None or end < start:
-            end = start
-        rows.append((p, start, end, end == start, live))
-    return rows
-
-
-def _timeline_window(rows, cfg, today):
-    """(first, last) month boundaries the plot spans.
-
-    The window is fitted to the data and then widened to a whole number of
-    months, rather than being a fixed lookback. A fixed window is the version
-    that was written first and it was wrong in the one way that matters here:
-    the two oldest parts fell outside it and had to be clamped to the left edge
-    with an open end, which draws a project as though it were still running off
-    the side of the sheet when it was actually finished eighteen months ago.
-    """
-    starts = [r[1] for r in rows if r[1]]
-    ends = [r[2] for r in rows if r[2]]
-    if not starts:
-        return _add_months(today, -TL_MIN_MONTHS), _add_months(today, 1)
-    first = _add_months(min(starts), 0)
-    last = _add_months(max(ends + [today]), 1)
-    floor_months = max(TL_MIN_MONTHS,
-                       int((cfg.get("timeline") or {}).get("months", 0) or 0))
-    span = (last.year * 12 + last.month) - (first.year * 12 + first.month)
-    if span < floor_months:
-        first = _add_months(last, -floor_months)
-    return first, last
-
-
-def _timeline(cfg, data, t):
+def _assemblies(cfg, data, t):
     W = 900
     x0, x1 = 26, 874
-    px0 = x0 + TL_GUTTER
-    px1 = x1 - TL_COMMITS
-    today = (data.get("generated_at") or dt.datetime.now(dt.timezone.utc)).date()
+    rows = _asm_rows(cfg)
 
-    rows = _timeline_rows(cfg, data)
-    first, last = _timeline_window(rows, cfg, today)
-    total_days = max(1, (last - first).days)
+    head_y = 54
+    if not rows:
+        return sheet(W, 200, t,
+                     _nodata(x0, head_y, x1 - x0, 90, t,
+                             label="NO ASSEMBLIES LISTED"),
+                     label="TYPICAL ASSEMBLIES",
+                     sheet_no=_sheet_no("assemblies"))
 
-    def px(d):
-        """A date to an x coordinate, clamped to the plot."""
-        frac = (d - first).days / total_days
-        return px0 + max(0.0, min(1.0, frac)) * (px1 - px0)
+    n = len(rows)
+    col_w = (x1 - x0 - ASM_GAP * (n - 1)) / n
 
-    head_y = 52                     # the month scale
-    body_y = head_y + 26            # first row's baseline band
-    # Two footer lines and the sheet number in the corner. The first version
-    # set the milestone legend right-aligned on the footer line and it landed
-    # exactly on top of "SH 4 / 6".
-    H = int(body_y + max(1, len(rows)) * TL_ROW_H + 76)
-    axis_y = head_y + 12
-    plot_b = body_y + len(rows) * TL_ROW_H
+    # Every column's stack starts at the same y and every Nth layer is the same
+    # height across columns, so the four sections read as one drawing rather
+    # than four charts that happen to be adjacent. Heights come from the
+    # longest lettering in that band, measured, not guessed.
+    depth = max(len(a.get("layers") or []) for a, _p in rows)
+    band_h = []
+    for i in range(depth):
+        lines = 1
+        for asm, _parts in rows:
+            layers = asm.get("layers") or []
+            if i < len(layers):
+                lines = max(lines, len(_wrap(str(layers[i]), col_w - 18,
+                                             ASM_LAYER_SIZE)))
+        band_h.append(max(ASM_MIN_LAYER, ASM_LAYER_PAD * 2 + lines * ASM_LINE))
+
+    name_y = head_y
+    stack_y = name_y + 22
+    stack_h = sum(band_h)
+    parts_y = stack_y + stack_h + 20
+
+    # The parts list under each stack wraps, so the sheet closes under whichever
+    # column carries the most designators.
+    part_lines = 1
+    for _asm, parts in rows:
+        part_lines = max(part_lines, len(parts))
+    H = int(parts_y + part_lines * 14 + 46)
 
     defs = ""
-    for i, (p, *_rest) in enumerate(rows):
-        defs += defs_hatch(i, _lang_color(cfg, p.get("lang"), t, spare_at=i),
-                           angle=HATCH_ANGLES[i % len(HATCH_ANGLES)], gap=4.5,
-                           w=1.2)
+    for i, (_asm, _parts) in enumerate(rows):
+        defs += defs_hatch(i, t["rule"],
+                           angle=HATCH_ANGLES[i % len(HATCH_ANGLES)], gap=6,
+                           w=0.7)
 
     out = ""
 
-    # ── month scale ─────────────────────────────────────────────────────────
-    #
-    # A tick at every month, a label only where there is room for one. Labelling
-    # all nineteen months of a two-year window overlaps them into a smear, so
-    # the quarters carry the lettering and January carries the year.
-    months = _month_starts(first, last)
-    step = 1
-    while (px1 - px0) / max(1, len(months) / step) < 46:
-        step += 1
-    out += _drawn_rule(px0, axis_y, px1, axis_y, t, D_RULE, w=1.1, color="rule")
-    labelled = False
-    for i, m in enumerate(months):
-        mx = px(m)
-        if mx < px0 - 0.5 or mx > px1 + 0.5:
-            continue
-        is_year = m.month == 1
-        out += _g(D_RULE + 0.1,
-                  rule(mx, axis_y - 4 if is_year else axis_y - 2.5, mx, axis_y,
-                       t, w=1.0 if is_year else 0.8))
-        # A year boundary gets a full-height rule through the plot: it is the
-        # one gridline a reader actually navigates by.
-        if is_year:
-            out += _g(D_RULE + 0.18,
-                      rule(mx, axis_y, mx, plot_b + 6, t, color="grid", w=1.0))
-        if i % step == 0 or is_year:
-            # The first label carries its year even when it is not January.
-            # Without it the axis reads FEB APR JUN AUG OCT DEC 2026 FEB, and
-            # the only thing telling a reader which year the left half is in is
-            # the word 2026 sitting in the middle of it. Every January after
-            # that letters the year on its own, which is the point of a year
-            # boundary rule.
-            label = (m.strftime("%Y") if is_year
-                     else m.strftime("%b %Y") if not labelled
-                     else m.strftime("%b"))
-            labelled = True
-            out += _g(D_LETTER + 0.02 * i,
-                      caps(mx, axis_y - 8, label, t, size=6.8, track=0.8,
-                           anchor="middle",
-                           color="soft" if is_year or label != m.strftime("%b")
-                           else "faint"))
+    # The one legend the sheet needs: which end of a stack is which. There was
+    # a matching WHERE IT LANDS under the stacks, and it had to go twice over:
+    # it sat directly on the leader line dropping out of the shortest column,
+    # and the footer's "each stack reads top to bottom" was already saying it.
+    out += _g(D_LETTER, caps(x0, stack_y - 6, "what you touch", t, size=6.4,
+                             track=0.9))
+    out += _g(D_LETTER, caps(x1, stack_y - 6, "typ.", t, size=6.4, track=0.9,
+                             anchor="end"))
 
-    # ── today ───────────────────────────────────────────────────────────────
-    tx = px(today)
-    out += _g(D_DATA + 0.1,
-              rule(tx, axis_y, tx, plot_b + 6, t, color="accent", w=1.0,
-                   dash="3 3", opacity=0.85))
-    out += _g(D_DATA + 0.1, caps(tx, plot_b + 18, "TODAY", t, size=6.6,
-                                 track=1.0, anchor="middle", color="accent"))
+    for c, (asm, parts) in enumerate(rows):
+        cx = x0 + c * (col_w + ASM_GAP)
+        d = D_DATA + c * 0.10
 
-    # ── one row per part ────────────────────────────────────────────────────
-    live_rows = 0
-    for i, (p, start, end, milestone, live) in enumerate(rows):
-        ry = body_y + i * TL_ROW_H
-        cy = ry + TL_BAR_H + 1          # baseline of the name line
-        d = D_DATA + i * 0.07
-        color = _lang_color(cfg, p.get("lang"), t, spare_at=i)
+        title = str(asm.get("name") or DASH)
+        out += _g(D_LETTER + c * 0.05,
+                  caps(cx, name_y, _fit(title, col_w, 8, 1.1), t, size=8,
+                       track=1.1, color="ink"))
+        out += _drawn_rule(cx, name_y + 7, cx + col_w, name_y + 7, t,
+                           D_RULE + c * 0.04, w=1.3, color="rule")
 
-        out += _g(D_LETTER + i * 0.03,
-                  caps(x0, cy, p.get("pn") or DASH, t, size=7, track=0.9))
-        out += _g(D_LETTER + i * 0.03,
-                  text(x0 + 46, cy,
-                       _fit(str(p.get("name") or DASH), TL_GUTTER - 56, 8.6),
-                       t, size=8.6))
-        span = _span_label(start, end)
-        if span:
-            out += _g(D_DATA + i * 0.05,
-                      text(x0 + 46, cy + 11, span, t, size=TL_SPAN_SIZE,
-                           color="faint"))
+        layers = [str(s) for s in (asm.get("layers") or [])]
+        ly = stack_y
+        for i in range(depth):
+            h = band_h[i]
+            if i >= len(layers):
+                # A shorter assembly stops where it stops. The band below it is
+                # left open rather than padded with a blank box, which would
+                # read as a layer nobody bothered to name.
+                break
+            # The outermost layer carries the accent: it is the only one of the
+            # four the reader ever sees.
+            edge = t["accent"] if i == 0 else t["rule"]
+            out += _g(d + i * 0.05,
+                      f'<rect x="{cx:.1f}" y="{ly:.1f}" width="{col_w:.1f}" '
+                      f'height="{h:.1f}" fill="{"none" if i else f"url(#h{c})"}" '
+                      f'stroke="{edge}" stroke-width="{1.4 if i == 0 else 0.9}">'
+                      + fade(d + i * 0.05) + '</rect>')
+            wrapped = _wrap(layers[i], col_w - 18, ASM_LAYER_SIZE)
+            ty = ly + (h - (len(wrapped) - 1) * ASM_LINE) / 2 + 2.6
+            for k, line in enumerate(wrapped):
+                out += _g(d + i * 0.05 + 0.06,
+                          text(cx + 9, ty + k * ASM_LINE, line, t,
+                               size=ASM_LAYER_SIZE,
+                               color="ink" if i == 0 else "soft"))
+            ly += h
 
-        if start is None:
-            out += _nodata(px0, ry + 1, px1 - px0, TL_BAR_H + 4, t, delay=d,
-                           label="NO DATES")
-            continue
-        if live:
-            live_rows += 1
-
-        bx, ex = px(start), px(end)
-        if milestone:
-            # A project whose entire history landed on one day has a date and
-            # no duration, and that is exactly what a Gantt milestone is. Drawn
-            # as the diamond rather than as a bar rounded up to something wide
-            # enough to see, which would be a made-up duration.
-            r = TL_BAR_H * 0.72
-            # A milestone on the first or last day of the window would
-            # otherwise be drawn half outside the plot, which reads as a mark
-            # trailing off the sheet rather than as a date.
-            bx = min(px1 - r, max(px0 + r, bx))
-            my = ry + 1 + TL_BAR_H / 2
-            out += _g(d, f'<path d="M{bx:.1f} {my-r:.1f} L{bx+r:.1f} {my:.1f} '
-                         f'L{bx:.1f} {my+r:.1f} L{bx-r:.1f} {my:.1f} Z" '
-                         f'fill="{color}" stroke="{color}" stroke-width="1"/>')
-        else:
-            # Floor the width at five pixels. Most of this work happened inside
-            # a couple of weeks and the window is closer to two years, so a
-            # truthful bar for a fortnight is about four pixels and a reader
-            # cannot tell it from the one next to it. Five is the width at
-            # which a bar still reads as a bar. Anything the floor is doing is
-            # visible in the commit column beside it, which is not scaled.
-            bw = max(TL_MIN_BAR, ex - bx)
-            out += _g(d, _grow_bar(bx, ry + 1, bw, TL_BAR_H, f"url(#h{i})", d,
-                                   stroke=color, sw=1.0))
-            # An end cap that says whether the bar stopped or is still running:
-            # a closed tick for finished work, an open chevron for a part still
-            # in flight.
-            done = str(p.get("status") or "").upper() == "QUALIFIED"
-            if done:
-                out += _g(d + 0.1, rule(bx + bw, ry - 1, bx + bw,
-                                        ry + TL_BAR_H + 2, t, color="rule",
-                                        w=1.3))
-            else:
-                out += _g(d + 0.1,
-                          f'<path d="M{bx+bw+1.5:.1f} {ry+0.5:.1f} '
-                          f'L{bx+bw+6.5:.1f} {ry+1+TL_BAR_H/2:.1f} '
-                          f'L{bx+bw+1.5:.1f} {ry+TL_BAR_H+1.5:.1f}" '
-                          f'fill="none" stroke="{color}" stroke-width="1.4" '
-                          f'opacity="0.9"/>')
-
-        n = p.get("commits")
-        out += _g(d + 0.14,
-                  text(x1, cy, f"{int(n):,}" if isinstance(n, int) and n
-                       else DASH, t, size=8, anchor="end",
-                       color="soft" if n else "faint"))
-
-    out += _g(D_LETTER + 0.2, caps(x1, axis_y - 8, "COMMITS", t, size=6.6,
-                                   track=0.9, anchor="end"))
+        # A leader tick off the bottom of the stack, into the parts it names.
+        out += _g(d + 0.3, rule(cx + 4, ly, cx + 4, parts_y - 11, t, w=0.8,
+                                color="rule", opacity=0.8))
+        for k, part in enumerate(parts):
+            py = parts_y + k * 14
+            out += _g(d + 0.34 + k * 0.04,
+                      rule(cx + 4, py - 3.4, cx + 10, py - 3.4, t, w=0.8,
+                           color="rule", opacity=0.8))
+            label = f'{part.get("pn") or DASH}  {part.get("name") or ""}'.strip()
+            out += _g(d + 0.34 + k * 0.04,
+                      text(cx + 14, py, _fit(label, col_w - 14, 7.8), t,
+                           size=7.8, color="soft"))
 
     # ── footer ──────────────────────────────────────────────────────────────
     #
-    # It says where the right-hand end of each bar came from. Some of these rows
-    # are refreshed from the API every morning and some are as current as the
-    # last hand edit, and a reader who cannot tell which is which has to treat
-    # all of them as the weaker claim. A row is only refreshable if the account
-    # owns the repository and it is public, which is why the count is not simply
-    # the public parts.
-    stale = sum(1 for r in rows if r[1] and not r[4])
-    fy = plot_b + 38
-    out += _g(D_LETTER + 0.4,
-              text(x0, fy, "first commit to most recent · "
-                           f"{live_rows} row{'' if live_rows == 1 else 's'} "
-                           f"refreshed from GitHub, {stale} from the config "
-                           "(private, or somebody else's repository)", t,
-                   size=6.9,
-                   color="faint"))
-    if any(r[3] for r in rows):
-        out += _g(D_LETTER + 0.45,
-                  text(x0, fy + 12, "◆ whole history pushed in one day, so it "
-                                    "has a date and no duration", t, size=6.9,
-                       color="faint"))
-
-    return sheet(W, H, t, out, defs=defs, label="PROJECT TIMELINE",
-                 sheet_no=_sheet_no("timeline"))
+    # One readout, and it is the fact this sheet exists to make visible. It is
+    # counted from the `deps` list on each part rather than typed, so it cannot
+    # drift away from the bill of materials.
+    projects = cfg.get("projects") or []
+    bare = [p for p in projects if not (p.get("deps") or [])]
+    fy = parts_y + part_lines * 14 + 18
+    if projects:
+        out += _g(D_DATA + 0.6,
+                  text(x0, fy, f"{len(bare)} of {len(projects)} install "
+                               f"nothing at all: no package manager, no lock "
+                               f"file, no build step", t, size=7.4,
+                       color="ink" if bare else "faint"))
+    out += _g(D_LETTER + 0.5,
+              text(x1, fy, "each stack reads top to bottom", t, size=6.9,
+                   color="faint", anchor="end"))
+    return sheet(W, H, t, out, defs=defs, label="TYPICAL ASSEMBLIES",
+                 sheet_no=_sheet_no("assemblies"))
 
 
 # ── sheet 5: material composition ────────────────────────────────────────────
@@ -1683,7 +1529,7 @@ _RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
     "bom": _bom,
-    "timeline": _timeline,
+    "assemblies": _assemblies,
     "composition": _composition,
     "toolbox": _toolbox,
 }
