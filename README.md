@@ -28,17 +28,17 @@
   There is no plain-text copy of the sheets any more. What a screen reader gets
   is the alt text, so the alt text is written to carry the content rather than
   to name the picture: the bill of materials lists its parts and their status,
-  the timeline reads out each project's dates and commit count. Keep it that
-  way when adding a sheet.
+  the assemblies sheet reads out each stack and what is built that way.
+  Keep it that way when adding a sheet.
 -->
 
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=c71475ece6">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=a8ef948086">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=49fab6279c">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=8c78e207a3" alt="Title block. Henry Kanaskie. MACHINE LEARNING · SIGNAL PROCESSING · TOOLS I USE MYSELF. I like building things and taking them apart to see how they work. MS STUDENT, OREGON STATE, CORVALLIS, OREGON. Recent commits: aggregateAnalytics, Lines snapshot 2026-09-09 23:34 UTC; Ground-Control, Give each colour one job; animAgent, feat(scene): compact rooms, and a room that says whose it is.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=372adf956e">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=bda0ea1ba4">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=a71f6dbbd6">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=3a87f80db9" alt="Title block. Henry Kanaskie. MACHINE LEARNING · SIGNAL PROCESSING · TOOLS I USE MYSELF. I like building things and taking them apart to see how they work. MS STUDENT, OREGON STATE, CORVALLIS, OREGON. Recent commits: aggregateAnalytics, Lines snapshot 2026-09-10 07:48 UTC; Ground-Control, Give each colour one job; animAgent, feat(scene): compact rooms, and a room that says whose it is.">
 </picture>
 
 <picture><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-blank.svg?v=9059e608fe"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-dark.svg?v=97d92cb020"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-light.svg?v=6a349416aa" alt=""></picture><a href="https://henrykanaskie.com"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-dark.svg?v=20c4c5c1c8"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-light.svg?v=b2cea950d1"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-dark.svg?v=5956186fbb"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-light.svg?v=2f0fec82c8" alt="henrykanaskie.com"></picture></a><a href="https://github.com/henrykanaskie?tab=repositories"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-dark.svg?v=97c99b5425"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-light.svg?v=937b74f8ca"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-dark.svg?v=13d5c8f635"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-light.svg?v=98b2e93e34" alt="repositories"></picture></a><a href="SETUP.md"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-dark.svg?v=459a84d22c"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-light.svg?v=b716ad92ac"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-dark.svg?v=e823c0f080"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-light.svg?v=78b2aece65" alt="how this is built"></picture></a><a href="data/profile.toml"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-dark.svg?v=26f5efe254"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-light.svg?v=410f0eba46"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-dark.svg?v=4ddaae53c8"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-light.svg?v=bb53ba5025" alt="the source of truth"></picture></a>
@@ -66,10 +66,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/timeline-narrow-dark.svg?v=3e588bf30b">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/timeline-narrow-light.svg?v=13f408983d">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/timeline-dark.svg?v=0484c90550">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/timeline-light.svg?v=9b866514a7" alt="Project timeline, first commit to most recent. Cap_Match_Net, February 2026, 2 commits; small-shell, February 2025, 3 commits; floralytics, October 2025 to May 2026, 313 commits; accliMate, May 2026 to May 2026, 88 commits; animAgent, August 2026 to August 2026, 186 commits; groupStat, August 2026 to September 2026, 48 commits; Ground-Control, August 2026 to September 2026, 41 commits; orchestrate, August 2026 to September 2026, 128 commits; GrowthApp, July 2026 to August 2026, 1 commits; aggregateAnalytics, August 2026 to September 2026, 100 commits.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-narrow-dark.svg?v=dfdb407e11">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-narrow-light.svg?v=8a504e822e">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-dark.svg?v=8d3f51ab99">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-light.svg?v=ddf0db5364" alt="Typical assemblies, each read from what you touch down to where it lands. RUNS IN A TERMINAL: a command, or a prompt, then solver, model, or raw syscalls, then files on disk, or nothing at all. Built this way: Cap_Match_Net, small-shell, aggregateAnalytics; LOCAL SERVER, NATIVE WINDOW: a WKWebView in a Swift app, then HTTP on 127.0.0.1, and nowhere else, then a standard-library server, then plain files on disk. Built this way: groupStat, Ground-Control, orchestrate; NATIVE APP: SwiftUI, and SpriteKit where it moves, then app state, one source of it, then one shared store on disk. Built this way: animAgent, GrowthApp; WEB SERVICE: React, or a page it serves itself, then a JSON API over HTTP, then a model or an index, then the dataset underneath. Built this way: floralytics, accliMate. 6 of 10 install nothing at all.">
 </picture>
 
 <picture>
@@ -92,7 +92,7 @@
 </picture>
 
 <sub>
-6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-10 07:28 UTC<br>
+6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-10 07:49 UTC<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
