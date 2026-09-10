@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Phone layouts for the two sheets built out of side-by-side columns.
+"""The phone layout for the bill of materials.
 
-The wide BOM is a six-column table and the wide telemetry sheet is four or five
-vertical panels standing next to each other. Both depend on having 900px to
-divide up. At 300 there is nothing to divide, so neither sheet is rescaled here:
-the BOM's row becomes a stacked block and telemetry's panel becomes a full-width
-row, and everything the wide sheet says is said again in the same words.
+The wide BOM is a six-column table and it depends on having 900px to divide up.
+At 300 there is nothing to divide, so the sheet is not rescaled here: each row
+becomes a stacked block, and everything the wide sheet says is said again in the
+same words.
+
+This module used to carry the phone telemetry sheet as well, which is why it is
+its own module rather than another function in narrow.py. That sheet is gone;
+the BOM stayed here because it is 250 lines on its own.
 
 Nothing in here is a second, looser version of the drawing. The completion
-figure is still a real dimension line with a hatched fill under it, the fill is
-still the part's own material hatch, and the ground track is still plotted from
-the orbit's inclination rather than drawn as a wave. Those are the sheets; a
-phone layout that dropped them would be a different drawing.
+figure is still a real dimension line with a hatched fill under it, and the fill
+is still the part's own material hatch. That is the sheet; a phone layout that
+dropped them would be a different drawing.
 
 `cards` is reached through the module at call time rather than by from-import.
 This module is imported from the bottom of cards.py, while cards is still being
@@ -245,8 +247,7 @@ def _bom(cfg, data, t):
             cd = cards.D_DATA + n * 0.05 + 0.35
             cloud = bp.revcloud(X0 + 2, y + 2, CONTENT_W - 4, bh - 8, t,
                                 delay=cd)
-            rev_letter = str((cfg.get("identity") or {}).get("revision") or "")
-            flag = f"REV {rev_letter}".strip()
+            flag = "LATEST"
             # On the status line, not the identity line: the identity line's
             # right half is the material swatch, and the flag would sit on it.
             cloud += cards._g(cd + 0.45,
@@ -286,214 +287,4 @@ def _bom(cfg, data, t):
                     inset=cards.NARROW_INSET)
 
 
-# ── sheet 4: telemetry ───────────────────────────────────────────────────────
-#
-# Each panel is a function of (x, w, y, t, delay, data) returning (svg, height),
-# the same shape the wide panels have, except that a narrow panel voids itself
-# at a height it picks rather than being squared off against its neighbours.
-# There are no neighbours to square off against once they are stacked, and a
-# dashed box as tall as the tallest row would be a large empty rectangle
-# claiming more attention than the channel that is actually down.
-
-
-def _p_launch(x, w, y, t, d, data):
-    launch = data.get("launch") or None
-    if not launch:
-        return cards._nodata(x, y, w, 52, t, delay=d,
-                             label="NO LAUNCH DATA"), 52
-
-    cd = cards._countdown(launch.get("net"), data.get("generated_at"))
-    if cd:
-        # The countdown is the headline of the panel and stays large. At 264 the
-        # full T-minus run still sets at 24px, so the fit is a guard rather than
-        # the normal path.
-        size = cards._fit_size(cd, w, 24, 0.06, floor=13)
-        out = cards._g(d, bp.text(x, y + 22, cd, t, size=size, weight=700,
-                                  track=size * 0.06), dur=0.5)
-    else:
-        out = cards._g(d, bp.text(x, y + 22, cards.DASH, t, size=24,
-                                  color="faint"))
-    out += cards._g(d + 0.05, bp.rule(x, y + 31, x + w, y + 31, t, w=0.7,
-                                      opacity=0.8))
-
-    # The launch API's list mode returns "Vehicle | Mission" as one string, and
-    # the pad is always absent, so rows are built from what is there rather than
-    # reserving a line that would be blank every day.
-    vehicle, _, mission = str(launch.get("name") or cards.DASH).partition("|")
-    rows = [(vehicle.strip() or cards.DASH, 11, "ink", 700)]
-    if mission.strip():
-        rows.append((mission.strip(), 8.6, "soft", 400))
-    if launch.get("provider"):
-        rows.append((str(launch["provider"]), 8.6, "soft", 400))
-
-    ry = y + 47
-    for s, size, color, weight in rows:
-        out += cards._g(d + 0.1, bp.text(x, ry, cards._fit(s, w, size), t,
-                                         size=size, color=color, weight=weight))
-        ry += 14
-
-    # Full width buys a label and its value on one line, which the wide panel
-    # cannot do in a column a third this wide.
-    status = str(launch.get("status") or "").strip()
-    out += cards._g(d + 0.15, bp.caps(x, ry + 8, "STATUS", t, size=6.8,
-                                      track=1.0))
-    out += cards._g(d + 0.18,
-                    bp.caps(x + w, ry + 8,
-                            cards._fit(status or cards.DASH, w - 60, 9.5, 1.2),
-                            t, size=9.5, track=1.2, anchor="end",
-                            color="accent" if status else "faint"))
-    return out, (ry + 14) - y
-
-
-def _p_humans(x, w, y, t, d, data):
-    humans = data.get("humans")
-    if humans is None:
-        return cards._nodata(x, y, w, 44, t, delay=d, label="NO DATA"), 44
-    # The count is the figure; the words are its unit. Side by side rather than
-    # stacked under a centred numeral, which at 264 would leave the row mostly
-    # empty on both sides.
-    val = str(humans)
-    out = cards._g(d, bp.text(x, y + 38, val, t, size=44, weight=700,
-                              track=1.0), dur=0.6)
-    lx = x + cards._w(val, 44, 1.0) + 14
-    out += cards._g(d + 0.1, bp.caps(lx, y + 22, "HUMANS", t, size=9,
-                                     track=1.3))
-    out += cards._g(d + 0.1, bp.caps(lx, y + 36, "IN SPACE", t, size=9,
-                                     track=1.3))
-    return out, 48
-
-
-def _p_iss(x, w, y, t, d, data):
-    iss = data.get("iss") or None
-    gh = w / 2.0                          # equirectangular is 2:1 by definition
-    if not iss:
-        return cards._nodata(x, y, w, 96, t, delay=d, label="NO ISS FIX"), 96
-    try:
-        lat0 = float(iss.get("lat"))
-        lon0 = float(iss.get("lon"))
-    except (TypeError, ValueError):
-        return cards._nodata(x, y, w, 96, t, delay=d, label="NO ISS FIX"), 96
-
-    # Both take their geometry as arguments, so the narrow plot is the same
-    # graticule and the same solved sinusoid, drawn into a smaller box. Nothing
-    # about the maths is width-dependent.
-    out = cards._graticule(x, y, w, gh, t, d)
-    out += cards._iss_track(lat0, lon0, x, y, w, gh, t, d + 0.25)
-
-    vel, alt = iss.get("vel_kmh"), iss.get("alt_km")
-    readout = (("LAT", f"{lat0:+.2f}°"),
-               ("LON", f"{lon0:+.2f}°"),
-               ("ALT", f"{float(alt):.1f} KM" if alt is not None else cards.DASH),
-               ("VEL", f"{float(vel):,.0f} KM/H".replace(",", " ")
-                if vel is not None else cards.DASH))
-    # The graticule letters its longitude ticks just under its own frame, so the
-    # readout clears them rather than landing on them.
-    ry = y + gh + 22
-    half = w / 2
-    for i, (k, v) in enumerate(readout):
-        cx = x + (i % 2) * half
-        yy = ry + (i // 2) * 13
-        out += cards._g(d + 0.35 + i * 0.04, bp.caps(cx, yy, k, t, size=7,
-                                                     track=1.0))
-        out += cards._g(d + 0.35 + i * 0.04,
-                        bp.text(cx + half - 14, yy, v, t, size=8.4, color="ink",
-                                anchor="end"))
-    stamp = cards._datestr(iss.get("at"), "%H:%M:%S")
-    # An orbital fix is an observation at an instant, not a live feed.
-    out += cards._g(d + 0.5,
-                    bp.caps(x, ry + 30, f"SAMPLED {stamp or cards.DASH} UTC", t,
-                            size=6.8, track=0.9))
-    return out, (ry + 34) - y
-
-
-def _p_contact(x, w, y, t, d, data):
-    lp = data.get("last_push") or {}
-    age = cards._ago(lp.get("at"), data.get("generated_at"))
-    act = data.get("activity") or []
-    out, yy = "", y + 10
-
-    if age or lp.get("repo"):
-        out += cards._stat(x, w, yy, "LAST CONTACT", age or cards.DASH, t, d)
-        out += cards._g(d + 0.1,
-                        bp.text(x, yy + 32,
-                                cards._fit(cards._repo_name(lp.get("repo"))
-                                           or cards.DASH, w, 8.6), t, size=8.6,
-                                color="soft"))
-    else:
-        out += cards._nodata(x, yy - 8, w, 44, t, delay=d, label="NO CONTACT")
-    yy += 50
-
-    # Two readings that are both short pair up across the width; the quietest
-    # part carries a repository name under it and takes the full row.
-    half = w / 2
-    streak = data.get("streak")
-    sval = f"{streak} DAY{'S' if streak != 1 else ''}" if streak is not None \
-        else cards.DASH
-    out += cards._stat(x, half - 8, yy, "STREAK", sval, t, d + 0.12, size=14)
-
-    last24 = act[-1][1] if act else None
-    out += cards._stat(x + half, half, yy, "PUSHES / 24 H",
-                       str(last24) if last24 is not None else cards.DASH, t,
-                       d + 0.2, size=14)
-    yy += 38
-
-    # The far end of the same measurement: the part nobody has touched in
-    # longest. Three-digit day counts are normal, so the value is fitted.
-    q = data.get("quietest") or {}
-    days = q.get("days")
-    out += cards._stat(x, w, yy, "QUIETEST",
-                       f"{days} DAYS" if days is not None else cards.DASH, t,
-                       d + 0.26, size=14)
-    if q.get("repo"):
-        out += cards._g(d + 0.3,
-                        bp.text(x, yy + 32,
-                                cards._fit(cards._repo_name(q["repo"]), w, 8.6),
-                                t, size=8.6, color="soft"))
-    return out, (yy + 38) - y
-
-
-def _p_audio(x, w, y, t, d, data):
-    # The wide audio panel is already a single narrow column of three runs, so
-    # it reflows to 264 unchanged. Rewriting it here would only be a second
-    # place for the same three lines to drift apart.
-    svg, h, _void = cards._panel_audio(x, w, y, t, d, data)
-    return svg, h
-
-
-def _telemetry(cfg, data, t):
-    panels = [("LAUNCH WINDOW", _p_launch),
-              ("OFF-PLANET", _p_humans),
-              ("ISS GROUND TRACK", _p_iss),
-              ("CONTACT", _p_contact)]
-    # The audio channel is off by configuration, not broken, so it is omitted
-    # rather than voided. A NO DATA cell would imply a failure that never
-    # happened.
-    if data.get("listening"):
-        panels.append(("AUDIO CHANNEL", _p_audio))
-
-    out, y = "", 42
-    for i, (title, fn) in enumerate(panels):
-        d = cards.D_DATA + i * 0.08
-        out += cards._g(cards.D_LETTER + i * 0.06,
-                        bp.caps(X0, y, cards._fit(title, CONTENT_W, 7.6, 1.3),
-                                t, size=7.6, track=1.3))
-        # The same head rule the wide panels carry. Stacked, it is also the rule
-        # between one row and the one above it.
-        out += cards._drawn_rule(X0, y + 8, X1, y + 8, t,
-                                 cards.D_RULE + 0.05 + i * 0.04, w=0.8, dur=0.6)
-        svg, h = fn(X0, CONTENT_W, y + 16, t, d, data)
-        out += svg
-        y += 16 + h + 20
-
-    stamp = cards._datestr(data.get("generated_at"), "%Y-%m-%d %H:%M") \
-        or cards.DASH
-    # The sheet's own timestamp, distinct from the ISS panel's fix time.
-    out += cards._g(cards.D_LETTER + 0.5,
-                    bp.caps(X0, y, f"GENERATED {stamp} UTC", t, size=6.8,
-                            track=1.0))
-    return bp.sheet(cards.NARROW_W, y + 22, t, out, label="DAILY TELEMETRY",
-                    sheet_no=cards._sheet_no("telemetry"),
-                    inset=cards.NARROW_INSET)
-
-
-RENDERERS = {"bom": _bom, "telemetry": _telemetry}
+RENDERERS = {"bom": _bom}

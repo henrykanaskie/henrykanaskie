@@ -7,7 +7,7 @@ How this profile is put together, and the handful of things you might want to ch
 ## The one-file control model
 
 `data/profile.toml` is the only file with facts in it. Your name, the project list,
-which telemetry channels are on, the palette. All of it lives there.
+the toolbox, the palette. All of it lives there.
 
 Everything else is output:
 
@@ -17,18 +17,21 @@ Everything else is output:
 | `assets/<card>-dark.svg`            | `scripts/build.py`  | `data/profile.toml` |
 | `README.md`                         | `scripts/build.py`  | `data/profile.toml` |
 
-Six sheets, in this order: `titleblock`, `general`, `bom`, `telemetry`,
-`composition`, `activity`. Each is drawn in a light and a dark variant, and in a wide
+Six sheets, in this order: `titleblock`, `general`, `bom`, `frameworks`,
+`composition`, `toolbox`. Each is drawn in a light and a dark variant, and in a wide
 and a narrow layout. Sheet numbers come from that order, so adding or reordering a card in
 `CARDS` renumbers every sheet automatically.
 
 The README has no markdown headings and no horizontal rules. Each sheet carries its own
 label inside the drawing frame, so a GitHub heading in the default UI font above a
-monospace drawing made the page read as two documents. The only prose outside a card is
-the link row and the collapsed written index. That index exists because an SVG served
-through `<img>` gives a screen reader nothing but alt text and none of its links are
-clickable, so every word on every sheet also appears there as real text with real
-anchors. If you add a card, add its words there too.
+monospace drawing made the page read as two documents. The only things outside a card
+are the two chip rows.
+
+An SVG served through `<img>` gives a screen reader nothing but its alt text, so the
+alt text is written to carry the sheet's content rather than to name the picture: the
+bill of materials reads out its parts and their status, the frameworks matrix reads
+out each framework and what uses it. `card_alt()` in `build.py` is where that lives. If
+you add a sheet, give it a branch there.
 
 **Do not hand-edit `README.md` or anything in `assets/`.** The next build overwrites
 them and your edit is gone. Edit the TOML.
@@ -36,19 +39,22 @@ them and your edit is gone. Edit the TOML.
 ### Running it locally
 
 ```sh
-python3 scripts/build.py            # full build, hits the network for telemetry
+python3 scripts/build.py            # full build, reads the GitHub API
 python3 scripts/build.py --offline  # skip every network call; uses SAMPLE data
+python3 scripts/build.py --check    # validate profile.toml and stop
 ```
 
 Pure standard library: `tomllib`, `urllib`, `json`. There is nothing to `pip install`,
 no virtualenv, no lockfile. Python 3.12 (3.11+ for `tomllib`).
 
 Use `--offline` when you are iterating on layout or wording. It is much faster and it
-does not spend your anonymous rate limit against the space APIs.
+does not spend your unauthenticated GitHub rate limit.
 
-> **`--offline` does not blank the telemetry. It invents it.** It substitutes a
-> plausible language mix, crew count and ISS fix so the layout has something to
-> render. Those numbers look exactly as real as the real ones.
+> **`--offline` does not blank the live figures. It invents them.** It substitutes a
+> plausible language mix and a set of recent commits so the layout has something to
+> render. Those look exactly as real as the real ones. The bill of materials, the
+> frameworks matrix and the toolbox are drawn straight from the config, so those three
+> sheets are the same offline as online.
 >
 > Every card from an offline build is therefore stamped **NOT FOR ISSUE** in red,
 > and the build prints a warning. If you see that stamp on the profile, someone
@@ -67,9 +73,9 @@ and `README.md` if they changed. If nothing changed it exits clean and commits n
 `[bom] mark_last_push` draws a red drafting revision cloud around whichever project
 was pushed to most recently. It is **off**. The mark is real drafting practice and the
 data behind it is real, but red is the loudest thing on the sheet and it moves to a
-different row every day, so it reads as an alarm rather than a note. The telemetry
-sheet already says the same thing calmly under LAST CONTACT. Set it to `true` if you
-want it back.
+different row every day, so it reads as an alarm rather than a note. The title block
+strip already says the same thing calmly under LAST PUSH. Set it to `true` if you want
+it back.
 
 ---
 
@@ -92,6 +98,8 @@ notes      = ["tolerance callout", "another one", "at most three"]
 repo       = "https://github.com/henrykanaskie/repo-name"
 ```
 
+Then name it from at least one `[[frameworks]]` entry, or the build fails. See below.
+
 | Field        | Notes                                                              |
 | ------------ | ------------------------------------------------------------------ |
 | `pn`         | Reference designator, `CLASS-NN`. The prefix says what the thing is before you read its name: `OPT` solver, `SYS` systems, `QNT` quantitative, `MDL` model from scratch, `APP` application, `TUL` tool, `EDU` teaching. Invent a class when none fits. |
@@ -105,18 +113,28 @@ repo       = "https://github.com/henrykanaskie/repo-name"
 | `repo`       | **Omit entirely** for a private or unpushed project.                |
 | `private`    | Optional. One line explaining why there is no link.                 |
 
+What a part is built **on** is not written here. It lives in `[[frameworks]]`, keyed
+the other way round: one entry per framework listing the parts that use it. That is
+the direction the matrix on sheet 4 is drawn from, and a second copy per project would
+only be a second thing to forget to update.
+
 ### The status / completion band rule
 
 Status is not a label you set independently. It is a band of the completion figure.
 `build.py` asserts this and **fails the build** if you break it:
 
 ```
-CONCEPT  <  0.25  <=  BREADBOARD  <  0.45  <=  FLIGHT  <  0.90  <=  QUALIFIED
+CONCEPT  <  0.25  <=  BREADBOARD  <  0.45  <=  FLIGHT  <  0.95  <=  QUALIFIED
 ```
 
-So a project at `completion = 0.30` cannot be `CONCEPT`, and one at `0.95` cannot be
+So a project at `completion = 0.30` cannot be `CONCEPT`, and one at `0.96` cannot be
 `FLIGHT`. This is deliberate: it stops the sheet drifting into optimism, where
 everything is somehow "in flight" forever.
+
+The QUALIFIED floor is `0.95` rather than `0.90` on purpose. Two projects here sit at
+exactly `0.90`, which is the number you would give somebody who asked, and it is not
+the same claim as "done". A vocabulary that rounds 90% up to DONE cannot be trusted on
+the rows where it says DONE.
 
 The bounds themselves are the `floor` values on the `[[status]]` blocks. Change a floor
 there and the check moves with it. You never have to touch Python.
@@ -154,76 +172,135 @@ so editing the config regenerates the profile within a minute rather than tomorr
 
 ---
 
-## The one optional secret: `LASTFM_API_KEY`
+## Adding a tool
 
-This is the **only** secret in the repo, and it is optional. Everything works without
-it. The listening channel simply does not appear on the telemetry card.
+The toolbox sheet is a `[[tools]]` list in the same file.
 
-**You have to do this yourself.** It is tied to your own Last.fm account, and repository
-secrets can only be set by the repo owner in the GitHub web UI. Nobody else can do it
-for you, and the key should never be committed to the repo.
-
-1. Sign in to Last.fm and go to <https://www.last.fm/api/account/create>.
-   Fill in an application name; "profile card" is fine. Submit it.
-   Copy the **API key** it gives you. Ignore the shared secret; this build only reads.
-
-2. In this repository on GitHub, go to
-   **Settings → Secrets and variables → Actions → New repository secret**.
-   Name it exactly `LASTFM_API_KEY`, paste the key as the value, and save.
-
-3. Turn the channel on in `data/profile.toml`:
-
-   ```toml
-   [telemetry.listening]
-   enabled  = true
-   provider = "lastfm"
-   user     = "your-lastfm-username"
-   ```
-
-4. Commit. The push to `main` touches `data/profile.toml`, so the workflow runs on its
-   own and the channel appears on the next build.
-
-To test locally before committing:
-
-```sh
-LASTFM_API_KEY=your-key-here python3 scripts/build.py
+```toml
+[[tools]]
+name = "polars"
+for  = "season-scale football data, because pandas was the slow half of the loop"
+on   = ["aggregateAnalytics"]
+lang = "Python"          # optional
 ```
 
-To turn it back off, set `enabled = false`. You can leave the secret in place.
+| Field  | Notes                                                                    |
+| ------ | ------------------------------------------------------------------------ |
+| `name` | The tool.                                                                |
+| `for`  | What you use it for, in one line. See the rule below.                    |
+| `on`   | Projects it is used on. **Every name must match a `[[projects]]` name**, or the build fails and prints the ones it knows. An empty list letters as NOT ON THIS SHEET. |
+| `lang` | Optional. When set, the row takes the same hatch and colour that language carries on the composition sheet, so the two sheets agree about what colour Python is. |
+
+The rule for `for` is that it says what the tool does in **your** work. "Python: a
+general purpose language" is a row that could sit on anybody's profile, which is the
+definition of a row not worth drawing. Each entry should name the thing that would not
+exist without it.
 
 ---
 
-## Telemetry channels and what they depend on
+## The frameworks matrix
 
-The telemetry card is a band of live readouts. Each is an independent channel with its
-own upstream service, toggled in `[telemetry]` in `data/profile.toml`.
+Sheet 4 is a cross-reference matrix: frameworks down the side, the parts of the bill of
+materials across the top, a mark where one uses the other.
 
-| Channel           | Toggle              | Service                    | Key needed          |
-| ----------------- | ------------------- | -------------------------- | ------------------- |
-| Next launch window | `launch_window`    | thespacedevs Launch Library 2 | No                |
-| Humans in space    | `humans_in_space`  | thespacedevs Launch Library 2 | No                |
-| ISS ground track   | `iss_track`        | wheretheiss.at             | No                  |
-| Push activity      | `repo_telemetry`   | GitHub REST API            | Built-in token      |
-| Now listening      | `[telemetry.listening] enabled` | Last.fm       | **Yes**, optional   |
+```toml
+[[frameworks]]
+name    = "WKWebView"
+bundled = true
+on      = ["groupStat", "Ground-Control", "orchestrate"]
+```
 
-**thespacedevs (LL2)**, <https://ll.thespacedevs.com>. Powers both the next-orbital-launch
-countdown and the humans-currently-in-space count. No account, no key. Anonymous access is
-rate limited to roughly **15 requests per hour per IP**, which is generous for one build a
-day but is exactly why you should use `--offline` while iterating locally. If you do get
-rate limited, the channel renders `NO DATA` and the build still succeeds.
+| Field     | Notes                                                                 |
+| --------- | --------------------------------------------------------------------- |
+| `name`    | The framework, as it is actually called.                              |
+| `bundled` | `true` if it ships with the platform, `false` if you install it. Required, and the two bands on the sheet are exactly this field. |
+| `on`      | The parts that use it. Every name must match a `[[projects]]` name. An entry used by nothing is rejected: it would draw an empty row. |
 
-**wheretheiss.at**, <https://wheretheiss.at/w/developer>. Returns the ISS sub-satellite
-point (lat/lon). No key. The position is sampled once at build time and stamped with that
-timestamp on the card. A static SVG cannot track it live, so the stamp is there to make
-clear the reading is a snapshot rather than a claim about right now.
+The list form ("project X uses A, B and C") hides the thing worth knowing, which is the
+shape of the columns: what recurs, what is used once, and which parts share a stack.
+That is the whole reason this is a matrix.
 
-**GitHub API**, for push activity over the recent window. In CI this uses the built-in
-`GITHUB_TOKEN`, which Actions provides automatically; there is nothing to set up. Running
-locally without a token falls back to unauthenticated access (60 requests/hour), which is
-usually enough for one build. If you hit that limit locally, export a personal access token
-as `GITHUB_TOKEN`. A classic token with no scopes at all is enough for public data.
+**Every part must be named by at least one framework.** The build fails otherwise, and
+that check matters more here than it looks: an empty column on this sheet reads as
+"installs nothing", so a part that is merely unlisted would be making a claim nobody
+wrote.
 
-**Last.fm**, optional. See the section above.
+`bundled` is the sheet. SwiftUI is on every Mac and the Node standard library arrives
+with Node, so using either costs nothing and installs nothing. Anything in the
+INSTALLED band you have to go and fetch, and then keep fetching: a lock file, a version
+to pin, a thing that can break on a Tuesday.
+
+Six of the ten parts have nothing at all in the INSTALLED band, and the sheet does not
+say so in words: those six columns are visibly empty. The footer's count is derived
+from the marks rather than typed beside them, so the sentence and the drawing cannot
+disagree.
+
+Column heads are set vertically. Ten columns across 620px is 62px each and
+`aggregateAnalytics` is eighteen characters; rotating is what a real matrix does with a
+long column head, and it is the only fitting that does not cut a project's name down to
+its designator.
+
+### Two sheets that were here first
+
+**A project timeline**, drawing each part from its first commit to its most recent. It
+was accurate and it was not worth a sheet: six of ten projects were built inside five
+weeks against a window of two years, so most of the drawing was empty space and the
+bars that mattered were five pixels wide. A chart that needs its own numbers lettered
+beside it is a chart doing no work.
+
+**A typical assemblies sheet**, grouping the parts into four shapes and drawing each as
+a stack of layers. It was true and it was an abstraction over the work rather than a
+reading of it. Writing it also produced a wrong claim that survived a full review:
+animAgent's stack was lettered "SwiftUI, and SpriteKit", and animAgent has no SwiftUI
+in it at all. A sheet built out of generalisations is a sheet where that kind of error
+has somewhere to hide. The matrix has nowhere: every mark is one framework in one
+project.
+
+---
+
+## What the build fetches
+
+Everything comes from one place: GitHub's own API about this account. There used to be
+three more channels on this profile, carrying the next orbital launch, the number of
+people currently in space, and the ISS ground track. They worked and they were real,
+and none of them were about the person whose profile this is, so they came off along
+with the sheet that carried them.
+
+The whole toggle is one line:
+
+```toml
+[sources]
+github = true
+```
+
+| Reading                     | Endpoint                                | Cost                  |
+| --------------------------- | --------------------------------------- | --------------------- |
+| Language mix                | `/users/:u/repos` + one `languages_url` per repo | ~1 per repository |
+| Repo count, account age     | `/users/:u`                             | 1                     |
+| Last push and its age       | `/users/:u/events/public`               | 1                     |
+| Push time per repository    | `/users/:u/repos` (cached)              | 0                     |
+| Latest commit per project   | `/repos/:o/:r/commits?per_page=1`       | 1 per revision row    |
+
+In CI this uses the built-in `GITHUB_TOKEN`, which Actions provides automatically;
+there is nothing to set up and there are no other secrets in this repository. Running
+locally without a token falls back to unauthenticated access (60 requests/hour), which
+is tight once the language channel makes a call per repository. Export a token if you
+hit it:
+
+```sh
+GITHUB_TOKEN="$(gh auth token)" python3 scripts/build.py
+```
+
+A classic token with no scopes at all is enough for public data.
+
+### Why the revision table costs a request per row
+
+The obvious implementation reads the public events feed, which already carries a
+`PushEvent` per push. It does not work: GitHub strips `payload.commits` for
+unauthenticated reads and returns an empty array, so a revision table built on it
+letters three blank descriptions and looks like a renderer bug. `/commits?per_page=1`
+is the only source that carries the message, which is why the table is three rows and
+not ten.
 
 ### Every channel degrades, none of them break the build
 
@@ -275,6 +352,13 @@ completion bar in green instead of its material colour, so "done" is visible wit
 reading the status column. It follows the status *rank*, not the name, so renaming
 `QUALIFIED` does not turn it off. The MATL swatch still shows the language.
 
+A chip row wider than GitHub's 846px README column is split into rows **here**, not
+by the browser. Letting it wrap produced a first row packed to the edge and a second
+row holding one chip, which reads as a mistake rather than as a layout. `pack_rows()`
+in `build.py` balances the break instead, aiming for rows of roughly equal length, and
+the build prints how many rows it decided on. The leading rail label only ever appears
+on the first row.
+
 Every asset URL in `README.md` carries a `?v=` that is a hash of that file's own
 bytes. README images are cached hard, so without it a rebuild stays invisible. It
 used to be the build date, which was wrong the moment it mattered: iterating on the
@@ -293,6 +377,14 @@ Python in `scripts/`, and nothing re-implements it.
 **A card shows `NO DATA` every day.** The channel's upstream is failing consistently, not
 transiently. Run `python3 scripts/build.py` locally and read the warning it prints for that
 channel.
+
+**The build fails saying a part is named by no framework.** You added a `[[projects]]`
+block without naming it from any `[[frameworks]]` entry. Every part has to appear in at
+least one, because an empty column on that sheet means "installs nothing".
+
+**The build fails naming a project.** A `[[tools]]` or `[[frameworks]]` entry cites a
+name that is not on the bill of materials, usually a case difference. The error prints
+every name it does know.
 
 **The workflow is green but nothing changes.** Correct behaviour when the output is
 byte-identical to what is already committed, meaning nothing on the card moved that day. Check the

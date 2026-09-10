@@ -49,8 +49,8 @@ rule, dim, balloon, revcloud = bp.rule, bp.dim, bp.balloon, bp.revcloud
 fade, grow, draw_on = bp.fade, bp.grow, bp.draw_on
 sheet, field, defs_hatch = bp.sheet, bp.field, bp.defs_hatch
 
-CARDS = ["titleblock", "general", "bom", "telemetry", "composition",
-         "activity"]
+CARDS = ["titleblock", "general", "bom", "frameworks", "composition",
+         "toolbox"]
 
 
 def _sheet_no(name: str) -> str:
@@ -283,38 +283,26 @@ def _datestr(v, fmt="%Y-%m-%d") -> str | None:
 
 
 def _ago(then, now) -> str | None:
-    """Humanised age, coarse on purpose: nobody reads a push age to the second."""
+    """Humanised age, to one unit.
+
+    Coarse on purpose. This lands in a title block field that answers "is this
+    person still working on any of this", and the honest resolution for that
+    question is hours or days. It used to carry a second unit and read "5h 00m
+    ago", which spends four characters implying a precision the question does
+    not have and looks broken on the hour.
+    """
     if then is None or now is None or not hasattr(then, "strftime"):
         return None
     try:
         secs = (now - then).total_seconds()
     except TypeError:                    # naive/aware mismatch, not worth a crash
         return None
-    if secs < 0:
-        secs = 0
-    m, h = int(secs // 60) % 60, int(secs // 3600)
-    if h < 1:
-        return f"{m}m ago"
-    if h < 24:
-        return f"{h}h {m:02d}m ago"
-    return f"{h // 24}d {h % 24:02d}h ago"
-
-
-def _countdown(net, now) -> str | None:
-    """`T− 02d 14h 09m`, or T+ once the window has opened. A launch that
-    already flew is still the correct answer to "next launch" for a few hours,
-    so the sign flips rather than the panel voiding."""
-    if net is None or now is None or not hasattr(net, "strftime"):
-        return None
-    try:
-        secs = (net - now).total_seconds()
-    except TypeError:
-        return None
-    sign = "−" if secs >= 0 else "+"
-    secs = abs(secs)
-    d, rem = divmod(int(secs), 86400)
-    h, rem = divmod(rem, 3600)
-    return f"T{sign} {d:02d}d {h:02d}h {rem // 60:02d}m"
+    secs = max(0.0, secs)
+    if secs < 3600:
+        return f"{int(secs // 60)}m ago"
+    if secs < 86400:
+        return f"{int(secs // 3600)}h ago"
+    return f"{int(secs // 86400)}d ago"
 
 
 def _bytes(n) -> str:
@@ -361,12 +349,12 @@ def _status_map(cfg) -> dict:
     return {str(s.get("key")): (i, s) for i, s in enumerate(st)}
 
 
-# ── bill of materials geometry, shared ────────────────────────────────────────────────
+# ── bill of materials geometry ──────────────────────────────────────────────
 #
-# The revision table on sheet 1 cites zones on the BOM sheet, so the two have
-# to agree about where a part sits. These constants are the single source of
-# that agreement. _bom_zone() derives the zone from the same numbers the BOM
-# actually lays itself out with, so the citation is true rather than plausible.
+# The one number here anything outside this file depends on is COL_DESC_R, by
+# way of summary_capacity(): build.py rejects a summary longer than the
+# description column can hold, so the column width and the length check cannot
+# disagree.
 
 BOM_W = 900
 BOM_X0, BOM_X1 = 26, 874
@@ -403,36 +391,6 @@ def _bom_height(n_rows: int) -> int:
     return BOM_BODY_Y + max(1, n_rows) * BOM_ROW_H + 54
 
 
-def _bom_zone(cfg, repo, sheet_no=None) -> str:
-    """Zone reference for a part on the BOM sheet, e.g. `3-C1`.
-
-    Recomputes blueprint.zone_marks' own division of the sheet (inset 12, pitch
-    88) against the BOM's real height, so the letter is the zone the part is
-    genuinely drawn in.
-
-    The sheet number comes from the BOM's own place in CARDS. A citation that
-    names the wrong sheet is worse than no citation, and adding a sheet ahead
-    of the BOM is exactly the edit that would break a literal.
-    """
-    if sheet_no is None:
-        sheet_no = CARDS.index("bom") + 1
-    projects = cfg.get("projects") or []
-    idx = next((i for i, p in enumerate(projects)
-                if str(p.get("name", "")).casefold() == str(repo).casefold()),
-               None)
-    if idx is None:
-        return DASH
-    h = _bom_height(len(projects))
-    rows = max(2, int((h - 2 * INSET) / 88))
-    rh = (h - 2 * INSET) / rows
-    cy = BOM_BODY_Y + idx * BOM_ROW_H + BOM_ROW_H / 2
-    j = min(rows - 1, max(0, int((cy - INSET) / rh)))
-    cols = max(2, int((BOM_W - 2 * INSET) / 88))
-    cw = (BOM_W - 2 * INSET) / cols
-    k = min(cols - 1, max(0, int((COL_PN - INSET) / cw)))
-    return f"{sheet_no}-{chr(65 + j)}{k + 1}"
-
-
 def todays_note(cfg: dict, data: dict) -> str:
     """The day's field note, or "" when no notes are configured.
 
@@ -458,49 +416,89 @@ def todays_note(cfg: dict, data: dict) -> str:
 # ── sheet 1: title block ─────────────────────────────────────────────────────
 
 def _rev_rows(cfg, data, n=3):
-    """The three most recent pushes, as revision rows.
+    """The most recent commit on each of the projects pushed to most recently.
 
-    A revision block records what changed and where. Pushes are the only real
-    change record this repository has, so the most recent one becomes the
-    current revision letter and the ones behind it step back through the
-    alphabet. Only the newest push carries a timestamp, because the API does not
-    date the rest. An undated revision row letters as N/A rather than an
-    invented date.
+    A revision block records what changed and when. This one is filled with the
+    only change record this work actually has: the latest commit on each of the
+    three projects touched most recently, its subject line, and the date it was
+    authored. Every cell is measured and none of them can read N/A while the
+    data is healthy.
+
+    The version this replaced letters a revision LETTER against a repository
+    NAME, a ZONE that only resolved for parts drawn on the BOM sheet, and a date
+    on the first row only, because the events feed dates one push and not the
+    rest. On a normal day that table drew N/A in five of its twelve cells. A
+    table that cannot fill itself is not a record, it is a picture of one, and
+    the whole claim of this drawing set is that its figures are real.
+
+    Rows short of `n` come back as None and draw as a ruled, voided row, which
+    is what a drawing does with a revision block it has not filled yet.
+    """
+    rows = []
+    for rec in (data.get("revisions") or [])[:n]:
+        repo = str(rec.get("repo") or "").strip()
+        message = str(rec.get("message") or "").strip()
+        at = _datestr(rec.get("at"))
+        # Partial rows are dropped rather than dashed. A row is one commit, and
+        # a commit with no message or no date is a parse failure, not a commit.
+        if not repo or not message or not at:
+            continue
+        rows.append((repo, message, at))
+    while len(rows) < n:
+        rows.append(None)
+    return rows
+
+
+def _strip_fields(cfg, data):
+    """The boxed fields under the title block, as (key, value, width weight).
+
+    What a title block strip is for is telling a reader the things they would
+    otherwise have to ask: who drew it, what it is, how current it is. The
+    version this replaced carried DRAWN BY, REV, SHEET 1 OF 6, DATE, SCALE NONE
+    and UNITS UTC. Four of those six are drafting furniture with no answer on a
+    profile page: the scale of a person is not a quantity, the sheet number is
+    already lettered in the corner of every sheet, and the revision letter was
+    bumped by hand and therefore meant only that somebody remembered to bump it.
+
+    These five all say something, and three of the five are measured rather than
+    written down: the part counts come off the bill of materials, the push age
+    off the API, and the date off the clock the build ran on.
     """
     ident = cfg.get("identity") or {}
-    rev = str(ident.get("revision") or "A").strip()[:1].upper()
+    projects = cfg.get("projects") or []
+    done = sum(1 for p in projects
+               if str(p.get("status") or "").upper() == "QUALIFIED")
+
     lp = data.get("last_push") or {}
+    age = _ago(lp.get("at"), data.get("generated_at"))
 
-    order, seen = [], set()
-    for cand in ([lp.get("repo")] if lp.get("repo") else []) + \
-                [nm for nm, _c in (data.get("top_repos") or [])]:
-        name = _repo_name(cand)
-        if name and name.casefold() not in seen:
-            seen.add(name.casefold())
-            order.append(name)
-
-    rows = []
-    for i, name in enumerate(order[:n]):
-        letter = chr(max(65, ord(rev) - i)) if rev.isalpha() else rev
-        date = _datestr(lp.get("at")) if i == 0 else None
-        rows.append((letter, _bom_zone(cfg, name), name, date))
-    while len(rows) < n:
-        rows.append(None)                # a blank revision block still gets rows
-    return rows
+    return (
+        ("STATUS", str(ident.get("status") or DASH), 2.3),
+        ("BASED IN", str(ident.get("location") or DASH), 1.7),
+        ("ON THIS SHEET", f"{len(projects)} PARTS, {done} DONE"
+         if projects else DASH, 1.6),
+        ("LAST PUSH", (age or DASH).upper(), 1.1),
+        ("BUILT", _datestr(data.get("generated_at")) or DASH, 1.4),
+    )
 
 
 def _titleblock(cfg, data, t):
     W = 900
     ident = cfg.get("identity") or {}
     x0, x1 = 26, 874
-    lcol_r = 512                          # left column stops well clear of the
-    rev_x0 = 548                          # revision table's first rule
 
     out = ""
 
-    # ── left: who the drawing is by ─────────────────────────────────────────
+    # ── who the drawing is by ───────────────────────────────────────────────
+    #
+    # There is no line of URLs under the tagline any more. There used to be one
+    # lettering "github.com/henrykanaskie · henrykanaskie.com", and it looked
+    # like two links and was neither: a sheet is served through <img>, so
+    # nothing drawn inside one is clickable. It read as a broken link rather
+    # than as a caption. The chip rail immediately under this sheet carries the
+    # same two destinations as real anchors, which is where they belong.
     name = str(ident.get("name") or DASH)
-    nsize = _fit_size(name, lcol_r - x0, 36, 0.10, floor=16)
+    nsize = _fit_size(name, x1 - x0, 36, 0.10, floor=16)
     name_base = 92
     out += _g(D_LETTER, text(x0, name_base, name.upper(), t, size=nsize,
                              weight=700, track=nsize * 0.10), dur=0.55)
@@ -509,74 +507,62 @@ def _titleblock(cfg, data, t):
     title = str(ident.get("title") or "").strip()
     if title:
         out += _g(D_LETTER + 0.10,
-                  caps(x0, y, _fit(title, lcol_r - x0, 11, 1.4), t, size=11,
+                  caps(x0, y, _fit(title, x1 - x0, 11, 1.4), t, size=11,
                        track=1.4, color="soft"))
-        y += 19
+        y += 20
     tagline = str(ident.get("tagline") or "").strip()
     if tagline:
         out += _g(D_LETTER + 0.16,
-                  text(x0, y, _fit(tagline, lcol_r - x0, 8.6), t, size=8.6,
+                  text(x0, y, _fit(tagline, x1 - x0, 9), t, size=9,
                        color="soft"))
-        y += 17
-    links = " · ".join(s for s in (
-        (f"github.com/{ident['github']}" if ident.get("github") else ""),
-        str(ident.get("website") or "").replace("https://", ""),
-    ) if s)
-    if links:
-        out += _g(D_LETTER + 0.22,
-                  caps(x0, y, _fit(links, lcol_r - x0, 7.6, 0.9), t, size=7.6,
-                       track=0.9, color="faint"))
-        y += 14
-    left_bottom = y
+        y += 16
 
-    # ── right: revision history ─────────────────────────────────────────────
-    rev_head, rev_rule = 58, 64
-    rrow_h = 22
-    cols = ((rev_x0 + 6, "REV", 30), (rev_x0 + 44, "ZONE", 56),
-            (rev_x0 + 108, "DESCRIPTION", 150))
-    out += _g(D_LETTER, "".join(
-        caps(cx, rev_head, key, t, size=7, track=1.1) for cx, key, _w_ in cols))
-    out += _g(D_LETTER, caps(x1, rev_head, "DATE", t, size=7, track=1.1,
-                             anchor="end"))
-    out += _drawn_rule(rev_x0, rev_rule, x1, rev_rule, t, D_RULE, w=1.4,
-                       color="rule")
+    # ── revision history, across the full width ─────────────────────────────
+    #
+    # It used to sit in a right-hand column beside the name, which left the
+    # DESCRIPTION cell 150px wide. A commit subject does not fit in 150px, and
+    # the column only ever held a repository name because that was the longest
+    # thing that would go in. Given the whole measure it holds a real message,
+    # which is what makes the table worth drawing at all.
+    y += 30
+    desc_x = x0 + 168
+    desc_r = x1 - 96
+    rrow_h = 23
+    out += _g(D_LETTER,
+              caps(x0, y, "PROJECT", t, size=7, track=1.1)
+              + caps(desc_x, y, "LATEST COMMIT", t, size=7, track=1.1)
+              + caps(x1, y, "DATE", t, size=7, track=1.1, anchor="end"))
+    rule_y = y + 7
+    out += _drawn_rule(x0, rule_y, x1, rule_y, t, D_RULE, w=1.4, color="rule")
 
     rows = _rev_rows(cfg, data)
     for i, row in enumerate(rows):
-        ry = rev_rule + (i + 1) * rrow_h - 7
+        ry = rule_y + (i + 1) * rrow_h - 7
         d = D_DATA + i * 0.09
         if i:
             out += _g(D_RULE + 0.1,
-                      rule(rev_x0, ry - 15, x1, ry - 15, t, w=0.6, opacity=0.7))
+                      rule(x0, ry - 16, x1, ry - 16, t, w=0.6, opacity=0.7))
         if row is None:
             # An unfilled revision block is not blank on a real sheet. It is
             # ruled and voided, waiting for the next issue.
-            out += _g(d, "".join(
-                text(cx, ry, DASH, t, size=9, color="faint")
-                for cx, _k, _wd in cols)
-                + text(x1, ry, DASH, t, size=8.5, color="faint", anchor="end"))
+            out += _g(d, text(x0, ry, DASH, t, size=9, color="faint")
+                      + text(desc_x, ry, DASH, t, size=9, color="faint")
+                      + text(x1, ry, DASH, t, size=8.5, color="faint",
+                             anchor="end"))
             continue
-        letter, zone, desc, date = row
-        out += _g(d, text(cols[0][0], ry, letter, t, size=10, weight=700))
-        out += _g(d, text(cols[1][0], ry, zone, t, size=8.5, color="soft"))
-        out += _g(d, text(cols[2][0], ry, _fit(desc, cols[2][2], 9), t, size=9))
-        out += _g(d, text(x1, ry, date or DASH, t, size=8.5,
-                          color="soft" if date else "faint", anchor="end"))
-    rev_bottom = rev_rule + len(rows) * rrow_h + 6
+        repo, message, date = row
+        out += _g(d, text(x0, ry, _fit(repo, desc_x - x0 - 14, 9), t, size=9,
+                          weight=600))
+        out += _g(d, text(desc_x, ry, _fit(message, desc_r - desc_x, 9), t,
+                          size=9, color="soft"))
+        out += _g(d, text(x1, ry, date, t, size=8.5, color="soft",
+                          anchor="end"))
+    y = rule_y + len(rows) * rrow_h + 22
 
-    # ── bottom: the boxed field strip ───────────────────────────────────────
-    strip_y = max(left_bottom, rev_bottom) + 20
+    # ── the boxed field strip ───────────────────────────────────────────────
+    strip_y = y
     strip_h = 38
-    date = _datestr(data.get("generated_at")) or DASH
-    fields = (("DRAWN BY", str(ident.get("drawn_by") or DASH), 2.2),
-              ("REV", str(ident.get("revision") or DASH), 0.7),
-              ("SHEET", "%d OF %d" % (CARDS.index("titleblock") + 1,
-                                      len(CARDS)), 1.0),
-              ("DATE", date, 1.5),
-              # A drawing with no scale says so. NONE is the correct answer for
-              # a sheet whose subject has no physical size, not a missing value.
-              ("SCALE", "NONE", 0.9),
-              ("UNITS", "UTC", 1.0))
+    fields = _strip_fields(cfg, data)
     total = sum(f[2] for f in fields)
     out += _g(D_RULE + 0.2,
               f'<rect x="{x0-2}" y="{strip_y}" width="{x1-x0+4}" '
@@ -858,13 +844,17 @@ def _bom(cfg, data, t):
         # is genuine drafting practice, a scalloped outline around whatever
         # moved since the last issue. But red is the loudest thing on the sheet
         # and it lands on a different row every day, so it reads as an alarm
-        # rather than a note. LAST CONTACT on the telemetry sheet states the
+        # rather than a note. LAST PUSH in the title block strip states the
         # same fact calmly, so nothing is lost by leaving this off.
+        #
+        # The flag used to read "REV G" off a hand-bumped identity field.
+        # That field is gone, along with everything else on these sheets
+        # that had to be remembered rather than measured, so the flag now
+        # says what the mark actually means.
         if mark_last_push and changed and name.casefold() == changed:
             cloud = revcloud(BOM_X0 + 4, ty + 3, BOM_X1 - BOM_X0 - 8,
                              BOM_ROW_H - 8, t, delay=D_DATA + n * 0.05 + 0.35)
-            rev_letter = str((cfg.get("identity") or {}).get("revision") or "")
-            flag = f"REV {rev_letter}".strip()
+            flag = "LATEST"
             cloud += _g(D_DATA + n * 0.05 + 0.8,
                         f'<rect x="816" y="{ty+4}" width="46" height="13" '
                         f'rx="1.5" fill="{t["ground"]}" stroke="{t["red"]}" '
@@ -895,325 +885,175 @@ def _bom(cfg, data, t):
                  sheet_no=_sheet_no("bom"))
 
 
-# ── sheet 4: telemetry ───────────────────────────────────────────────────────
+# ── sheet 4: frameworks ──────────────────────────────────────────────────────
+#
+# A cross-reference matrix: frameworks down the side, the parts of the bill of
+# materials across the top, a mark where one uses the other. Drawings carry
+# matrices like this because the list form ("project X uses A, B and C") hides
+# the thing worth knowing, which is the shape of the columns. What recurs, what
+# is used once, and which parts share a stack with which.
+#
+# The two bands are the sheet. BUNDLED ships with the platform: SwiftUI is on
+# every Mac and the Node standard library arrives with Node, so using it costs
+# nothing and installs nothing. INSTALLED you have to go and fetch, and then
+# keep fetching: a lock file, a version to pin, a thing that can break on a
+# Tuesday.
+#
+# Six of the ten parts have nothing at all in the INSTALLED band, and the sheet
+# does not have to claim that in words. Those six columns are visibly empty. It
+# is the one fact on this profile best made by drawing it and then saying
+# nothing, so the footer only counts what the marks already show.
+#
+# Column heads are set vertically. Ten columns across 620px is 62px each and
+# `aggregateAnalytics` is 18 characters; rotating is what a real matrix does
+# with a long column head, and it is the only fitting that does not abbreviate
+# a project's name down to its designator.
 
-ISS_INCL = 51.64        # ISS orbital inclination, degrees
+FW_ROW_H = 17
+FW_LABEL_W = 214        # framework names, down the left
+FW_MARK = 7.5           # side of the filled square
+FW_HEAD_H = 108         # rotated column heads
+FW_BAND_GAP = 20        # between the two bands
+FW_BAND_LABEL_H = 18    # the band's own heading, above its rows
 
 
-def _iss_track(lat0, lon0, x, y, w, h, t, delay):
-    """Plot the ISS ground track through the live sub-satellite point.
+def _fw_bands(cfg):
+    """[(band label, [(framework, [parts])])], bundled first, then installed.
 
-    For a circular orbit the geodetic latitude is a pure function of the
-    argument of latitude u (the angle travelled from the ascending node):
-
-        sin(lat) = sin(i) * sin(u),     i = 51.64 deg for the ISS
-
-    and over a single pass u advances almost linearly with longitude, which is
-    why an equirectangular ground track is the familiar sinusoid bounded by
-    +/- i rather than anything more exotic. Plotting lat against a phase-shifted
-    longitude is therefore the correct shape, not a decorative sine wave.
-
-    The phase is solved so the curve passes exactly through the observed point:
-
-        u0    = asin( sin(lat0) / sin(i) )
-        phase = u0 - lon0
-
-    asin returns the ascending branch; the descending branch (pi - u0) is the
-    other valid solution, and a single sample cannot distinguish them, so the
-    ascending one is drawn and the readout carries the sample time.
+    A band with no entries is dropped rather than drawn as a heading over
+    nothing. An `on` name that matches no part is dropped here; build.py
+    rejects that case outright, so reaching it means validation was skipped.
     """
-    inc = math.radians(ISS_INCL)
-    si = math.sin(inc)
-    # A reported latitude outside the inclination is sensor noise, not physics.
-    s = max(-1.0, min(1.0, math.sin(math.radians(lat0)) / si))
-    phase = math.asin(s) - math.radians(lon0)
-
-    pts = []
-    for step in range(0, 181):
-        lon = -180 + step * 2
-        lat = math.degrees(math.asin(si * math.sin(math.radians(lon) + phase)))
-        pts.append((x + (lon + 180) / 360 * w, y + (90 - lat) / 180 * h))
-
-    d = "M" + " L".join(f"{px:.1f} {py:.1f}" for px, py in pts)
-    length = sum(math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1])
-                 for i in range(len(pts) - 1))
-    out = (f'<path d="{d}" fill="none" stroke="{t["accent"]}" '
-           f'stroke-width="1.4" stroke-linejoin="round" '
-           f'stroke-dasharray="{length:.0f}" stroke-dashoffset="0">'
-           f'{draw_on(length, delay, 1.3)}</path>')
-
-    mx = x + (lon0 + 180) / 360 * w
-    my = y + (90 - lat0) / 180 * h
-    out += _g(delay + 0.9,
-              f'<circle cx="{mx:.1f}" cy="{my:.1f}" r="7" fill="none" '
-              f'stroke="{t["accent"]}" stroke-width="0.9" opacity="0.65"/>'
-              f'<circle cx="{mx:.1f}" cy="{my:.1f}" r="2.6" '
-              f'fill="{t["accent"]}"/>'
-              + rule(mx - 11, my, mx + 11, my, t, color="accent", w=0.7,
-                     opacity=0.55)
-              + rule(mx, my - 11, mx, my + 11, t, color="accent", w=0.7,
-                     opacity=0.55))
+    by_name = {str(p.get("name") or ""): p for p in (cfg.get("projects") or [])}
+    bands = [("BUNDLED WITH THE PLATFORM", True), ("INSTALLED", False)]
+    out = []
+    for label, bundled in bands:
+        rows = []
+        for fw in cfg.get("frameworks") or []:
+            if bool(fw.get("bundled")) is not bundled:
+                continue
+            parts = [by_name[str(n)] for n in (fw.get("on") or [])
+                     if str(n) in by_name]
+            rows.append((fw, parts))
+        if rows:
+            out.append((label, rows))
     return out
 
 
-def _graticule(x, y, w, h, t, delay):
-    """Equirectangular graticule, 30 degree spacing, equator emphasised."""
-    out = (f'<rect x="{x:.1f}" y="{y:.1f}" width="{w:.1f}" height="{h:.1f}" '
-           f'fill="{t["fill"]}" stroke="{t["rule"]}" stroke-width="1" '
-           f'opacity="0.9"/>')
-    for lon in range(-150, 180, 30):
-        gx = x + (lon + 180) / 360 * w
-        out += rule(gx, y, gx, y + h, t, w=0.6, opacity=0.65)
-    for lat in range(-60, 90, 30):
-        gy = y + (90 - lat) / 180 * h
-        out += rule(x, gy, x + w, gy, t, w=0.6,
-                    opacity=0.95 if lat == 0 else 0.6)
-    # The equator gets a name rather than a number: a bare "0°" sitting at the
-    # left edge of a lon/lat plot reads as longitude zero, which is the wrong
-    # axis and lands on the frame besides.
-    out += caps(x + 4, y + h / 2 - 4, "EQ", t, size=6, track=0.6, opacity=0.8)
-
-    # The orbit's latitude limits, drawn as the dashed extremes they are. The
-    # track is tangent to these two lines and never crosses them. That is the
-    # whole reason the sinusoid peaks where it does, and showing it turns the
-    # curve from a decorative wave into a consequence of the inclination.
-    for lat in (ISS_INCL, -ISS_INCL):
-        gy = y + (90 - lat) / 180 * h
-        out += rule(x, gy, x + w, gy, t, color="soft", w=0.7, dash="3 3",
-                    opacity=0.55)
-    out += caps(x + w - 4, y + (90 - ISS_INCL) / 180 * h - 4,
-                f"INC {ISS_INCL:.1f}°", t, size=6, track=0.4,
-                anchor="end", opacity=0.75)
-
-    for lon, anchor, dx in ((-180, "start", 1), (0, "middle", 0),
-                            (180, "end", -1)):
-        out += caps(x + (lon + 180) / 360 * w + dx, y + h + 8,
-                    f"{lon}°", t, size=6, track=0.4, anchor=anchor)
-    return _g(delay, out)
-
-
-def _panel_launch(x, w, y, t, d, data):
-    launch = data.get("launch") or None
-    if not launch:
-        return "", 104, "NO LAUNCH DATA"
-    cd = _countdown(launch.get("net"), data.get("generated_at"))
-    out = ""
-    if cd:
-        size = _fit_size(cd, w, 20, 0.06, floor=12)
-        out += _g(d, text(x, y + 20, cd, t, size=size, weight=700,
-                          track=size * 0.06), dur=0.5)
-    else:
-        out += _g(d, text(x, y + 20, DASH, t, size=20, color="faint"))
-    out += _g(d + 0.05, rule(x, y + 30, x + w, y + 30, t, w=0.7, opacity=0.8))
-
-    # The launch API's list mode returns "Vehicle | Mission" as one string and
-    # omits the pad object entirely, so splitting the name is the normal path
-    # and the site is normally unknown. Rows are built from what is actually
-    # there rather than reserving a line that would be blank every day.
-    vehicle, _, mission = str(launch.get("name") or DASH).partition("|")
-    rows = [(vehicle.strip() or DASH, 11, "ink", 700)]
-    if mission.strip():
-        rows.append((mission.strip(), 8.6, "soft", 400))
-    if launch.get("provider"):
-        rows.append((str(launch["provider"]), 8.6, "soft", 400))
-    if launch.get("pad"):
-        rows.append((str(launch["pad"]), 8.0, "faint", 400))
-
-    ry = y + 48
-    for s, size, color, weight in rows:
-        out += _g(d + 0.1, text(x, ry, _fit(s, w, size), t, size=size,
-                                color=color, weight=weight))
-        ry += 14
-    status = str(launch.get("status") or "").strip()
-    out += _g(d + 0.15, caps(x, ry + 8, "STATUS", t, size=6.8, track=1.0))
-    out += _g(d + 0.18, caps(x, ry + 22, _fit(status or DASH, w, 11, 1.2), t,
-                             size=11, track=1.2,
-                             color="accent" if status else "faint"))
-    return out, (ry + 26) - y, None
-
-
-def _panel_humans(x, w, y, t, d, data):
-    humans = data.get("humans")
-    if humans is None:
-        return "", 96, "NO DATA"
-    out = _g(d, text(x + w / 2, y + 46, str(humans), t, size=48, weight=700,
-                     anchor="middle", track=1.0), dur=0.6)
-    out += _g(d + 0.1, caps(x + w / 2, y + 64, "HUMANS", t, size=8,
-                            anchor="middle", track=1.3))
-    out += _g(d + 0.1, caps(x + w / 2, y + 76, "IN SPACE", t, size=8,
-                            anchor="middle", track=1.3))
-    return out, 84, None
-
-
-def _panel_iss(x, w, y, t, d, data):
-    iss = data.get("iss") or None
-    gw = w
-    gh = min(126.0, gw / 2.0)             # equirectangular is 2:1 by definition
-    if not iss:
-        return "", gh + 60, "NO ISS FIX"
-    out = _graticule(x, y, gw, gh, t, d)
-    try:
-        lat0 = float(iss.get("lat"))
-        lon0 = float(iss.get("lon"))
-    except (TypeError, ValueError):
-        return "", gh + 60, "NO ISS FIX"
-    out += _iss_track(lat0, lon0, x, y, gw, gh, t, d + 0.25)
-
-    vel = iss.get("vel_kmh")
-    alt = iss.get("alt_km")
-    readout = (("LAT", f"{lat0:+.2f}°"),
-               ("LON", f"{lon0:+.2f}°"),
-               ("ALT", f"{float(alt):.1f} KM" if alt is not None else DASH),
-               ("VEL", f"{float(vel):,.0f} KM/H".replace(",", " ")
-                if vel is not None else DASH))
-    # No leader from the marker down to this readout: it has to cross the
-    # graticule to get here, and at the same weight and colour as the track it
-    # reads as a second plotted line. The crosshair on the point does the job.
-    ry = y + gh + 24
-    half = w / 2
-    for i, (k, v) in enumerate(readout):
-        cx = x + (i % 2) * half
-        yy = ry + (i // 2) * 13
-        out += _g(d + 0.35 + i * 0.04, caps(cx, yy, k, t, size=7, track=1.0))
-        # Values stop well short of the next column's key so the pairs read as
-        # four readings rather than one run of alternating words.
-        out += _g(d + 0.35 + i * 0.04,
-                  text(cx + half - 18, yy, v, t, size=8.4, color="ink",
-                       anchor="end"))
-    stamp = _datestr(iss.get("at"), "%H:%M:%S")
-    # An orbital fix is an observation at an instant, not a live feed. Saying so
-    # is the difference between a reading and a claim.
-    out += _g(d + 0.5, caps(x, ry + 30, f"SAMPLED {stamp or DASH} UTC", t,
-                            size=6.8, track=0.9))
-    return out, (ry + 34) - y, None
-
-
-def _stat(x, w, y, label, value, t, d, *, size=15, color="ink"):
-    out = _g(d, caps(x, y, label, t, size=7, track=1.1))
-    out += _g(d + 0.06, text(x, y + 19, _fit(value, w, size, 0.3), t, size=size,
-                             weight=600, color=color, track=0.3))
-    return out
-
-
-def _panel_contact(x, w, y, t, d, data):
-    lp = data.get("last_push") or {}
-    age = _ago(lp.get("at"), data.get("generated_at"))
-    act = data.get("activity") or []
-    out, yy = "", y + 10
-
-    if age or lp.get("repo"):
-        out += _stat(x, w, yy, "LAST CONTACT", age or DASH, t, d)
-        out += _g(d + 0.1, text(x, yy + 32, _fit(_repo_name(lp.get("repo"))
-                                                 or DASH, w, 8.6), t, size=8.6,
-                                color="soft"))
-    else:
-        out += _nodata(x, yy - 8, w, 44, t, delay=d, label="NO CONTACT")
-    yy += 52
-
-    streak = data.get("streak")
-    sval = f"{streak} DAY{'S' if streak != 1 else ''}" if streak is not None \
-        else DASH
-    out += _stat(x, w, yy, "STREAK", sval, t, d + 0.12, size=14)
-    yy += 40
-
-    last24 = act[-1][1] if act else None
-    out += _stat(x, w, yy, "PUSHES / 24 H",
-                 str(last24) if last24 is not None else DASH, t, d + 0.2,
-                 size=14)
-    yy += 40
-
-    # The far end of the same measurement: the part nobody has touched in
-    # longest. Three-digit day counts are normal here, so the value is fitted
-    # to the column like every other run rather than assumed short.
-    q = data.get("quietest") or {}
-    days = q.get("days")
-    out += _stat(x, w, yy, "QUIETEST",
-                 f"{days} DAYS" if days is not None else DASH, t, d + 0.26,
-                 size=14)
-    if q.get("repo"):
-        out += _g(d + 0.3, text(x, yy + 32, _fit(_repo_name(q["repo"]), w, 8.6),
-                                t, size=8.6, color="soft"))
-    return out, (yy + 38) - y, None
-
-
-def _panel_audio(x, w, y, t, d, data):
-    li = data.get("listening") or {}
-    out = _g(d, text(x, y + 20, _fit(str(li.get("track") or DASH), w, 11), t,
-                     size=11, weight=700))
-    out += _g(d + 0.06, text(x, y + 36, _fit(str(li.get("artist") or DASH), w,
-                                             8.8), t, size=8.8, color="soft"))
-    if li.get("now_playing"):
-        out += _g(d + 0.12, caps(x, y + 58, "NOW DECODING", t, size=8.5,
-                                 track=1.2, color="green"))
-    else:
-        stamp = _datestr(li.get("at"), "%Y-%m-%d %H:%M") or DASH
-        out += _g(d + 0.12, caps(x, y + 58, stamp, t, size=7.6, track=0.9))
-    return out, 70, None
-
-
-def _telemetry(cfg, data, t):
+def _frameworks(cfg, data, t):
     W = 900
     x0, x1 = 26, 874
-    head_y, body_y = 52, 78
+    projects = list(cfg.get("projects") or [])
+    bands = _fw_bands(cfg)
 
-    # Panels reflow: weights are relative demands on the width, normalised over
-    # whichever panels are actually present. The graticule asks for the most
-    # because it is the only panel whose content has a fixed aspect ratio.
-    panels = [("LAUNCH WINDOW", 1.20, _panel_launch),
-              ("OFF-PLANET", 0.68, _panel_humans),
-              ("ISS GROUND TRACK", 1.62, _panel_iss),
-              ("CONTACT", 1.00, _panel_contact)]
-    # The audio channel is off by configuration, not broken, so it is omitted
-    # rather than voided. A NO DATA cell would imply a failure that never
-    # happened.
-    if data.get("listening"):
-        panels.append(("AUDIO CHANNEL", 0.88, _panel_audio))
+    head_y = 50
+    if not projects or not bands:
+        return sheet(W, 200, t,
+                     _nodata(x0, head_y, x1 - x0, 90, t,
+                             label="NO FRAMEWORKS LISTED"),
+                     label="FRAMEWORKS", sheet_no=_sheet_no("frameworks"))
 
-    total = sum(p[1] for p in panels)
-    span = x1 - x0
-    bodies, edges = [], []
-    px = x0
-    for i, (title, weight, fn) in enumerate(panels):
-        pw = span * weight / total
-        inner_x = px + (10 if i else 0)
-        inner_w = pw - (10 if i else 0) - 12
-        svg, h, void = fn(inner_x, inner_w, body_y, t, D_DATA + i * 0.08, data)
-        bodies.append([title, px, pw, inner_x, inner_w, svg, h,
-                       (void, D_DATA + i * 0.08)])
-        if i:
-            edges.append(px)
-        px += pw
+    grid_x = x0 + FW_LABEL_W
+    col_w = (x1 - grid_x) / len(projects)
+    body_y = head_y + FW_HEAD_H + 10
 
-    body_h = max(b[6] for b in bodies)
-    H = int(body_y + body_h + 34)
-
-    # A voided panel is sized once the tallest panel is known, so the dashed
-    # cells square off against each other instead of leaving a ragged edge on
-    # the day every channel is down.
-    for b in bodies:
-        label, delay = b[7]
-        if label:
-            b[5] = _nodata(b[3], body_y, b[4], body_h, t, delay=delay,
-                           label=label)
+    # Every band costs its own heading as well as its rows, and leaving that
+    # out of the height put the footer 36px below the frame, printed over the
+    # zone marks in the margin.
+    n_rows = sum(len(rows) for _l, rows in bands)
+    grid_h = (n_rows * FW_ROW_H + (len(bands) - 1) * FW_BAND_GAP
+              + len(bands) * FW_BAND_LABEL_H)
+    H = int(body_y + grid_h + 62)
 
     out = ""
-    for x in edges:
-        out += _drawn_rule(x, head_y - 20, x, H - 30, t, D_RULE + 0.12, w=0.9,
-                           dur=0.9)
-    for i, (title, ppx, pw, inner_x, inner_w, svg, _h, _v) in enumerate(bodies):
-        out += _g(D_LETTER + i * 0.06,
-                  caps(inner_x, head_y, _fit(title, inner_w, 7.6, 1.3), t,
-                       size=7.6, track=1.3))
-        out += _drawn_rule(inner_x, head_y + 8, inner_x + inner_w, head_y + 8,
-                           t, D_RULE + 0.05 + i * 0.04, w=0.8, dur=0.6)
-        out += svg
 
-    stamp = _datestr(data.get("generated_at"), "%Y-%m-%d %H:%M") or DASH
-    # The sheet's own timestamp, distinct from the ISS panel's fix time.
-    out += _g(D_LETTER + 0.5, caps(x0, H - 22, f"GENERATED {stamp} UTC", t,
-                                   size=6.8, track=1.0))
-    return sheet(W, H, t, out, label="DAILY TELEMETRY",
-                 sheet_no=_sheet_no("telemetry"))
+    # ── column heads, set vertically, and the rule they sit on ─────────────
+    for j, p in enumerate(projects):
+        cx = grid_x + (j + 0.5) * col_w
+        d = D_LETTER + j * 0.03
+        label = str(p.get("name") or DASH)
+        out += _g(d, f'<g transform="rotate(-90 {cx:.1f} {body_y - 14:.1f})">'
+                  + text(cx + 4, body_y - 11.4,
+                         _fit(label, FW_HEAD_H - 16, 7.6), t, size=7.6)
+                  + '</g>')
+        out += _g(d, caps(cx, body_y - 4, p.get("pn") or DASH, t, size=6,
+                          track=0.6, anchor="middle"))
+    out += _drawn_rule(x0, body_y, x1, body_y, t, D_RULE, w=1.3, color="rule")
+
+    # A faint column rule the full height of the grid, so the eye can run down
+    # a project without losing its place across nineteen rows.
+    for j in range(len(projects) + 1):
+        gx = grid_x + j * col_w
+        out += _g(D_RULE + 0.15,
+                  rule(gx, body_y, gx, body_y + grid_h, t, color="grid",
+                       w=0.9))
+
+    # ── the bands ───────────────────────────────────────────────────────────
+    y = body_y
+    used_installed = set()
+    for b, (band_label, rows) in enumerate(bands):
+        if b:
+            y += FW_BAND_GAP
+            out += _drawn_rule(x0, y - FW_BAND_GAP / 2, x1,
+                               y - FW_BAND_GAP / 2, t, D_RULE + 0.2, w=1.0,
+                               color="rule")
+        out += _g(D_LETTER + 0.1 + b * 0.06,
+                  caps(x0, y + 12, band_label, t, size=6.8, track=1.2,
+                       color="soft"))
+        y += FW_BAND_LABEL_H
+
+        for i, (fw, parts) in enumerate(rows):
+            ry = y + i * FW_ROW_H
+            d = D_DATA + (b * 0.3) + i * 0.035
+            if i:
+                out += _g(D_RULE + 0.1,
+                          rule(x0, ry - 3, x1, ry - 3, t, w=0.5, opacity=0.5))
+            out += _g(d, text(x0, ry + 8,
+                              _fit(str(fw.get("name") or DASH),
+                                   FW_LABEL_W - 32, 8.2), t, size=8.2))
+            # How many parts use it, right up against the grid. A framework
+            # used once and one used three times are different facts and the
+            # marks alone make you count them.
+            out += _g(d + 0.08,
+                      text(grid_x - 12, ry + 8, str(len(parts)), t, size=7.4,
+                           color="soft" if parts else "faint", anchor="end"))
+
+            for part in parts:
+                if not fw.get("bundled"):
+                    used_installed.add(str(part.get("name")))
+                try:
+                    j = projects.index(part)
+                except ValueError:
+                    continue
+                cx = grid_x + (j + 0.5) * col_w
+                c = _lang_color(cfg, part.get("lang"), t, spare_at=j)
+                out += _g(d + 0.1,
+                          f'<rect x="{cx - FW_MARK / 2:.1f}" '
+                          f'y="{ry + 4 - FW_MARK / 2:.1f}" width="{FW_MARK}" '
+                          f'height="{FW_MARK}" fill="{c}" stroke="{c}" '
+                          f'stroke-width="0.8" rx="0.8">'
+                          + fade(d + 0.1) + '</rect>')
+        y += len(rows) * FW_ROW_H
+
+    out += _drawn_rule(x0, y + 2, x1, y + 2, t, D_RULE + 0.3, w=1.2,
+                       color="rule")
+
+    # ── footer ──────────────────────────────────────────────────────────────
+    #
+    # The count is derived from the marks, not written down beside them, so the
+    # sentence and the drawing cannot disagree. It deliberately says less than
+    # the sheet does: the six empty columns are the argument, and a footer that
+    # restated them would be explaining a picture that works.
+    bare = [p for p in projects if str(p.get("name")) not in used_installed]
+    fy = y + 26
+    out += _g(D_DATA + 0.7,
+              text(x0, fy, f"{len(bare)} of {len(projects)} install nothing "
+                           f"at all", t, size=8.2, weight=600))
+    out += _g(D_LETTER + 0.5,
+              text(x1, fy, "a mark is coloured by the part's own language",
+                   t, size=6.9, color="faint", anchor="end"))
+    return sheet(W, H, t, out, label="FRAMEWORKS",
+                 sheet_no=_sheet_no("frameworks"))
 
 
 # ── sheet 5: material composition ────────────────────────────────────────────
@@ -1329,91 +1169,110 @@ def _composition(cfg, data, t):
                  sheet_no=_sheet_no("composition"))
 
 
-# ── sheet 6: push activity ───────────────────────────────────────────────────
+# ── sheet 6: toolbox ─────────────────────────────────────────────────────────
+#
+# What gets reached for, and what for. This replaced a thirty-day push-activity
+# chart, which measured how often the account was busy and said nothing about
+# what any of it was. A bar chart of pushes is a chart about diligence; this is
+# a chart about work.
+#
+# The rule for the middle column is that it says what the tool does in THIS
+# work. "Python: a general purpose language" is a row that could sit on anyone's
+# profile, which is the definition of a row not worth drawing. Every entry here
+# has to name the thing that would not exist without it.
+#
+# The right-hand column cites parts from the bill of materials by name, and
+# build.py rejects a name that is not on it, so the two sheets cannot drift out
+# of agreement. A tool used somewhere off this drawing set letters as such
+# rather than being given a citation it does not have.
 
-def _activity(cfg, data, t):
+TB_ROW_H = 26
+TB_SWATCH = 15
+TB_TOOL_X = 22          # from x0, past the swatch
+TB_TOOL_W = 118
+TB_FOR_X = 146
+TB_FOR_W = 420
+TB_ON_X = 578
+
+
+def _toolbox(cfg, data, t):
     W = 900
     x0, x1 = 26, 874
-    px0, px1 = 62, x1                     # left gutter carries the axis labels
-    pty, pby = 62, 178                    # plot top / baseline
-    act = list(data.get("activity") or [])
+    tools = list(cfg.get("tools") or [])
+
+    head_y = 54
+    body_y = head_y + 22
+    H = int(body_y + max(1, len(tools)) * TB_ROW_H + 52)
+
+    # Hatches are keyed to the language palette, and to the same colour that
+    # language carries on the composition sheet, so a reader who learned that
+    # Python is this blue two sheets ago is not re-taught it here.
+    defs = ""
+    for i, tool in enumerate(tools):
+        lang = tool.get("lang")
+        if lang:
+            defs += defs_hatch(i, _lang_color(cfg, lang, t, spare_at=i),
+                               angle=HATCH_ANGLES[i % len(HATCH_ANGLES)],
+                               gap=4.5, w=1.1)
 
     out = ""
-    if not act:
-        out += _nodata(px0, pty, px1 - px0, pby - pty, t,
-                       label="NO ACTIVITY DATA")
-    else:
-        counts = [int(c or 0) for _d, c in act]
-        peak = max(counts)
-        # 18% headroom keeps the peak's dimension line clear of the plot border
-        # instead of letting the label collide with the frame.
-        scale = (peak * 1.18) if peak else 1.0
+    if not tools:
+        return sheet(W, 200, t,
+                     _nodata(x0, 60, x1 - x0, 90, t, label="NO TOOLS LISTED"),
+                     label="TOOLBOX", sheet_no=_sheet_no("toolbox"))
 
-        out += _drawn_rule(px0, pby, px1, pby, t, D_RULE, w=1.2, color="rule")
-        out += _drawn_rule(px0, pty, px0, pby, t, D_RULE + 0.06, w=1.2,
-                           color="rule")
+    cols = ((x0 + TB_TOOL_X, "TOOL"), (x0 + TB_FOR_X, "WHAT I USE IT FOR"),
+            (x0 + TB_ON_X, "ON"))
+    out += _g(D_LETTER, "".join(caps(cx, head_y, key, t, size=6.8, track=1.1)
+                                for cx, key in cols))
+    out += _drawn_rule(x0, head_y + 8, x1, head_y + 8, t, D_RULE, w=1.4,
+                       color="rule")
 
-        ticks = [0, peak] if peak < 2 else [0, peak // 2, peak]
-        for v in sorted(set(ticks)):
-            gy = pby - (v / scale) * (pby - pty)
-            # No gridline at the peak: the dimension line already runs there,
-            # and two rules on one level read as a drafting error.
-            if v and v != peak:
-                out += _g(D_RULE + 0.2,
-                          rule(px0, gy, px1, gy, t, color="grid", w=0.8))
-            out += _g(D_RULE + 0.2, rule(px0 - 3.5, gy, px0, gy, t, w=0.9))
-            out += _g(D_LETTER, text(px0 - 7, gy + 3, str(v), t, size=7,
-                                     color="faint", anchor="end"))
+    for i, tool in enumerate(tools):
+        ry = body_y + i * TB_ROW_H + 12
+        d = D_DATA + i * 0.06
+        if i:
+            out += _g(D_RULE + 0.1,
+                      rule(x0, ry - 17, x1, ry - 17, t, w=0.6, opacity=0.6))
 
-        slot = (px1 - px0) / len(act)
-        bw = max(2.0, slot * 0.66)
-        for i, c in enumerate(counts):
-            cx = px0 + slot * i + (slot - bw) / 2
-            h = (c / scale) * (pby - pty)
-            if h > 0:
-                out += _grow_col(cx, pby, bw, h, t["accent"],
-                                 D_DATA + i * 0.012)
-            if i % 5 == 0:                # tick every five days, under the axis
-                out += _g(D_RULE + 0.25,
-                          rule(cx + bw / 2, pby, cx + bw / 2, pby + 3.5, t,
-                               w=0.8))
+        lang = tool.get("lang")
+        if lang:
+            c = _lang_color(cfg, lang, t, spare_at=i)
+            out += _g(d, f'<rect x="{x0:.1f}" y="{ry-9:.1f}" '
+                         f'width="{TB_SWATCH}" height="11" fill="url(#h{i})" '
+                         f'stroke="{c}" stroke-width="0.9"/>')
+        else:
+            # No swatch rather than a grey one. A swatch on this sheet means
+            # "this language has a share of the bar two sheets back", and
+            # OR-Tools does not.
+            out += _g(d, rule(x0 + 3, ry - 3.5, x0 + TB_SWATCH - 3, ry - 3.5,
+                              t, color="faint", w=1.0, opacity=0.7))
 
-        if peak:
-            ypk = pby - (peak / scale) * (pby - pty)
-            out += _g(D_DATA + 0.5,
-                      dim(px0, px1, ypk, f"PEAK {peak}", t, color="soft"))
+        out += _g(d, text(x0 + TB_TOOL_X, ry,
+                          _fit(str(tool.get("name") or DASH), TB_TOOL_W, 9),
+                          t, size=9, weight=600))
+        out += _g(d + 0.04, text(x0 + TB_FOR_X, ry,
+                                 _fit(str(tool.get("for") or DASH), TB_FOR_W,
+                                      8.4), t, size=8.4, color="soft"))
 
-        first = _datestr(act[0][0], "%m-%d") or ""
-        last = _datestr(act[-1][0], "%m-%d") or ""
-        out += _g(D_LETTER + 0.2, caps(px0, pby + 15, first, t, size=6.8,
-                                       track=0.8))
-        out += _g(D_LETTER + 0.2, caps(px1, pby + 15, last, t, size=6.8,
-                                       track=0.8, anchor="end"))
+        on = [str(s) for s in (tool.get("on") or []) if str(s).strip()]
+        if on:
+            out += _g(d + 0.08,
+                      text(x0 + TB_ON_X, ry,
+                           _fit(" · ".join(on), x1 - (x0 + TB_ON_X), 7.8), t,
+                           size=7.8, color="soft"))
+        else:
+            out += _g(d + 0.08,
+                      caps(x0 + TB_ON_X, ry, "not on this sheet", t, size=7,
+                           track=0.8))
 
-    # The GitHub events API does not carry per-push commit counts, so the axis
-    # says PUSHES. Labelling it COMMITS would be a nicer number and a false one.
-    lx, ly = 34, (pty + pby) / 2
-    out += _g(D_LETTER, f'<g transform="rotate(-90 {lx} {ly:.1f})">'
-                        + caps(lx, ly, "PUSHES", t, size=7.4, track=1.6,
-                               anchor="middle") + '</g>')
-
-    fy = pby + 34
-    tops = [_repo_name(n) for n, _c in (data.get("top_repos") or [])][:3]
-    out += _g(D_LETTER + 0.35, caps(x0, fy, "MOST ACTIVE", t, size=6.8,
-                                    track=1.1))
-    out += _g(D_DATA + 0.4,
-              text(x0, fy + 14, _fit(" · ".join(tops) if tops else DASH,
-                                     x1 - x0, 8.4), t, size=8.4, color="soft"))
-    lp = data.get("last_push") or {}
-    stamp = _datestr(lp.get("at"), "%Y-%m-%d %H:%M")
-    out += _g(D_DATA + 0.45,
-              caps(x1, fy, f"LAST PUSH {stamp or DASH}", t, size=6.8,
-                   track=0.9, anchor="end"))
-
-    H = max(SIDE_MIN_H, int(fy + 40))
-    return sheet(W, H, t, out, label="PUSH ACTIVITY / 30 D",
-                 sheet_no=_sheet_no("activity"))
-
+    fy = body_y + len(tools) * TB_ROW_H + 24
+    out += _g(D_LETTER + 0.4,
+              text(x0, fy, "projects named here are parts on sheet "
+                           f"{CARDS.index('bom') + 1}; the build fails on a "
+                           "name that isn't", t, size=6.9, color="faint"))
+    return sheet(W, H, t, out, defs=defs, label="TOOLBOX",
+                 sheet_no=_sheet_no("toolbox"))
 
 
 # ── entry point ──────────────────────────────────────────────────────────────
@@ -1668,9 +1527,9 @@ _RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
     "bom": _bom,
-    "telemetry": _telemetry,
+    "frameworks": _frameworks,
     "composition": _composition,
-    "activity": _activity,
+    "toolbox": _toolbox,
 }
 
 

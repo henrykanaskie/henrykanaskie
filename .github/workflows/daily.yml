@@ -1,10 +1,8 @@
 # Rebuilds the profile drawing once a day and commits the result.
 #
 # scripts/build.py generates everything on the profile from data/profile.toml:
-# the five SVG cards in assets/ and README.md itself. This workflow is the only
-# thing that keeps them current; nothing renders at request time any more.
-#
-# Replaces the old cards.yml.
+# the six SVG sheets in assets/, the chips, and README.md itself. This workflow
+# is the only thing that keeps them current; nothing renders at request time.
 
 name: Daily
 
@@ -59,13 +57,12 @@ jobs:
         #
         # The two failure modes are not the same thing.
         #
-        #   Transient upstream failure: thespacedevs is rate limited, the ISS
-        #   API times out, Last.fm 500s. build.py already swallows these
-        #   internally and renders the channel as a dashed "NO DATA" cell. It
-        #   exits 0. The run stays green and the profile shows a card with one
-        #   blank cell. Nothing to do here. The degradation lives in the script,
-        #   which is the right place for it because it also works when you run
-        #   locally.
+        #   Transient upstream failure: the GitHub API is rate limited or times
+        #   out. build.py already swallows these internally and renders the
+        #   affected channel as a dashed "NO DATA" cell. It exits 0. The run
+        #   stays green and the profile shows a sheet with one blank field.
+        #   Nothing to do here. The degradation lives in the script, which is
+        #   the right place for it because it also works when you run locally.
         #
         #   Genuine build crash: a malformed profile.toml, a status/completion
         #   band violation, a traceback in a renderer. build.py exits non-zero
@@ -77,11 +74,10 @@ jobs:
         # noticed the cards had stopped moving.
         run: python3 scripts/build.py
         env:
-          # Built-in, scoped to this repo, nothing to configure.
+          # Built-in, scoped to this repo, nothing to configure. It is also the
+          # only secret this build wants: every figure on the profile now comes
+          # from the GitHub API, so there is nothing else to hold a key for.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Optional. Empty string when the secret does not exist; build.py
-          # treats that as "listening channel off" rather than an error.
-          LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
 
       - name: Commit and push if changed
         run: |

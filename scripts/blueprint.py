@@ -313,9 +313,10 @@ def sheet(w, h, t, body, *, defs="", label=None, sheet_no=None, grid=True,
 def not_for_issue(w, h, t, *, note="SAMPLE DATA") -> str:
     """The stamp drafters put on a drawing that must not be built from.
 
-    This exists because `--offline` does not blank the telemetry. It substitutes
-    plausible sample values (a language mix, a crew count, an ISS fix) so layout
-    can be worked on without burning rate limit. Those numbers look real at a
+    This exists because `--offline` does not blank the live figures. It
+    substitutes plausible sample values (a language mix, a set of recent
+    commits) so layout can be worked on without burning rate limit against the
+    GitHub API. Those numbers look real at a
     glance, and a sheet whose entire claim is that every figure is measured
     cannot afford to ship invented ones because someone iterated on spacing and
     committed the result.
