@@ -17,7 +17,7 @@ Everything else is output:
 | `assets/<card>-dark.svg`            | `scripts/build.py`  | `data/profile.toml` |
 | `README.md`                         | `scripts/build.py`  | `data/profile.toml` |
 
-Six sheets, in this order: `titleblock`, `general`, `bom`, `assemblies`,
+Six sheets, in this order: `titleblock`, `general`, `bom`, `frameworks`,
 `composition`, `toolbox`. Each is drawn in a light and a dark variant, and in a wide
 and a narrow layout. Sheet numbers come from that order, so adding or reordering a card in
 `CARDS` renumbers every sheet automatically.
@@ -29,8 +29,8 @@ are the two chip rows.
 
 An SVG served through `<img>` gives a screen reader nothing but its alt text, so the
 alt text is written to carry the sheet's content rather than to name the picture: the
-bill of materials reads out its parts and their status, the assemblies sheet reads out
-each stack and what is built that way. `card_alt()` in `build.py` is where that lives. If
+bill of materials reads out its parts and their status, the frameworks matrix reads
+out each framework and what uses it. `card_alt()` in `build.py` is where that lives. If
 you add a sheet, give it a branch there.
 
 **Do not hand-edit `README.md` or anything in `assets/`.** The next build overwrites
@@ -53,7 +53,7 @@ does not spend your unauthenticated GitHub rate limit.
 > **`--offline` does not blank the live figures. It invents them.** It substitutes a
 > plausible language mix and a set of recent commits so the layout has something to
 > render. Those look exactly as real as the real ones. The bill of materials, the
-> assemblies and the toolbox are all drawn straight from the config, so those three
+> frameworks matrix and the toolbox are drawn straight from the config, so those three
 > sheets are the same offline as online.
 >
 > Every card from an offline build is therefore stamped **NOT FOR ISSUE** in red,
@@ -96,10 +96,9 @@ detail     = """
 The expanded paragraph. What it is, and the actual interesting problem in it."""
 notes      = ["tolerance callout", "another one", "at most three"]
 repo       = "https://github.com/henrykanaskie/repo-name"
-deps       = ["polars", "scikit-learn"]
 ```
 
-Then add it to an assembly, or the build fails. See below.
+Then name it from at least one `[[frameworks]]` entry, or the build fails. See below.
 
 | Field        | Notes                                                              |
 | ------------ | ------------------------------------------------------------------ |
@@ -113,7 +112,11 @@ Then add it to an assembly, or the build fails. See below.
 | `notes`      | Short, factual. Three maximum.                                      |
 | `repo`       | **Omit entirely** for a private or unpushed project.                |
 | `private`    | Optional. One line explaining why there is no link.                 |
-| `deps`       | Third-party runtime dependencies, by name. Required, and `[]` is a claim rather than a blank: it says this installs nothing, and the assemblies sheet counts those. |
+
+What a part is built **on** is not written here. It lives in `[[frameworks]]`, keyed
+the other way round: one entry per framework listing the parts that use it. That is
+the direction the matrix on sheet 4 is drawn from, and a second copy per project would
+only be a second thing to forget to update.
 
 ### The status / completion band rule
 
@@ -195,54 +198,63 @@ exist without it.
 
 ---
 
-## The assemblies sheet
+## The frameworks matrix
 
-Every part of the bill of materials belongs to exactly one assembly, and the sheet
-draws each assembly as a stack of layers read top to bottom: from the thing you touch
-down to where it lands on disk.
+Sheet 4 is a cross-reference matrix: frameworks down the side, the parts of the bill of
+materials across the top, a mark where one uses the other.
 
 ```toml
-[[assemblies]]
-name   = "LOCAL SERVER, NATIVE WINDOW"
-layers = ["a WKWebView in a Swift app", "HTTP on 127.0.0.1, and nowhere else",
-          "a standard-library server", "plain files on disk"]
-on     = ["groupStat", "Ground-Control", "orchestrate"]
+[[frameworks]]
+name    = "WKWebView"
+bundled = true
+on      = ["groupStat", "Ground-Control", "orchestrate"]
 ```
 
-| Field    | Notes                                                                  |
-| -------- | ---------------------------------------------------------------------- |
-| `name`   | The assembly, in caps. It is a column head, so keep it short.           |
-| `layers` | Outermost first. Three or four. Five is the most a column at this width can letter, and the build rejects more. |
-| `on`     | The parts built this way.                                              |
+| Field     | Notes                                                                 |
+| --------- | --------------------------------------------------------------------- |
+| `name`    | The framework, as it is actually called.                              |
+| `bundled` | `true` if it ships with the platform, `false` if you install it. Required, and the two bands on the sheet are exactly this field. |
+| `on`      | The parts that use it. Every name must match a `[[projects]]` name. An entry used by nothing is rejected: it would draw an empty row. |
 
-**Every part must appear in exactly one assembly.** The build fails on a part that is
-in none and on a part that is in two. That check is the important one: a project
-quietly missing from this sheet is the single error a reader cannot detect by looking,
-because the sheet has no idea it is incomplete.
+The list form ("project X uses A, B and C") hides the thing worth knowing, which is the
+shape of the columns: what recurs, what is used once, and which parts share a stack.
+That is the whole reason this is a matrix.
 
-"TYPICAL" is the drafting word and it is meant literally. A typical detail on a real
-drawing is one section that stands for every instance marked TYP; it does not claim
-they are identical. groupStat's server is Python and Ground-Control's is Node, and the
-assembly is the same assembly.
+**Every part must be named by at least one framework.** The build fails otherwise, and
+that check matters more here than it looks: an empty column on this sheet reads as
+"installs nothing", so a part that is merely unlisted would be making a claim nobody
+wrote.
 
-The footer counts `deps` across the bill of materials and reads out how many parts
-install nothing at all. It is counted rather than typed, so it cannot drift away from
-the parts it describes. That is also why `deps = []` has to be written out on a project
-rather than left off: an absent list and an empty one are different claims and the
-sheet cannot tell them apart.
+`bundled` is the sheet. SwiftUI is on every Mac and the Node standard library arrives
+with Node, so using either costs nothing and installs nothing. Anything in the
+INSTALLED band you have to go and fetch, and then keep fetching: a lock file, a version
+to pin, a thing that can break on a Tuesday.
 
-### What was here before
+Six of the ten parts have nothing at all in the INSTALLED band, and the sheet does not
+say so in words: those six columns are visibly empty. The footer's count is derived
+from the marks rather than typed beside them, so the sentence and the drawing cannot
+disagree.
 
-A project timeline, drawing each part from its first commit to its most recent. It was
-accurate and it was not worth a sheet. Six of ten projects were built inside five weeks
-against a window of two years, so most of the drawing was empty space and the bars that
-mattered were five pixels wide. Lettering each row's exact dates next to it made the
-sheet readable, but a chart that needs its own numbers written beside it is a chart
-doing no work.
+Column heads are set vertically. Ten columns across 620px is 62px each and
+`aggregateAnalytics` is eighteen characters; rotating is what a real matrix does with a
+long column head, and it is the only fitting that does not cut a project's name down to
+its designator.
 
-When the work all happens at once, time is not the interesting axis. What these
-projects have in common is how they are put together, and that turned out to be four
-shapes rather than ten.
+### Two sheets that were here first
+
+**A project timeline**, drawing each part from its first commit to its most recent. It
+was accurate and it was not worth a sheet: six of ten projects were built inside five
+weeks against a window of two years, so most of the drawing was empty space and the
+bars that mattered were five pixels wide. A chart that needs its own numbers lettered
+beside it is a chart doing no work.
+
+**A typical assemblies sheet**, grouping the parts into four shapes and drawing each as
+a stack of layers. It was true and it was an abstraction over the work rather than a
+reading of it. Writing it also produced a wrong claim that survived a full review:
+animAgent's stack was lettered "SwiftUI, and SpriteKit", and animAgent has no SwiftUI
+in it at all. A sheet built out of generalisations is a sheet where that kind of error
+has somewhere to hide. The matrix has nowhere: every mark is one framework in one
+project.
 
 ---
 
@@ -366,10 +378,11 @@ Python in `scripts/`, and nothing re-implements it.
 transiently. Run `python3 scripts/build.py` locally and read the warning it prints for that
 channel.
 
-**The build fails saying a part is in no assembly.** You added a `[[projects]]` block
-without adding its name to an `[[assemblies]]` entry. Every part belongs to exactly one.
+**The build fails saying a part is named by no framework.** You added a `[[projects]]`
+block without naming it from any `[[frameworks]]` entry. Every part has to appear in at
+least one, because an empty column on that sheet means "installs nothing".
 
-**The build fails naming a project.** A `[[tools]]` or `[[assemblies]]` entry cites a
+**The build fails naming a project.** A `[[tools]]` or `[[frameworks]]` entry cites a
 name that is not on the bill of materials, usually a case difference. The error prints
 every name it does know.
 

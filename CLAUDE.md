@@ -22,7 +22,7 @@ So a change to the profile is a change to `data/profile.toml` and nothing else.
 `main` that touches `data/profile.toml` or `scripts/`, and again at 13:00 UTC
 daily. Committing generated output by hand only creates a conflict with it.
 
-The six sheets, in order: `titleblock`, `general`, `bom`, `assemblies`,
+The six sheets, in order: `titleblock`, `general`, `bom`, `frameworks`,
 `composition`, `toolbox`. Sheet numbers derive from `cards.CARDS`, so reordering
 that list renumbers everything.
 
@@ -36,16 +36,19 @@ do. The title block strip carries STATUS / BASED IN / ON THIS SHEET / LAST PUSH
 / BUILT rather than DRAWN BY / REV / SCALE / UNITS, because a person has no
 scale and the revision letter only ever meant that somebody remembered to bump
 it. The revision table holds real commit subjects with real dates rather than
-repository names against N/A zones. `deps = []` has to be written out on a
-project rather than left off, because an absent list and an empty one are
-different claims and the sheet that counts them cannot tell them apart.
+repository names against N/A zones. On the frameworks matrix an unlisted part
+would draw an empty column, and an empty column there already means "installs
+nothing", so the build refuses a part no framework names rather than let an
+oversight sit on the sheet looking like a claim.
 
-The same rule removes sheets. A project timeline sat at sheet 4 and was
-perfectly accurate: six of ten projects were built inside five weeks against a
-window of two years, so most of it was empty and the bars that mattered were
-five pixels wide. Accurate is necessary and it is not sufficient. It was
-replaced by the assemblies sheet, which says something the reader could not
-already get from the bill of materials.
+Sheet 4 went through three subjects before it held. A project timeline was
+perfectly accurate and mostly empty, because six of ten projects were built
+inside five weeks against a window of two years. A typical assemblies sheet
+grouped the parts into four shapes, and generalising is what let it letter
+animAgent's stack as "SwiftUI, and SpriteKit" when animAgent contains no
+SwiftUI at all. Accurate is necessary and not sufficient, and an abstraction
+over the work is somewhere an error can hide. The matrix that replaced them has
+nowhere: every mark is one framework in one project.
 
 When adding to a sheet, the question is not "would a drawing have this" but
 "can this be filled with something measured". If it cannot, it does not go on.
@@ -57,9 +60,9 @@ When adding to a sheet, the question is not "would a drawing have this" but
 
 Standard library only, no install step. `--check` runs the real validators:
 summary length against the BOM description column, the status/completion band
-assertions, the notes-per-row cap, `deps` on every part, that every part is
-in exactly one assembly, and every project name a `[[tools]]` or
-`[[assemblies]]` row cites. It prints `config ok: N projects` when the config is
+assertions, the notes-per-row cap, that every part is named by at least one
+framework, and every project name a `[[tools]]` or `[[frameworks]]` row
+cites. It prints `config ok: N projects` when the config is
 sound.
 
 `--offline` writes cards stamped `NOT FOR ISSUE / SAMPLE DATA`, because it fills
@@ -82,13 +85,13 @@ the 60/hour anonymous budget:
   DONE means it.
 - Reference designators are not recycled. A retired `TUL-01` leaves a gap; the
   next tool part is `TUL-05`.
-- A new part needs a home in `[[assemblies]]` as well as a BOM row. The build
-  fails on a part in no assembly and on a part in two, because a project
-  quietly missing from that sheet is the one error a reader cannot see.
+- A new part needs at least one `[[frameworks]]` entry naming it as well as a
+  BOM row. What a part is built on is keyed by framework, not by project, so
+  there is one place to update rather than two that can disagree.
 - The repo chip rail under the sheet is generated from whichever parts carry a
   `repo` URL. There is no separate list to update, and `pack_rows()` splits the
   rail into balanced rows when it outgrows the README column.
-- Prose in `[about]`, `[notes]`, `[[tools]]` and `[[assemblies]]` names
+- Prose in `[about]`, `[notes]`, `[[tools]]` and `[[frameworks]]` names
   specific projects. When a part leaves the BOM, check all of them for
   references that just went stale. The `on` fields are checked by the build;
   the prose is not.

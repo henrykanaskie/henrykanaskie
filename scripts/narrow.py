@@ -12,8 +12,8 @@ dropped rather than squeezed to four characters.
                   lines, field strip down to one column
     _general      the same prose, notes, and focus tags, rewrapped
     _composition  bar full width, legend down to one column
-    _assemblies   the four sections stacked instead of set side by side,
-                  each layer keeping the full measure
+    _frameworks   the matrix unrolled: one block per framework, with its
+                  parts listed under it as marks and designators
     _toolbox      each tool as a stacked block instead of a three column row
 
 The usable measure is 264px: NARROW_W less the frame inset on both sides less a
@@ -313,87 +313,90 @@ def _composition(cfg, data, t):
                   label="MATERIAL COMPOSITION")
 
 
-# ── sheet 4: typical assemblies ──────────────────────────────────────────────
+# ── sheet 4: frameworks ──────────────────────────────────────────────────────
 #
-# The wide sheet sets the four assemblies side by side, which is most of the
-# point: you see at a glance that there are four shapes and not ten. Four
-# columns will not fit in 264px, so they stack, and the comparison becomes
-# vertical rather than horizontal. Every layer keeps its own full width, which
-# is what the wide sheet has to ration.
+# The wide sheet is a matrix ten columns across. Ten columns of 62px do not
+# become ten columns of 18px, so the matrix unrolls: one block per framework,
+# its parts listed under it by designator. What is lost is the column reading,
+# which is most of why the matrix exists, so the two bands do the work here
+# instead. A reader still comes away with the thing that matters, which is how
+# short the INSTALLED band is.
 
-ASM_LINE = 11.5
-ASM_LAYER_SIZE = 8.0
+FW_ROW_H = 12
 
 
-def _assemblies(cfg, data, t):
-    rows = cards._asm_rows(cfg)
-    if not rows:
-        return _sheet("assemblies", 160, t,
+def _frameworks(cfg, data, t):
+    projects = list(cfg.get("projects") or [])
+    bands = cards._fw_bands(cfg)
+    if not projects or not bands:
+        return _sheet("frameworks", 160, t,
                       cards._nodata(X0, 46, SPAN, 70, t,
-                                    label="NO ASSEMBLIES LISTED"),
-                      label="TYPICAL ASSEMBLIES")
+                                    label="NO FRAMEWORKS LISTED"),
+                      label="FRAMEWORKS")
 
-    defs = ""
-    for i, _row in enumerate(rows):
-        defs += bp.defs_hatch(i, t["rule"],
-                              angle=cards.HATCH_ANGLES[i % len(cards.HATCH_ANGLES)],
-                              gap=6, w=0.7)
-
-    out, y = "", 50
-    for c, (asm, parts) in enumerate(rows):
-        d = cards.D_DATA + c * 0.08
-        out += cards._g(cards.D_LETTER + c * 0.05,
-                        bp.caps(X0, y, cards._fit(str(asm.get("name") or cards.DASH),
-                                                  SPAN, 7.6, 1.0),
-                                t, size=7.6, track=1.0, color="ink"))
-        out += cards._drawn_rule(X0, y + 6, X1, y + 6, t,
-                                 cards.D_RULE + c * 0.04, w=1.3, color="rule")
+    out, y = "", 48
+    used_installed = set()
+    for b, (band_label, rows) in enumerate(bands):
+        if b:
+            y += 10
+            out += cards._drawn_rule(X0, y - 6, X1, y - 6, t,
+                                     cards.D_RULE + 0.2, w=1.0, color="rule")
+        out += cards._g(cards.D_LETTER + 0.1 + b * 0.06,
+                        bp.caps(X0, y, band_label, t, size=6.6, track=1.1,
+                                color="soft"))
         y += 14
 
-        for i, layer in enumerate([str(s) for s in (asm.get("layers") or [])]):
-            wrapped = cards._wrap(layer, SPAN - 18, ASM_LAYER_SIZE)
-            h = 22 + (len(wrapped) - 1) * ASM_LINE
-            edge = t["accent"] if i == 0 else t["rule"]
-            out += cards._g(d + i * 0.05,
-                            f'<rect x="{X0:.1f}" y="{y:.1f}" width="{SPAN:.1f}" '
-                            f'height="{h:.1f}" '
-                            f'fill="{"none" if i else f"url(#h{c})"}" '
-                            f'stroke="{edge}" '
-                            f'stroke-width="{1.4 if i == 0 else 0.9}">'
-                            + bp.fade(d + i * 0.05) + '</rect>')
-            ty = y + (h - (len(wrapped) - 1) * ASM_LINE) / 2 + 2.8
-            for k, line in enumerate(wrapped):
-                out += cards._g(d + i * 0.05 + 0.06,
-                                bp.text(X0 + 9, ty + k * ASM_LINE, line, t,
-                                        size=ASM_LAYER_SIZE,
-                                        color="ink" if i == 0 else "soft"))
-            y += h
-        y += 8
+        for i, (fw, parts) in enumerate(rows):
+            d = cards.D_DATA + b * 0.3 + i * 0.035
+            if i:
+                out += cards._g(cards.D_RULE + 0.1,
+                                bp.rule(X0, y - 9, X1, y - 9, t, w=0.5,
+                                        opacity=0.5))
+            out += cards._g(d, bp.text(X0, y,
+                                       cards._fit(str(fw.get("name") or cards.DASH),
+                                                  SPAN - 20, 8.2),
+                                       t, size=8.2))
+            out += cards._g(d + 0.08,
+                            bp.text(X1, y, str(len(parts)), t, size=7.2,
+                                    color="soft" if parts else "faint",
+                                    anchor="end"))
+            y += FW_ROW_H
 
-        for k, part in enumerate(parts):
-            py = y + k * 12
-            out += cards._g(d + 0.3 + k * 0.03,
-                            bp.rule(X0 + 2, py - 3.2, X0 + 8, py - 3.2, t,
-                                    w=0.8, color="rule", opacity=0.8))
-            label = f'{part.get("pn") or cards.DASH}  {part.get("name") or ""}'
-            out += cards._g(d + 0.3 + k * 0.03,
-                            bp.text(X0 + 12, py, cards._fit(label.strip(),
-                                                            SPAN - 12, 7.8),
-                                    t, size=7.8, color="soft"))
-        y += len(parts) * 12 + 20
+            # The mark and the designator together, so the colour still keys to
+            # the language the way it does on the wide sheet.
+            mx = X0 + 8
+            for part in parts:
+                if not fw.get("bundled"):
+                    used_installed.add(str(part.get("name")))
+                label = str(part.get("pn") or cards.DASH)
+                w = cards._w(label, 6.8, 0.6) + 22
+                if mx + w > X1:
+                    mx = X0 + 8
+                    y += 11
+                j = projects.index(part) if part in projects else 0
+                c = cards._lang_color(cfg, part.get("lang"), t, spare_at=j)
+                out += cards._g(d + 0.1,
+                                f'<rect x="{mx:.1f}" y="{y - 6:.1f}" width="6" '
+                                f'height="6" fill="{c}" stroke="{c}" '
+                                f'stroke-width="0.8" rx="0.8">'
+                                + bp.fade(d + 0.1) + '</rect>')
+                out += cards._g(d + 0.1,
+                                bp.caps(mx + 10, y, label, t, size=6.8,
+                                        track=0.6, color="soft"))
+                mx += w
+            y += 12
 
-    projects = cfg.get("projects") or []
-    bare = [p for p in projects if not (p.get("deps") or [])]
-    if projects:
-        for i, line in enumerate(cards._wrap(
-                f"{len(bare)} of {len(projects)} install nothing at all: no "
-                "package manager, no lock file, no build step", SPAN, 7.4)):
-            out += cards._g(cards.D_DATA + 0.6,
-                            bp.text(X0, y + i * 10.5, line, t, size=7.4,
-                                    color="ink" if bare else "faint"))
-            y += 10.5
-    return _sheet("assemblies", y + 24, t, out, defs=defs,
-                  label="TYPICAL ASSEMBLIES")
+    y += 6
+    out += cards._drawn_rule(X0, y - 8, X1, y - 8, t, cards.D_RULE + 0.3,
+                             w=1.2, color="rule")
+    bare = [p for p in projects if str(p.get("name")) not in used_installed]
+    for i, line in enumerate(cards._wrap(
+            f"{len(bare)} of {len(projects)} install nothing at all",
+            SPAN, 8.2)):
+        out += cards._g(cards.D_DATA + 0.7,
+                        bp.text(X0, y + i * 11, line, t, size=8.2, weight=600))
+        y += 11
+    return _sheet("frameworks", y + 22, t, out, label="FRAMEWORKS")
 
 
 # ── sheet 6: toolbox ─────────────────────────────────────────────────────────
@@ -476,6 +479,6 @@ RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
     "composition": _composition,
-    "assemblies": _assemblies,
+    "frameworks": _frameworks,
     "toolbox": _toolbox,
 }

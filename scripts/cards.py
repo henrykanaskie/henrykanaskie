@@ -49,7 +49,7 @@ rule, dim, balloon, revcloud = bp.rule, bp.dim, bp.balloon, bp.revcloud
 fade, grow, draw_on = bp.fade, bp.grow, bp.draw_on
 sheet, field, defs_hatch = bp.sheet, bp.field, bp.defs_hatch
 
-CARDS = ["titleblock", "general", "bom", "assemblies", "composition",
+CARDS = ["titleblock", "general", "bom", "frameworks", "composition",
          "toolbox"]
 
 
@@ -885,177 +885,175 @@ def _bom(cfg, data, t):
                  sheet_no=_sheet_no("bom"))
 
 
-# ── sheet 4: typical assemblies ──────────────────────────────────────────────
+# ── sheet 4: frameworks ──────────────────────────────────────────────────────
 #
-# The shape each project takes, as a stack of layers read top to bottom: from
-# the thing you touch down to where it lands on disk. It is drawn the way a wall
-# section is drawn, because that is the same drawing: a cut through a thing to
-# show what it is made of.
+# A cross-reference matrix: frameworks down the side, the parts of the bill of
+# materials across the top, a mark where one uses the other. Drawings carry
+# matrices like this because the list form ("project X uses A, B and C") hides
+# the thing worth knowing, which is the shape of the columns. What recurs, what
+# is used once, and which parts share a stack with which.
 #
-# TYPICAL is the drafting word and it is meant literally. A typical detail is
-# one section that stands for every instance marked TYP. It does not claim they
-# are identical: groupStat's server is Python and Ground-Control's is Node, and
-# the assembly is the same assembly.
+# The two bands are the sheet. BUNDLED ships with the platform: SwiftUI is on
+# every Mac and the Node standard library arrives with Node, so using it costs
+# nothing and installs nothing. INSTALLED you have to go and fetch, and then
+# keep fetching: a lock file, a version to pin, a thing that can break on a
+# Tuesday.
 #
-# This replaced a project timeline. That sheet was accurate and it was not worth
-# a sheet: six of ten projects were built inside five weeks against a window of
-# two years, so most of the drawing was empty and the bars that mattered were
-# five pixels wide. When the work all happens at once, time is not the
-# interesting axis. What these have in common is how they are put together, and
-# that turns out to be four shapes rather than ten.
+# Six of the ten parts have nothing at all in the INSTALLED band, and the sheet
+# does not have to claim that in words. Those six columns are visibly empty. It
+# is the one fact on this profile best made by drawing it and then saying
+# nothing, so the footer only counts what the marks already show.
+#
+# Column heads are set vertically. Ten columns across 620px is 62px each and
+# `aggregateAnalytics` is 18 characters; rotating is what a real matrix does
+# with a long column head, and it is the only fitting that does not abbreviate
+# a project's name down to its designator.
 
-ASM_GAP = 18            # between columns
-ASM_LAYER_PAD = 13      # above and below a layer's lettering
-ASM_LINE = 11.5         # lettering leading inside a layer
-ASM_LAYER_SIZE = 7.6
-ASM_MIN_LAYER = 30      # a layer thinner than this reads as a rule, not a layer
+FW_ROW_H = 17
+FW_LABEL_W = 214        # framework names, down the left
+FW_MARK = 7.5           # side of the filled square
+FW_HEAD_H = 108         # rotated column heads
+FW_BAND_GAP = 20        # between the two bands
+FW_BAND_LABEL_H = 18    # the band's own heading, above its rows
 
 
-def _asm_rows(cfg):
-    """(assembly, parts) for each assembly, parts resolved to project dicts.
+def _fw_bands(cfg):
+    """[(band label, [(framework, [parts])])], bundled first, then installed.
 
-    An `on` entry that names nothing is dropped here rather than lettered as a
-    designator with no part behind it. build.py rejects that case outright, so
-    reaching this is a config that skipped validation.
+    A band with no entries is dropped rather than drawn as a heading over
+    nothing. An `on` name that matches no part is dropped here; build.py
+    rejects that case outright, so reaching it means validation was skipped.
     """
     by_name = {str(p.get("name") or ""): p for p in (cfg.get("projects") or [])}
+    bands = [("BUNDLED WITH THE PLATFORM", True), ("INSTALLED", False)]
     out = []
-    for asm in cfg.get("assemblies") or []:
-        parts = [by_name[str(n)] for n in (asm.get("on") or [])
-                 if str(n) in by_name]
-        out.append((asm, parts))
+    for label, bundled in bands:
+        rows = []
+        for fw in cfg.get("frameworks") or []:
+            if bool(fw.get("bundled")) is not bundled:
+                continue
+            parts = [by_name[str(n)] for n in (fw.get("on") or [])
+                     if str(n) in by_name]
+            rows.append((fw, parts))
+        if rows:
+            out.append((label, rows))
     return out
 
 
-def _assemblies(cfg, data, t):
+def _frameworks(cfg, data, t):
     W = 900
     x0, x1 = 26, 874
-    rows = _asm_rows(cfg)
+    projects = list(cfg.get("projects") or [])
+    bands = _fw_bands(cfg)
 
-    head_y = 54
-    if not rows:
+    head_y = 50
+    if not projects or not bands:
         return sheet(W, 200, t,
                      _nodata(x0, head_y, x1 - x0, 90, t,
-                             label="NO ASSEMBLIES LISTED"),
-                     label="TYPICAL ASSEMBLIES",
-                     sheet_no=_sheet_no("assemblies"))
+                             label="NO FRAMEWORKS LISTED"),
+                     label="FRAMEWORKS", sheet_no=_sheet_no("frameworks"))
 
-    n = len(rows)
-    col_w = (x1 - x0 - ASM_GAP * (n - 1)) / n
+    grid_x = x0 + FW_LABEL_W
+    col_w = (x1 - grid_x) / len(projects)
+    body_y = head_y + FW_HEAD_H + 10
 
-    # Every column's stack starts at the same y and every Nth layer is the same
-    # height across columns, so the four sections read as one drawing rather
-    # than four charts that happen to be adjacent. Heights come from the
-    # longest lettering in that band, measured, not guessed.
-    depth = max(len(a.get("layers") or []) for a, _p in rows)
-    band_h = []
-    for i in range(depth):
-        lines = 1
-        for asm, _parts in rows:
-            layers = asm.get("layers") or []
-            if i < len(layers):
-                lines = max(lines, len(_wrap(str(layers[i]), col_w - 18,
-                                             ASM_LAYER_SIZE)))
-        band_h.append(max(ASM_MIN_LAYER, ASM_LAYER_PAD * 2 + lines * ASM_LINE))
-
-    name_y = head_y
-    stack_y = name_y + 22
-    stack_h = sum(band_h)
-    parts_y = stack_y + stack_h + 20
-
-    # The parts list under each stack wraps, so the sheet closes under whichever
-    # column carries the most designators.
-    part_lines = 1
-    for _asm, parts in rows:
-        part_lines = max(part_lines, len(parts))
-    H = int(parts_y + part_lines * 14 + 46)
-
-    defs = ""
-    for i, (_asm, _parts) in enumerate(rows):
-        defs += defs_hatch(i, t["rule"],
-                           angle=HATCH_ANGLES[i % len(HATCH_ANGLES)], gap=6,
-                           w=0.7)
+    # Every band costs its own heading as well as its rows, and leaving that
+    # out of the height put the footer 36px below the frame, printed over the
+    # zone marks in the margin.
+    n_rows = sum(len(rows) for _l, rows in bands)
+    grid_h = (n_rows * FW_ROW_H + (len(bands) - 1) * FW_BAND_GAP
+              + len(bands) * FW_BAND_LABEL_H)
+    H = int(body_y + grid_h + 62)
 
     out = ""
 
-    # The one legend the sheet needs: which end of a stack is which. There was
-    # a matching WHERE IT LANDS under the stacks, and it had to go twice over:
-    # it sat directly on the leader line dropping out of the shortest column,
-    # and the footer's "each stack reads top to bottom" was already saying it.
-    out += _g(D_LETTER, caps(x0, stack_y - 6, "what you touch", t, size=6.4,
-                             track=0.9))
-    out += _g(D_LETTER, caps(x1, stack_y - 6, "typ.", t, size=6.4, track=0.9,
-                             anchor="end"))
+    # ── column heads, set vertically, and the rule they sit on ─────────────
+    for j, p in enumerate(projects):
+        cx = grid_x + (j + 0.5) * col_w
+        d = D_LETTER + j * 0.03
+        label = str(p.get("name") or DASH)
+        out += _g(d, f'<g transform="rotate(-90 {cx:.1f} {body_y - 14:.1f})">'
+                  + text(cx + 4, body_y - 11.4,
+                         _fit(label, FW_HEAD_H - 16, 7.6), t, size=7.6)
+                  + '</g>')
+        out += _g(d, caps(cx, body_y - 4, p.get("pn") or DASH, t, size=6,
+                          track=0.6, anchor="middle"))
+    out += _drawn_rule(x0, body_y, x1, body_y, t, D_RULE, w=1.3, color="rule")
 
-    for c, (asm, parts) in enumerate(rows):
-        cx = x0 + c * (col_w + ASM_GAP)
-        d = D_DATA + c * 0.10
+    # A faint column rule the full height of the grid, so the eye can run down
+    # a project without losing its place across nineteen rows.
+    for j in range(len(projects) + 1):
+        gx = grid_x + j * col_w
+        out += _g(D_RULE + 0.15,
+                  rule(gx, body_y, gx, body_y + grid_h, t, color="grid",
+                       w=0.9))
 
-        title = str(asm.get("name") or DASH)
-        out += _g(D_LETTER + c * 0.05,
-                  caps(cx, name_y, _fit(title, col_w, 8, 1.1), t, size=8,
-                       track=1.1, color="ink"))
-        out += _drawn_rule(cx, name_y + 7, cx + col_w, name_y + 7, t,
-                           D_RULE + c * 0.04, w=1.3, color="rule")
+    # ── the bands ───────────────────────────────────────────────────────────
+    y = body_y
+    used_installed = set()
+    for b, (band_label, rows) in enumerate(bands):
+        if b:
+            y += FW_BAND_GAP
+            out += _drawn_rule(x0, y - FW_BAND_GAP / 2, x1,
+                               y - FW_BAND_GAP / 2, t, D_RULE + 0.2, w=1.0,
+                               color="rule")
+        out += _g(D_LETTER + 0.1 + b * 0.06,
+                  caps(x0, y + 12, band_label, t, size=6.8, track=1.2,
+                       color="soft"))
+        y += FW_BAND_LABEL_H
 
-        layers = [str(s) for s in (asm.get("layers") or [])]
-        ly = stack_y
-        for i in range(depth):
-            h = band_h[i]
-            if i >= len(layers):
-                # A shorter assembly stops where it stops. The band below it is
-                # left open rather than padded with a blank box, which would
-                # read as a layer nobody bothered to name.
-                break
-            # The outermost layer carries the accent: it is the only one of the
-            # four the reader ever sees.
-            edge = t["accent"] if i == 0 else t["rule"]
-            out += _g(d + i * 0.05,
-                      f'<rect x="{cx:.1f}" y="{ly:.1f}" width="{col_w:.1f}" '
-                      f'height="{h:.1f}" fill="{"none" if i else f"url(#h{c})"}" '
-                      f'stroke="{edge}" stroke-width="{1.4 if i == 0 else 0.9}">'
-                      + fade(d + i * 0.05) + '</rect>')
-            wrapped = _wrap(layers[i], col_w - 18, ASM_LAYER_SIZE)
-            ty = ly + (h - (len(wrapped) - 1) * ASM_LINE) / 2 + 2.6
-            for k, line in enumerate(wrapped):
-                out += _g(d + i * 0.05 + 0.06,
-                          text(cx + 9, ty + k * ASM_LINE, line, t,
-                               size=ASM_LAYER_SIZE,
-                               color="ink" if i == 0 else "soft"))
-            ly += h
+        for i, (fw, parts) in enumerate(rows):
+            ry = y + i * FW_ROW_H
+            d = D_DATA + (b * 0.3) + i * 0.035
+            if i:
+                out += _g(D_RULE + 0.1,
+                          rule(x0, ry - 3, x1, ry - 3, t, w=0.5, opacity=0.5))
+            out += _g(d, text(x0, ry + 8,
+                              _fit(str(fw.get("name") or DASH),
+                                   FW_LABEL_W - 32, 8.2), t, size=8.2))
+            # How many parts use it, right up against the grid. A framework
+            # used once and one used three times are different facts and the
+            # marks alone make you count them.
+            out += _g(d + 0.08,
+                      text(grid_x - 12, ry + 8, str(len(parts)), t, size=7.4,
+                           color="soft" if parts else "faint", anchor="end"))
 
-        # A leader tick off the bottom of the stack, into the parts it names.
-        out += _g(d + 0.3, rule(cx + 4, ly, cx + 4, parts_y - 11, t, w=0.8,
-                                color="rule", opacity=0.8))
-        for k, part in enumerate(parts):
-            py = parts_y + k * 14
-            out += _g(d + 0.34 + k * 0.04,
-                      rule(cx + 4, py - 3.4, cx + 10, py - 3.4, t, w=0.8,
-                           color="rule", opacity=0.8))
-            label = f'{part.get("pn") or DASH}  {part.get("name") or ""}'.strip()
-            out += _g(d + 0.34 + k * 0.04,
-                      text(cx + 14, py, _fit(label, col_w - 14, 7.8), t,
-                           size=7.8, color="soft"))
+            for part in parts:
+                if not fw.get("bundled"):
+                    used_installed.add(str(part.get("name")))
+                try:
+                    j = projects.index(part)
+                except ValueError:
+                    continue
+                cx = grid_x + (j + 0.5) * col_w
+                c = _lang_color(cfg, part.get("lang"), t, spare_at=j)
+                out += _g(d + 0.1,
+                          f'<rect x="{cx - FW_MARK / 2:.1f}" '
+                          f'y="{ry + 4 - FW_MARK / 2:.1f}" width="{FW_MARK}" '
+                          f'height="{FW_MARK}" fill="{c}" stroke="{c}" '
+                          f'stroke-width="0.8" rx="0.8">'
+                          + fade(d + 0.1) + '</rect>')
+        y += len(rows) * FW_ROW_H
+
+    out += _drawn_rule(x0, y + 2, x1, y + 2, t, D_RULE + 0.3, w=1.2,
+                       color="rule")
 
     # ── footer ──────────────────────────────────────────────────────────────
     #
-    # One readout, and it is the fact this sheet exists to make visible. It is
-    # counted from the `deps` list on each part rather than typed, so it cannot
-    # drift away from the bill of materials.
-    projects = cfg.get("projects") or []
-    bare = [p for p in projects if not (p.get("deps") or [])]
-    fy = parts_y + part_lines * 14 + 18
-    if projects:
-        out += _g(D_DATA + 0.6,
-                  text(x0, fy, f"{len(bare)} of {len(projects)} install "
-                               f"nothing at all: no package manager, no lock "
-                               f"file, no build step", t, size=7.4,
-                       color="ink" if bare else "faint"))
+    # The count is derived from the marks, not written down beside them, so the
+    # sentence and the drawing cannot disagree. It deliberately says less than
+    # the sheet does: the six empty columns are the argument, and a footer that
+    # restated them would be explaining a picture that works.
+    bare = [p for p in projects if str(p.get("name")) not in used_installed]
+    fy = y + 26
+    out += _g(D_DATA + 0.7,
+              text(x0, fy, f"{len(bare)} of {len(projects)} install nothing "
+                           f"at all", t, size=8.2, weight=600))
     out += _g(D_LETTER + 0.5,
-              text(x1, fy, "each stack reads top to bottom", t, size=6.9,
-                   color="faint", anchor="end"))
-    return sheet(W, H, t, out, defs=defs, label="TYPICAL ASSEMBLIES",
-                 sheet_no=_sheet_no("assemblies"))
+              text(x1, fy, "a mark is coloured by the part's own language",
+                   t, size=6.9, color="faint", anchor="end"))
+    return sheet(W, H, t, out, label="FRAMEWORKS",
+                 sheet_no=_sheet_no("frameworks"))
 
 
 # ── sheet 5: material composition ────────────────────────────────────────────
@@ -1529,7 +1527,7 @@ _RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
     "bom": _bom,
-    "assemblies": _assemblies,
+    "frameworks": _frameworks,
     "composition": _composition,
     "toolbox": _toolbox,
 }

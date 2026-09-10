@@ -181,74 +181,40 @@ def validate(cfg: dict) -> None:
                 f"[identity] has no '{key}'. It is a field in the title block "
                 f"strip and nothing else can supply it")
 
-    # `deps` is what the assemblies sheet counts to say how many of these
-    # install nothing. An absent list and an empty one are different claims and
-    # the sheet cannot tell them apart, so an absent one fails here.
-    for p in cfg.get("projects", []):
-        who = p.get("name", "<unnamed>")
-        if "deps" not in p:
-            problems.append(
-                f"{who}: no 'deps'. An empty list is the claim that it installs "
-                f"nothing, and the assemblies sheet counts those, so it has to "
-                f"be written down rather than left out")
-        elif not isinstance(p["deps"], list):
-            problems.append(f"{who}: 'deps' is {p['deps']!r}, expected a list")
-
-    # Every part must appear on the assemblies sheet exactly once. A project
-    # quietly missing from it is the one error a reader could not detect by
-    # looking at the sheet, because the sheet has no idea it is incomplete.
+    # The frameworks matrix is drawn one row per framework, so a project is on
+    # it only by being named. A part nobody names gets a column of blanks, which
+    # on this sheet reads as "installs nothing and uses nothing", and one of
+    # those two is a claim and the other is an oversight that looks identical.
     known = {str(p.get("name", "")) for p in cfg.get("projects", [])}
-    placed = {}
-    for asm in cfg.get("assemblies", []):
-        who = asm.get("name", "<unnamed>")
-        if not str(asm.get("name") or "").strip():
-            problems.append("an [[assemblies]] entry has no 'name'")
-        layers = asm.get("layers") or []
-        if not layers:
-            problems.append(f"assembly {who!r}: no 'layers' to draw")
-        elif len(layers) > 5:
+    seen = set()
+    for fw in cfg.get("frameworks", []):
+        who = fw.get("name", "<unnamed>")
+        if not str(fw.get("name") or "").strip():
+            problems.append("a [[frameworks]] entry has no 'name'")
+        if not isinstance(fw.get("bundled"), bool):
             problems.append(
-                f"assembly {who!r}: {len(layers)} layers. Five is the most a "
-                f"column at this width can letter")
-        for on in asm.get("on", []) or []:
-            if str(on) not in known:
+                f"framework {who!r}: 'bundled' is {fw.get('bundled')!r}, "
+                f"expected true (ships with the platform) or false (installed)")
+        on = fw.get("on") or []
+        if not on:
+            problems.append(
+                f"framework {who!r}: used by nothing, so it would draw an "
+                f"empty row. Remove it or name the part that uses it")
+        for name in on:
+            if str(name) not in known:
                 problems.append(
-                    f"assembly {who!r}: cites '{on}', which is not a part on "
-                    f"the bill of materials. Known parts: "
+                    f"framework {who!r}: cites '{name}', which is not a part "
+                    f"on the bill of materials. Known parts: "
                     f"{', '.join(sorted(known))}")
-            elif str(on) in placed:
-                problems.append(
-                    f"'{on}' is in two assemblies, {placed[str(on)]!r} and "
-                    f"{who!r}. A part is built one way")
             else:
-                placed[str(on)] = who
-    if cfg.get("assemblies"):
-        for missing in sorted(known - set(placed)):
+                seen.add(str(name))
+    if cfg.get("frameworks"):
+        for missing in sorted(known - seen):
             problems.append(
-                f"{missing}: on the bill of materials but in no assembly, so "
-                f"it would be missing from sheet "
-                f"{cards.CARDS.index('assemblies') + 1} with nothing to show it")
-
-    # The toolbox sheet cites parts of the bill of materials by name. A typo
-    # there draws a citation to a part that does not exist, which is the one
-    # kind of error this drawing set cannot afford, so the names are checked
-    # against the BOM rather than printed as written.
-    known = {str(p.get("name", "")) for p in cfg.get("projects", [])}
-    for tool in cfg.get("tools", []):
-        who = tool.get("name", "<unnamed>")
-        for required in ("name", "for"):
-            if not str(tool.get(required) or "").strip():
-                problems.append(f"tool {who!r}: missing '{required}'")
-        if tool.get("lang") and tool["lang"] not in langs:
-            problems.append(
-                f"tool {who!r}: language '{tool['lang']}' has no colour in "
-                f"[palette.lang]")
-        for on in tool.get("on", []) or []:
-            if str(on) not in known:
-                problems.append(
-                    f"tool {who!r}: cites '{on}', which is not a part on the "
-                    f"bill of materials. Known parts: "
-                    f"{', '.join(sorted(known))}")
+                f"{missing}: named by no framework, so its column on sheet "
+                f"{cards.CARDS.index('frameworks') + 1} would be empty. An "
+                f"empty column there means 'installs nothing', so a part that "
+                f"is merely unlisted reads as a claim")
 
     weighting = cfg.get("languages", {}).get("weighting", "equal")
     if weighting not in ("equal", "bytes"):
@@ -448,20 +414,20 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
                         for x in cfg.get("about", {}).get("points", []))
         foc = ", ".join(cfg.get("focus", []))
         return f"{body} {pts}. Focus areas: {foc}."
-    if card == "assemblies":
-        bits = []
-        for asm, parts in cards._asm_rows(cfg):
-            layers = ", then ".join(str(x) for x in (asm.get("layers") or []))
-            names = ", ".join(str(p.get("name")) for p in parts)
-            bits.append(f'{asm.get("name")}: {layers}'
-                        + (f". Built this way: {names}" if names else ""))
+    if card == "frameworks":
+        bits, used = [], set()
+        for band, rows in cards._fw_bands(cfg):
+            for fw, parts in rows:
+                names = ", ".join(str(p.get("name")) for p in parts)
+                bits.append(f'{fw.get("name")} ({band.lower()}) in {names}')
+                if not fw.get("bundled"):
+                    used |= {str(p.get("name")) for p in parts}
         projects = cfg.get("projects", [])
-        bare = sum(1 for p in projects if not (p.get("deps") or []))
+        bare = len({str(p.get("name")) for p in projects} - used)
         tail = (f" {bare} of {len(projects)} install nothing at all."
                 if projects else "")
-        return ("Typical assemblies, each read from what you touch down to "
-                "where it lands. " + ("; ".join(bits) + "." if bits else
-                                      "None listed.") + tail)
+        return ("Frameworks, and which project uses each. "
+                + ("; ".join(bits) + "." if bits else "None listed.") + tail)
     if card == "composition":
         langs = ", ".join(f"{n} {100*v:.0f}%" for n, v in
                           (data.get("languages") or [])[:6])
@@ -503,7 +469,7 @@ def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
         "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), vers),
         "CARD_GENERAL": picture("general", card_alt("general", cfg, data), vers),
         "CARD_BOM": picture("bom", card_alt("bom", cfg, data), vers),
-        "CARD_ASSEMBLIES": picture("assemblies", card_alt("assemblies", cfg, data), vers),
+        "CARD_FRAMEWORKS": picture("frameworks", card_alt("frameworks", cfg, data), vers),
         "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), vers),
         "CARD_TOOLBOX": picture("toolbox", card_alt("toolbox", cfg, data), vers),
     }

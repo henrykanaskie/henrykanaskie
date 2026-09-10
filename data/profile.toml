@@ -116,16 +116,16 @@ blurb = "scaffold and intent"
 #    notes      tolerance callouts. Short, factual, no more than three
 #    repo       omit entirely for a private or unpushed project
 #    private    optional note explaining why there is no link
-#    deps       third-party runtime dependencies, by name. An EMPTY list is a
-#               claim, not a blank: it says this installs nothing at all, and
-#               six of the ten parts here really do. The assemblies sheet counts
-#               them, so a lazy [] is a lie the sheet will repeat.
+#
+#  What a part is built ON is not here. It lives in [[frameworks]] below, keyed
+#  the other way round: one entry per framework, listing the parts that use it.
+#  That direction is the one the matrix on sheet 4 is drawn from, and keeping a
+#  second copy per project would only be a second thing to forget to update.
 
 [[projects]]
 pn         = "OPT-01"
 name       = "Cap_Match_Net"
 lang       = "Python"
-deps       = ["OR-Tools"]
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "picks matching-network capacitors from values you can actually buy"
@@ -142,7 +142,6 @@ repo       = "https://github.com/henrykanaskie/Cap_Match_Net"
 pn         = "SYS-01"
 name       = "small-shell"
 lang       = "C"
-deps       = []
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "a Unix shell in C: job control, redirection, and the signal handling"
@@ -159,7 +158,6 @@ repo       = "https://github.com/henrykanaskie/small-shell"
 pn         = "MDL-02"
 name       = "floralytics"
 lang       = "Python"
-deps       = ["React", "FastAPI", "NumPy"]
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Oregon bee-plant records turned into a ranked planting list for a county"
@@ -178,7 +176,6 @@ repo       = "https://github.com/Kellen-Sullivan/bee-plant-data-exploration"
 pn         = "APP-03"
 name       = "accliMate"
 lang       = "Python"
-deps       = ["tree-sitter", "ChromaDB", "FastAPI", "PyTorch"]
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "paste a repo URL, get answers that cite the exact lines they came from"
@@ -197,7 +194,6 @@ repo       = "https://github.com/henrykanaskie/accliMate"
 pn         = "APP-01"
 name       = "animAgent"
 lang       = "Swift"
-deps       = []
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "a macOS app that draws the agents you have running as pixel-art characters"
@@ -215,7 +211,6 @@ repo       = "https://github.com/henrykanaskie/animAgent"
 pn         = "TUL-02"
 name       = "groupStat"
 lang       = "Python"
-deps       = []
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "ranks a group chat eight ways by the tapbacks people actually left"
@@ -233,7 +228,6 @@ private    = "private repository"
 pn         = "TUL-03"
 name       = "Ground-Control"
 lang       = "JavaScript"
-deps       = []
 status     = "FLIGHT"
 completion = 0.90
 summary    = "one dashboard over every repo on my disk, and a place to work from"
@@ -251,7 +245,6 @@ repo       = "https://github.com/henrykanaskie/Ground-Control"
 pn         = "TUL-04"
 name       = "orchestrate"
 lang       = "JavaScript"
-deps       = []
 status     = "FLIGHT"
 completion = 0.90
 summary    = "runs a team of coding agents at a project as a real dependency graph"
@@ -269,7 +262,6 @@ private    = "private repository"
 pn         = "APP-02"
 name       = "GrowthApp"
 lang       = "Swift"
-deps       = []
 status     = "FLIGHT"
 completion = 0.62
 summary    = "a SwiftUI habit tracker that draws each streak as a filament of a graph"
@@ -286,7 +278,6 @@ private    = "private repository"
 pn         = "QNT-01"
 name       = "aggregateAnalytics"
 lang       = "Python"
-deps       = ["polars", "scikit-learn", "nflreadpy"]
 status     = "FLIGHT"
 completion = 0.60
 summary    = "an Elo model for NFL games that logs every prediction before kickoff"
@@ -354,55 +345,128 @@ field = [
 github = true
 
 
-# ─── ASSEMBLIES ──────────────────────────────────────────────────────────────
+# ─── FRAMEWORKS ──────────────────────────────────────────────────────────────
 #
-#  What shape each project actually takes, drawn on the assemblies sheet as a
-#  stack of layers read top to bottom: from the thing you touch down to where it
-#  lands on disk.
+#  Drawn on sheet 4 as a cross-reference matrix: frameworks down the side, the
+#  parts of the bill of materials across the top, a mark where one uses the
+#  other. Engineering drawings carry matrices like this because a table of
+#  "project X uses A, B, C" hides the thing you actually want, which is the
+#  shape of the columns: what recurs, what is used once, and which parts share
+#  a stack with which.
 #
-#  "TYPICAL" is the drafting word and it is the right one. A typical detail on a
-#  real drawing is one section that stands for every instance marked TYP; it is
-#  not a claim that all of them are identical to the millimetre. These stacks
-#  are the same: groupStat's server is Python and Ground-Control's is Node, and
-#  the assembly is the same assembly.
+#  The two bands are the point of the sheet.
 #
-#  This sheet replaced a project timeline, which plotted each project from its
-#  first commit to its last. It was accurate and it was not worth a sheet: six
-#  of ten projects were built inside five weeks against a window of two years,
-#  so most of the drawing was empty and the bars that mattered were five pixels
-#  wide. When the work all happens at once, the interesting axis is not time.
+#    BUNDLED    ships with the platform. SwiftUI is on every Mac; the Node
+#               standard library arrives with Node. Using it costs nothing and
+#               installs nothing.
+#    INSTALLED  you have to go and fetch it, and then keep fetching it. A lock
+#               file, a version to pin, a thing that can break on a Tuesday.
 #
-#    name    the assembly, in caps. Short: it is a column head.
-#    layers  top to bottom, outermost first. Three or four; five is too many to
-#            read at a column width.
-#    on      the parts built this way. Every part on the bill of materials must
-#            appear in exactly one assembly, and the build fails otherwise. A
-#            project quietly missing from this sheet would be the one thing a
-#            reader could not detect by looking.
+#  Six of the ten parts have nothing at all in the INSTALLED band, and the sheet
+#  does not have to say so in words: those columns are visibly empty. That count
+#  is derived from this table, so it cannot drift.
+#
+#    name     the framework, as it is actually called
+#    bundled  true if it ships with the platform, false if it is installed
+#    on       parts that use it. Names must match the bill of materials
+#
+#  ORDER: the bands are drawn in the order the entries appear, bundled first.
+#  Within a band, most-used first is the readable order.
 
-[[assemblies]]
-name   = "RUNS IN A TERMINAL"
-layers = ["a command, or a prompt", "solver, model, or raw syscalls",
-          "files on disk, or nothing at all"]
-on     = ["Cap_Match_Net", "small-shell", "aggregateAnalytics"]
+[[frameworks]]
+name    = "WKWebView"
+bundled = true
+on      = ["groupStat", "Ground-Control", "orchestrate"]
 
-[[assemblies]]
-name   = "LOCAL SERVER, NATIVE WINDOW"
-layers = ["a WKWebView in a Swift app", "HTTP on 127.0.0.1, and nowhere else",
-          "a standard-library server", "plain files on disk"]
-on     = ["groupStat", "Ground-Control", "orchestrate"]
+[[frameworks]]
+name    = "Node standard library"
+bundled = true
+on      = ["Ground-Control", "orchestrate"]
 
-[[assemblies]]
-name   = "NATIVE APP"
-layers = ["SwiftUI, and SpriteKit where it moves", "app state, one source of it",
-          "one shared store on disk"]
-on     = ["animAgent", "GrowthApp"]
+[[frameworks]]
+name    = "Python standard library"
+bundled = true
+on      = ["groupStat"]
 
-[[assemblies]]
-name   = "WEB SERVICE"
-layers = ["React, or a page it serves itself", "a JSON API over HTTP",
-          "a model or an index", "the dataset underneath"]
-on     = ["floralytics", "accliMate"]
+[[frameworks]]
+name    = "SwiftUI"
+bundled = true
+on      = ["GrowthApp"]
+
+[[frameworks]]
+name    = "SwiftData"
+bundled = true
+on      = ["GrowthApp"]
+
+[[frameworks]]
+name    = "WidgetKit"
+bundled = true
+on      = ["GrowthApp"]
+
+[[frameworks]]
+name    = "AppKit"
+bundled = true
+on      = ["animAgent"]
+
+[[frameworks]]
+name    = "SpriteKit"
+bundled = true
+on      = ["animAgent"]
+
+[[frameworks]]
+name    = "POSIX / libc"
+bundled = true
+on      = ["small-shell"]
+
+[[frameworks]]
+name    = "FastAPI"
+bundled = false
+on      = ["floralytics", "accliMate", "aggregateAnalytics"]
+
+[[frameworks]]
+name    = "NumPy"
+bundled = false
+on      = ["floralytics", "aggregateAnalytics"]
+
+[[frameworks]]
+name    = "React"
+bundled = false
+on      = ["floralytics"]
+
+[[frameworks]]
+name    = "MapLibre GL"
+bundled = false
+on      = ["floralytics"]
+
+[[frameworks]]
+name    = "OR-Tools"
+bundled = false
+on      = ["Cap_Match_Net"]
+
+[[frameworks]]
+name    = "polars"
+bundled = false
+on      = ["aggregateAnalytics"]
+
+[[frameworks]]
+name    = "scikit-learn"
+bundled = false
+on      = ["aggregateAnalytics"]
+
+[[frameworks]]
+name    = "tree-sitter"
+bundled = false
+on      = ["accliMate"]
+
+[[frameworks]]
+name    = "ChromaDB"
+bundled = false
+on      = ["accliMate"]
+
+[[frameworks]]
+name    = "PyTorch"
+bundled = false
+on      = ["accliMate"]
 
 
 # ─── TOOLBOX ─────────────────────────────────────────────────────────────────
@@ -412,6 +476,10 @@ on     = ["floralytics", "accliMate"]
 #  The rule for this table is that `for` says what the tool does in MY work, not
 #  what the tool is. Anyone can read what Python is. The row earns its place by
 #  saying which of these projects would not exist without it.
+#
+#  Languages and runtimes only. A library belongs on the frameworks matrix,
+#  which already says which parts use it and whether it has to be installed;
+#  repeating three of them here bought nothing but a second place to be wrong.
 #
 #    name   the tool
 #    for    what I use it for, in one line
@@ -434,7 +502,7 @@ on   = ["small-shell"]
 lang = "C"
 
 [[tools]]
-name = "Swift / SwiftUI"
+name = "Swift"
 for  = "native macOS and iOS apps, and the small app shells I wrap servers in"
 on   = ["animAgent", "GrowthApp", "groupStat"]
 lang = "Swift"
@@ -445,20 +513,8 @@ for  = "local dashboards that have to still run in a year with no install step"
 on   = ["Ground-Control", "orchestrate"]
 lang = "JavaScript"
 
-[[tools]]
-name = "OR-Tools"
-for  = "constraint problems where the answer has to be a part you can order"
-on   = ["Cap_Match_Net"]
 
-[[tools]]
-name = "polars"
-for  = "season-scale football data, because pandas was the slow half of the loop"
-on   = ["aggregateAnalytics"]
 
-[[tools]]
-name = "tree-sitter"
-for  = "splitting code by function and class instead of by line count"
-on   = ["accliMate"]
 
 [[tools]]
 name = "MATLAB"
