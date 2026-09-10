@@ -28,8 +28,8 @@
   There is no plain-text copy of the sheets any more. What a screen reader gets
   is the alt text, so the alt text is written to carry the content rather than
   to name the picture: the bill of materials lists its parts and their status,
-  the telemetry sheet reads out its channels. Keep it that way when adding a
-  sheet.
+  the timeline reads out each project's dates and commit count. Keep it that
+  way when adding a sheet.
 -->
 
 <div align="center">
@@ -48,11 +48,11 @@
 
 <div align="center">
 
-{{CARD_TELEMETRY}}
+{{CARD_TIMELINE}}
 
 {{CARD_COMPOSITION}}
 
-{{CARD_ACTIVITY}}
+{{CARD_TOOLBOX}}
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/{{GITHUB}}/{{GITHUB}}/output/github-snake-dark.svg">
@@ -60,7 +60,7 @@
 </picture>
 
 <sub>
-REV {{REVISION}} &nbsp;·&nbsp; {{SHEET_COUNT}} SHEETS &nbsp;·&nbsp; BUILT {{BUILT}} &nbsp;·&nbsp; SCALE NONE<br>
+{{SHEET_COUNT}} SHEETS &nbsp;·&nbsp; BUILT {{BUILT}}<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>

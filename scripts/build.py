@@ -17,6 +17,7 @@ is no dependency that can break the build at 6am while nobody is looking.
 from __future__ import annotations
 
 import argparse
+import datetime
 import hashlib
 import re
 import sys
@@ -71,7 +72,7 @@ def normalize(cfg: dict) -> dict:
     return cfg
 
 
-# Keys that must never appear inside a project or a telemetry table. Each one is
+# Keys that must never appear inside a project or a tool table. Each one is
 # a top-level array someone moved without moving its table header with it.
 STRAY = ("field_notes", "focus", "areas", "field")
 
@@ -156,11 +157,13 @@ def validate(cfg: dict) -> None:
                     f"{p.get('name', '<unnamed>')}: contains '{k}', which belongs "
                     f"at the top level. Move it above the [[projects]] blocks or "
                     f"give it its own table header")
-    for k in STRAY:
-        if k in cfg.get("telemetry", {}).get("listening", {}):
-            problems.append(
-                f"[telemetry.listening] contains '{k}'. It needs its own table "
-                f"header, or TOML binds it to the section above it")
+    for tool in cfg.get("tools", []):
+        for k in STRAY:
+            if k in tool:
+                problems.append(
+                    f"tool {tool.get('name', '<unnamed>')!r}: contains '{k}', "
+                    f"which belongs at the top level. Give it its own table "
+                    f"header, or TOML binds it to the section above it")
 
     if not cfg.get("field_notes"):
         problems.append(
@@ -168,6 +171,58 @@ def validate(cfg: dict) -> None:
     if not cfg.get("focus"):
         problems.append(
             "no focus areas found. Expected a [focus] table with an `areas` array")
+
+    # The title block strip draws these two directly. They are the only fields
+    # on it a build cannot measure, so an empty one letters as N/A on the sheet
+    # and there is nothing downstream that would notice.
+    for key in ("status", "location"):
+        if not str(cfg.get("identity", {}).get(key) or "").strip():
+            problems.append(
+                f"[identity] has no '{key}'. It is a field in the title block "
+                f"strip and nothing else can supply it")
+
+    # Timeline dates. A project with no `started` draws as a voided span on the
+    # timeline sheet, which is a hole in a drawing rather than a fact about the
+    # project, so it fails here instead.
+    for p in cfg.get("projects", []):
+        who = p.get("name", "<unnamed>")
+        started, last = _date(p.get("started")), _date(p.get("last"))
+        if p.get("started") is not None and started is None:
+            problems.append(f"{who}: 'started' is not a date")
+        if p.get("last") is not None and last is None:
+            problems.append(f"{who}: 'last' is not a date")
+        if started is None:
+            problems.append(
+                f"{who}: no 'started' date, so it has no bar on the timeline "
+                f"sheet. Read it off the repository: "
+                f"git log --reverse --format=%aI | head -1")
+        elif last is not None and last < started:
+            problems.append(
+                f"{who}: 'last' ({last}) is before 'started' ({started})")
+        n = p.get("commits")
+        if n is not None and (not isinstance(n, int) or n < 0):
+            problems.append(f"{who}: 'commits' is {n!r}, expected a count")
+
+    # The toolbox sheet cites parts of the bill of materials by name. A typo
+    # there draws a citation to a part that does not exist, which is the one
+    # kind of error this drawing set cannot afford, so the names are checked
+    # against the BOM rather than printed as written.
+    known = {str(p.get("name", "")) for p in cfg.get("projects", [])}
+    for tool in cfg.get("tools", []):
+        who = tool.get("name", "<unnamed>")
+        for required in ("name", "for"):
+            if not str(tool.get(required) or "").strip():
+                problems.append(f"tool {who!r}: missing '{required}'")
+        if tool.get("lang") and tool["lang"] not in langs:
+            problems.append(
+                f"tool {who!r}: language '{tool['lang']}' has no colour in "
+                f"[palette.lang]")
+        for on in tool.get("on", []) or []:
+            if str(on) not in known:
+                problems.append(
+                    f"tool {who!r}: cites '{on}', which is not a part on the "
+                    f"bill of materials. Known parts: "
+                    f"{', '.join(sorted(known))}")
 
     weighting = cfg.get("languages", {}).get("weighting", "equal")
     if weighting not in ("equal", "bytes"):
@@ -178,6 +233,24 @@ def validate(cfg: dict) -> None:
         raise ConfigError(
             "profile.toml has %d problem(s):\n  - %s"
             % (len(problems), "\n  - ".join(problems)))
+
+
+def _date(v):
+    """A TOML date, a datetime, or an ISO string, as a plain date. Else None.
+
+    tomllib hands back a real `datetime.date` for an unquoted date, so this is
+    mostly a guard for a value someone quoted by habit.
+    """
+    if v is None:
+        return None
+    if isinstance(v, datetime.datetime):
+        return v.date()
+    if isinstance(v, datetime.date):
+        return v
+    try:
+        return datetime.date.fromisoformat(str(v)[:10])
+    except ValueError:
+        return None
 
 
 def _version(svg: str) -> str:
@@ -240,41 +313,87 @@ def picture(card: str, alt: str, vers: dict, width: str | None = None) -> str:
     return out
 
 
+def pack_rows(specs: list, label: str, width: int = README_COL) -> list:
+    """Split a chip row into as many rows as the README column needs.
+
+    Emitting every chip on one markdown line and letting the browser wrap it
+    produced a first row packed to the edge and a second row holding one chip,
+    which reads as a mistake rather than as a layout. Splitting here means the
+    break is chosen rather than discovered, and the rows come out close to the
+    same length.
+
+    The leading rail only belongs to the first row. Repeating it would label
+    each row as though they were different sets of things.
+
+    Rows are balanced by target width rather than greedily: greedy packing is
+    what produced the stranded chip in the first place. `n` rows of roughly
+    `total / n` each is the same break a person would pick by eye.
+    """
+    if not specs:
+        return []
+    widths = [cards.chip_width(lab, accent=bool(acc))
+              for _s, lab, _sh, _h, acc in specs]
+    total = cards.rail_width(label) + sum(widths)
+    n = max(1, -(-int(total) // width))
+    if n == 1:
+        return [specs]
+
+    target = total / n
+    rows, current, run = [], [], cards.rail_width(label)
+    for spec, w in zip(specs, widths):
+        # Start a new row when this chip would push the run past its share, but
+        # never leave a row empty and never open a row that cannot be filled.
+        if current and run + w > target and len(rows) < n - 1:
+            rows.append(current)
+            current, run = [], 0.0
+        current.append(spec)
+        run += w
+    if current:
+        rows.append(current)
+    return rows
+
+
 def chip_row(specs: list, vers: dict, label: str, slug: str) -> str:
-    """A row of anchored chips, as one line of markdown with no gaps.
+    """Anchored chips, as one markdown line per row with no gaps inside a row.
 
     The chips MUST be emitted with no whitespace between them. A newline or a
     space between two inline images becomes a rendered space, which would show
     up as a ragged gap in the strip. Each chip carries its own padding instead,
-    so the line is long and unbroken on purpose.
+    so each line is long and unbroken on purpose.
+
+    Rows are separated by a blank line, which markdown reads as a paragraph
+    break, so each row is centred on its own rather than reflowing into the one
+    above it.
     """
-    parts = []
-    lead = cards.rail_width(label)
     brk = cards.CHIP_BREAK
-    if lead:
-        parts.append(
-            f'<picture>'
-            f'<source media="(max-width: {brk}px)" '
-            f'srcset="{asset_url("rail-blank", vers)}">'
-            f'<source media="(prefers-color-scheme: dark)" '
-            f'srcset="{asset_url(f"rail-{slug}-dark", vers)}">'
-            f'<img src="{asset_url(f"rail-{slug}-light", vers)}" alt="">'
-            f'</picture>')
-    for slug_, label_, _short, href, _accent in specs:
-        parts.append(
-            f'<a href="{esc_attr(href)}">'
-            f'<picture>'
-            f'<source media="(max-width: {brk}px) and '
-            f'(prefers-color-scheme: dark)" '
-            f'srcset="{asset_url(f"chip-{slug_}-narrow-dark", vers)}">'
-            f'<source media="(max-width: {brk}px)" '
-            f'srcset="{asset_url(f"chip-{slug_}-narrow-light", vers)}">'
-            f'<source media="(prefers-color-scheme: dark)" '
-            f'srcset="{asset_url(f"chip-{slug_}-dark", vers)}">'
-            f'<img src="{asset_url(f"chip-{slug_}-light", vers)}" '
-            f'alt="{esc_attr(label_)}">'
-            f'</picture></a>')
-    return "".join(parts)
+    lines = []
+    for r, row in enumerate(pack_rows(specs, label)):
+        parts = []
+        if r == 0 and cards.rail_width(label):
+            parts.append(
+                f'<picture>'
+                f'<source media="(max-width: {brk}px)" '
+                f'srcset="{asset_url("rail-blank", vers)}">'
+                f'<source media="(prefers-color-scheme: dark)" '
+                f'srcset="{asset_url(f"rail-{slug}-dark", vers)}">'
+                f'<img src="{asset_url(f"rail-{slug}-light", vers)}" alt="">'
+                f'</picture>')
+        for slug_, label_, _short, href, _accent in row:
+            parts.append(
+                f'<a href="{esc_attr(href)}">'
+                f'<picture>'
+                f'<source media="(max-width: {brk}px) and '
+                f'(prefers-color-scheme: dark)" '
+                f'srcset="{asset_url(f"chip-{slug_}-narrow-dark", vers)}">'
+                f'<source media="(max-width: {brk}px)" '
+                f'srcset="{asset_url(f"chip-{slug_}-narrow-light", vers)}">'
+                f'<source media="(prefers-color-scheme: dark)" '
+                f'srcset="{asset_url(f"chip-{slug_}-dark", vers)}">'
+                f'<img src="{asset_url(f"chip-{slug_}-light", vers)}" '
+                f'alt="{esc_attr(label_)}">'
+                f'</picture></a>')
+        lines.append("".join(parts))
+    return "\n\n".join(lines)
 
 
 def esc_attr(v: str) -> str:
@@ -303,27 +422,35 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
                         for x in cfg.get("about", {}).get("points", []))
         foc = ", ".join(cfg.get("focus", []))
         return f"{body} {pts}. Focus areas: {foc}."
-    if card == "telemetry":
+    if card == "timeline":
         bits = []
-        if data.get("launch"):
-            bits.append(f'next launch {data["launch"].get("name")}')
-        if data.get("humans") is not None:
-            bits.append(f'{data["humans"]} people in space')
-        if data.get("iss"):
-            bits.append(f'ISS at {data["iss"]["lat"]:.1f} degrees latitude')
-        if data.get("last_push"):
-            bits.append(f'last push to {data["last_push"].get("repo")}')
-        return "Daily telemetry. " + ("; ".join(bits) + "." if bits else "No data.")
+        for p in cfg.get("projects", []):
+            started, last = _date(p.get("started")), _date(p.get("last"))
+            if not started:
+                continue
+            when = (started.strftime("%B %Y") if last in (None, started)
+                    else f'{started.strftime("%B %Y")} to '
+                         f'{last.strftime("%B %Y")}')
+            n = p.get("commits")
+            bits.append(f'{p["name"]}, {when}'
+                        + (f", {n} commits" if n else ""))
+        return ("Project timeline, first commit to most recent. "
+                + ("; ".join(bits) + "." if bits else "No dates."))
     if card == "composition":
         langs = ", ".join(f"{n} {100*v:.0f}%" for n, v in
                           (data.get("languages") or [])[:6])
         return f"Language composition: {langs}." if langs else "Language composition, no data."
-    if card == "activity":
-        total = sum(c for _d, c in (data.get("activity") or []))
-        return f"Push activity, {total} pushes over the last 30 days."
+    if card == "toolbox":
+        bits = [f'{t["name"]} for {t.get("for", "")}'.rstrip()
+                for t in cfg.get("tools", [])]
+        return "Toolbox. " + ("; ".join(bits) + "." if bits else "Nothing listed.")
     ident = cfg.get("identity", {})
+    revs = "; ".join(f'{r["repo"]}, {r["message"]}'
+                     for r in (data.get("revisions") or []))
     return (f'Title block. {ident.get("name")}. {ident.get("title")}. '
-            f'{ident.get("tagline")} Revision {ident.get("revision")}.')
+            f'{ident.get("tagline")} {ident.get("status")}, '
+            f'{ident.get("location")}.'
+            + (f' Recent commits: {revs}.' if revs else ""))
 
 
 def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
@@ -331,15 +458,15 @@ def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
     now = data["generated_at"]
     vers = vers or {}
 
+    # The prose used to be laid into the README as markdown as well as being
+    # drawn on the general notes sheet, so a screen reader had something real to
+    # read. The alt text carries that now (see card_alt), and these three ran on
+    # as dead locals after the plain-text copy came out.
     ident = cfg["identity"]
-    about = " ".join(" ".join(cfg["about"]["body"]).split())
-    points = "\n".join(f"- {p}" for p in cfg["about"]["points"])
-    focus = " · ".join(f"`{f}`" for f in cfg["focus"])
 
     subs = {
         "WEBSITE": ident["website"],
         "GITHUB": ident["github"],
-        "REVISION": ident["revision"],
         "BUILT": now.strftime("%Y-%m-%d %H:%M UTC"),
         "SHEET_COUNT": len(cards.CARDS),
         "WEBSITE_LABEL": ident["website"].split("//")[-1].rstrip("/"),
@@ -350,9 +477,9 @@ def render_readme(cfg: dict, data: dict, vers: dict | None = None) -> str:
         "CARD_TITLEBLOCK": picture("titleblock", card_alt("titleblock", cfg, data), vers),
         "CARD_GENERAL": picture("general", card_alt("general", cfg, data), vers),
         "CARD_BOM": picture("bom", card_alt("bom", cfg, data), vers),
-        "CARD_TELEMETRY": picture("telemetry", card_alt("telemetry", cfg, data), vers),
+        "CARD_TIMELINE": picture("timeline", card_alt("timeline", cfg, data), vers),
         "CARD_COMPOSITION": picture("composition", card_alt("composition", cfg, data), vers),
-        "CARD_ACTIVITY": picture("activity", card_alt("activity", cfg, data), vers),
+        "CARD_TOOLBOX": picture("toolbox", card_alt("toolbox", cfg, data), vers),
     }
 
     out = tmpl
@@ -395,9 +522,9 @@ def main() -> int:
     for note in data.get("errors", []):
         print(f"  degraded: {note}", file=sys.stderr)
 
-    # An offline build substitutes sample telemetry that is indistinguishable
-    # from the real thing on the card. Stamp every sheet so an accidental commit
-    # is obvious at a glance rather than three weeks later.
+    # An offline build substitutes sample data that is indistinguishable from
+    # the real thing on the card. Stamp every sheet so an accidental commit is
+    # obvious at a glance rather than three weeks later.
     if args.offline:
         print("\n  *** OFFLINE BUILD: cards contain SAMPLE DATA and are\n"
               "      stamped NOT FOR ISSUE. Do not commit this output.\n",
@@ -466,8 +593,10 @@ def main() -> int:
             # say so at build time rather than discovering it on the page.
             total = cards.row_width(rspecs, rlabel)
             if ground == "light" and total > README_COL:
-                print(f"  note: the {row} chip row is {total:.0f}px and will "
-                      f"wrap below {total:.0f}px of column", file=sys.stderr)
+                n = len(pack_rows(rspecs, rlabel))
+                print(f"  note: the {row} chips are {total:.0f}px against a "
+                      f"{README_COL}px column, so they are laid out as {n} "
+                      f"rows", file=sys.stderr)
     print(f"  wrote {written - len(cards.CARDS) * 2} chips")
 
     README.write_text(render_readme(cfg, data, vers))

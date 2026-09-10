@@ -8,12 +8,13 @@ different. Where the wide sheet sets two things side by side, this one stacks
 them, and where a column exists only to key the reader to another sheet it is
 dropped rather than squeezed to four characters.
 
-    _titleblock   name shrunk to the measure, revision table full width with
-                  ZONE dropped, field strip as a 2 x 3 grid
+    _titleblock   name shrunk to the measure, each commit folded onto two
+                  lines, field strip down to one column
     _general      the same prose, notes, and focus tags, rewrapped
-    _notes        the numbered notes, rewrapped
     _composition  bar full width, legend down to one column
-    _activity     the same plot, x labels and y ticks thinned
+    _timeline     the same window and the same bars, each project's name moved
+                  above its bar so the plot keeps the whole measure
+    _toolbox      each tool as a stacked block instead of a three column row
 
 The usable measure is 264px: NARROW_W less the frame inset on both sides less a
 10px margin inside the frame. Every column here is budgeted from that number,
@@ -82,102 +83,78 @@ def _titleblock(cfg, data, t):
             y += 12
         y += 3
 
-    links = " · ".join(s for s in (
-        (f"github.com/{ident['github']}" if ident.get("github") else ""),
-        str(ident.get("website") or "").replace("https://", ""),
-    ) if s)
-    if links:
-        for i, line in enumerate(cards._wrap(links.upper(), SPAN, 7.2, 0.8)):
-            out += cards._g(cards.D_LETTER + 0.22 + i * 0.04,
-                            bp.caps(X0, y, line, t, size=7.2, track=0.8))
-            y += 11
+    # There is no line of URLs here, for the same reason there is none on the
+    # wide sheet: drawn inside an <img> it looks like a link and is not one. The
+    # chip rail under this sheet carries both destinations as real anchors, and
+    # on a phone those chips are already one full-width row each.
 
-    # ── revision history, now full width ────────────────────────────────────
+    # ── revision history, two lines to a row ────────────────────────────────
     #
-    # ZONE is dropped. It cites where on the BOM sheet the changed part is
-    # drawn, which is furniture at any width and useless on a phone, where the
-    # reader cannot hold two sheets side by side anyway. REV, DESCRIPTION and
-    # DATE are the three columns that say what actually changed and when, and
-    # dropping the fourth is what buys DESCRIPTION enough room to letter a
-    # repository name without cutting it.
-    y += 18
-    desc_x = X0 + 30
-    desc_r = X1 - 52
-    rrow_h = 20
+    # The wide sheet sets project, commit subject and date on one line across
+    # 848px. Three columns do not survive 264px: the subject would get about
+    # 90px, which is a dozen characters, and a dozen characters of a commit
+    # message is worse than not drawing it. So the row folds. Project and date
+    # share the first line, the message gets the whole measure on the second.
+    y += 20
     out += cards._g(cards.D_LETTER,
-                    bp.caps(X0 + 2, y, "REV", t, size=6.5, track=1.0)
-                    + bp.caps(desc_x, y, "DESCRIPTION", t, size=6.5, track=1.0)
-                    + bp.caps(X1, y, "DATE", t, size=6.5, track=1.0,
-                              anchor="end"))
+                    bp.caps(X0, y, "RECENT COMMITS", t, size=6.5, track=1.0))
     rule_y = y + 6
     out += cards._drawn_rule(X0, rule_y, X1, rule_y, t, cards.D_RULE, w=1.4,
                              color="rule")
 
+    ry = rule_y + 15
     rows = cards._rev_rows(cfg, data)
     for i, row in enumerate(rows):
-        ry = rule_y + (i + 1) * rrow_h - 6
         d = cards.D_DATA + i * 0.09
         if i:
             out += cards._g(cards.D_RULE + 0.1,
-                            bp.rule(X0, ry - 14, X1, ry - 14, t, w=0.6,
+                            bp.rule(X0, ry - 12, X1, ry - 12, t, w=0.6,
                                     opacity=0.7))
         if row is None:
-            # An unfilled revision block is ruled and voided, not blank.
-            out += cards._g(d, bp.text(X0 + 2, ry, cards.DASH, t, size=8.5,
+            out += cards._g(d, bp.text(X0, ry, cards.DASH, t, size=8.5,
                                        color="faint")
-                            + bp.text(desc_x, ry, cards.DASH, t, size=8.5,
-                                      color="faint")
-                            + bp.text(X1, ry, cards.DASH, t, size=8,
+                            + bp.text(X1, ry, cards.DASH, t, size=7.6,
                                       color="faint", anchor="end"))
+            ry += 26
             continue
-        letter, _zone, desc, date = row
-        out += cards._g(d, bp.text(X0 + 2, ry, letter, t, size=9.5, weight=700))
-        out += cards._g(d, bp.text(desc_x, ry,
-                                   cards._fit(desc, desc_r - desc_x, 8.5), t,
-                                   size=8.5))
-        out += cards._g(d, bp.text(X1, ry, date or cards.DASH, t, size=8,
-                                   color="soft" if date else "faint",
+        repo, message, date = row
+        dw = cards._w(date, 7.6) + 8
+        out += cards._g(d, bp.text(X0, ry,
+                                   cards._fit(repo, SPAN - dw, 8.5), t,
+                                   size=8.5, weight=600))
+        out += cards._g(d, bp.text(X1, ry, date, t, size=7.6, color="soft",
                                    anchor="end"))
-    y = rule_y + len(rows) * rrow_h + 10
+        ry += 12
+        for line in cards._wrap(message, SPAN, 8)[:2]:
+            out += cards._g(d + 0.04,
+                            bp.text(X0, ry, line, t, size=8, color="soft"))
+            ry += 11
+        ry += 6
 
-    # ── the field strip, folded into a 2 x 3 grid ───────────────────────────
+    # ── the field strip, one field to a row ─────────────────────────────────
     #
-    # Six boxes in a line would be 44px each here, which is narrower than the
-    # DRAWN BY value and would ellipsise the date. Folding to two columns keeps
-    # every field at full value rather than dropping any of them.
-    strip_y = y
-    rows_n, cols_n, fh = 3, 2, 30
-    fw = SPAN / cols_n
-    date = cards._datestr(data.get("generated_at")) or cards.DASH
-    fields = (("DRAWN BY", str(ident.get("drawn_by") or cards.DASH)),
-              ("REV", str(ident.get("revision") or cards.DASH)),
-              ("SHEET", "%d OF %d" % (cards.CARDS.index("titleblock") + 1,
-                                      len(cards.CARDS))),
-              ("DATE", date),
-              # A drawing with no scale says so. NONE is the correct answer for
-              # a sheet whose subject has no physical size.
-              ("SCALE", "NONE"),
-              ("UNITS", "UTC"))
+    # Two columns were the right answer when there were six fields and three of
+    # them were a word long. There are five now and the longest is a school and
+    # a state, which at 132px would ellipsise to "MS STUDENT, OREGO…". One
+    # column costs 60px of height and keeps every value whole.
+    strip_y = ry + 6
+    fields = cards._strip_fields(cfg, data)
+    fh = 30
     out += cards._g(cards.D_RULE + 0.2,
                     f'<rect x="{X0}" y="{strip_y}" width="{SPAN}" '
-                    f'height="{rows_n * fh}" fill="none" '
+                    f'height="{len(fields) * fh}" fill="none" '
                     f'stroke="{t["rule"]}" stroke-width="1.2"/>')
-    out += cards._g(cards.D_RULE + 0.26,
-                    bp.rule(X0 + fw, strip_y, X0 + fw,
-                            strip_y + rows_n * fh, t, w=1.0))
-    for r in range(1, rows_n):
-        out += cards._g(cards.D_RULE + 0.26,
-                        bp.rule(X0, strip_y + r * fh, X1, strip_y + r * fh, t,
-                                w=1.0))
-    for i, (key, val) in enumerate(fields):
-        fx = X0 + (i % cols_n) * fw
-        fy = strip_y + (i // cols_n) * fh
+    for i, (key, val, _weight) in enumerate(fields):
+        fy = strip_y + i * fh
+        if i:
+            out += cards._g(cards.D_RULE + 0.26,
+                            bp.rule(X0, fy, X1, fy, t, w=1.0))
         out += cards._g(cards.D_LETTER + 0.3 + i * 0.05,
-                        bp.field(fx, fy, fw, key,
-                                 cards._fit(val, fw - 12, 9.5, 0.3), t,
+                        bp.field(X0, fy, SPAN, key,
+                                 cards._fit(val, SPAN - 12, 9.5, 0.3), t,
                                  size=9.5, kh=10))
 
-    H = strip_y + rows_n * fh + 26        # clears the sheet number in the corner
+    H = strip_y + len(fields) * fh + 26   # clears the sheet number in the corner
     return _sheet("titleblock", H, t, out, label="TITLE BLOCK")
 
 
@@ -336,101 +313,255 @@ def _composition(cfg, data, t):
                   label="MATERIAL COMPOSITION")
 
 
-# ── sheet 6: push activity ───────────────────────────────────────────────────
+# ── sheet 4: project timeline ────────────────────────────────────────────────
+#
+# The wide sheet sets the project name in a 196px gutter beside its bar. There
+# is no 196px gutter here, so the name moves ABOVE its own bar and every bar
+# gets the full measure. That keeps the one thing this sheet is for, which is
+# comparing when things happened to each other, at full resolution: shrinking
+# the plot to make room for a label beside it would have left each bar 68px and
+# eighteen months of history unreadable.
 
-def _activity(cfg, data, t):
-    px0, px1 = X0 + 22, X1              # left gutter carries the axis labels
-    pty, pby = 52, 150                  # plot top / baseline
-    act = list(data.get("activity") or [])
+TL_ROW_H = 27           # name and dates on one line, then the bar
+
+
+def _timeline(cfg, data, t):
+    import datetime as _dt
+
+    today = (data.get("generated_at") or _dt.datetime.now(_dt.timezone.utc)).date()
+    rows = cards._timeline_rows(cfg, data)
+    first, last = cards._timeline_window(rows, cfg, today)
+    total_days = max(1, (last - first).days)
+
+    def px(d):
+        frac = (d - first).days / total_days
+        return X0 + max(0.0, min(1.0, frac)) * SPAN
+
+    axis_y = 46
+    body_y = axis_y + 20
+    plot_b = body_y + len(rows) * TL_ROW_H
+
+    defs = ""
+    for i, (p, *_rest) in enumerate(rows):
+        defs += bp.defs_hatch(
+            i, cards._lang_color(cfg, p.get("lang"), t, spare_at=i),
+            angle=cards.HATCH_ANGLES[i % len(cards.HATCH_ANGLES)], gap=4.5,
+            w=1.2)
 
     out = ""
-    if not act:
-        out += cards._nodata(px0, pty, px1 - px0, pby - pty, t,
-                             label="NO ACTIVITY DATA")
-    else:
-        counts = [int(c or 0) for _d, c in act]
-        peak = max(counts)
-        # 18% headroom keeps the peak's dimension line clear of the plot border
-        # instead of letting the label collide with the frame.
-        scale = (peak * 1.18) if peak else 1.0
+    out += cards._drawn_rule(X0, axis_y, X1, axis_y, t, cards.D_RULE, w=1.1,
+                             color="rule")
 
-        out += cards._drawn_rule(px0, pby, px1, pby, t, cards.D_RULE, w=1.2,
-                                 color="rule")
-        out += cards._drawn_rule(px0, pty, px0, pby, t, cards.D_RULE + 0.06,
-                                 w=1.2, color="rule")
-
-        # Zero and peak only. The wide sheet also ticks the midpoint; at this
-        # height three labels in 98px sit close enough to read as one smudge,
-        # and the midpoint is the one a reader can infer.
-        for v in sorted({0, peak}):
-            gy = pby - (v / scale) * (pby - pty)
-            out += cards._g(cards.D_RULE + 0.2,
-                            bp.rule(px0 - 3.5, gy, px0, gy, t, w=0.9))
+    # Only the year boundaries are lettered. The wide sheet names a month every
+    # third tick; at 264px those collide, and the year is the only mark a
+    # reader navigates a two-year window by anyway. The exception is the first
+    # tick, which carries its own year: without it a window opening in February
+    # 2025 letters nothing at all until January 2026, and a reader has no way
+    # to date the left half of the sheet.
+    labelled = False
+    for m in cards._month_starts(first, last):
+        mx = px(m)
+        if mx < X0 - 0.5 or mx > X1 + 0.5:
+            continue
+        if m.month == 1:
+            out += cards._g(cards.D_RULE + 0.1,
+                            bp.rule(mx, axis_y - 4, mx, axis_y, t, w=1.0))
+            out += cards._g(cards.D_RULE + 0.18,
+                            bp.rule(mx, axis_y, mx, plot_b + 4, t,
+                                    color="grid", w=1.0))
             out += cards._g(cards.D_LETTER,
-                            bp.text(px0 - 6, gy + 3, str(v), t, size=7,
-                                    color="faint", anchor="end"))
+                            bp.caps(mx, axis_y - 8, m.strftime("%Y"), t,
+                                    size=6.6, track=0.8, anchor="middle",
+                                    color="soft"))
+            labelled = True
+        elif m.month % 3 == 1:
+            out += cards._g(cards.D_RULE + 0.1,
+                            bp.rule(mx, axis_y - 2.5, mx, axis_y, t, w=0.8))
+            if not labelled:
+                out += cards._g(cards.D_LETTER,
+                                bp.caps(mx, axis_y - 8, m.strftime("%b %Y"), t,
+                                        size=6.6, track=0.8, anchor="middle",
+                                        color="soft"))
+                labelled = True
 
-        slot = (px1 - px0) / len(act)
-        bw = max(1.6, slot * 0.66)
-        for i, c in enumerate(counts):
-            cx = px0 + slot * i + (slot - bw) / 2
-            h = (c / scale) * (pby - pty)
-            if h > 0:
-                out += cards._grow_col(cx, pby, bw, h, t["accent"],
-                                       cards.D_DATA + i * 0.012)
-            # A tick under every fifth day is a picket fence at this pitch, so
-            # only the two days that carry a date label are ticked.
-            if i in (0, len(counts) - 1):
-                out += cards._g(cards.D_RULE + 0.25,
-                                bp.rule(cx + bw / 2, pby, cx + bw / 2,
-                                        pby + 3.5, t, w=0.8))
+    tx = px(today)
+    out += cards._g(cards.D_DATA + 0.1,
+                    bp.rule(tx, axis_y, tx, plot_b + 4, t, color="accent",
+                            w=1.0, dash="3 3", opacity=0.85))
 
-        if peak:
-            ypk = pby - (peak / scale) * (pby - pty)
-            out += cards._g(cards.D_DATA + 0.5,
-                            bp.dim(px0, px1, ypk, f"PEAK {peak}", t,
-                                   color="soft"))
+    live_rows = 0
+    for i, (p, start, end, milestone, live) in enumerate(rows):
+        ry = body_y + i * TL_ROW_H
+        d = cards.D_DATA + i * 0.07
+        color = cards._lang_color(cfg, p.get("lang"), t, spare_at=i)
 
-        first = cards._datestr(act[0][0], "%m-%d") or ""
-        last = cards._datestr(act[-1][0], "%m-%d") or ""
-        out += cards._g(cards.D_LETTER + 0.2,
-                        bp.caps(px0, pby + 14, first, t, size=6.8, track=0.8))
-        out += cards._g(cards.D_LETTER + 0.2,
-                        bp.caps(px1, pby + 14, last, t, size=6.8, track=0.8,
-                                anchor="end"))
+        # Designator, name, dates and commit count all on the line above the
+        # bar. The dates went UNDER the bar first, which put them nearer the
+        # next project's name than their own and made every row look like it
+        # was labelled with the span belonging to the row above. There is room
+        # for all four on one line at this measure, so they go on one line.
+        n = p.get("commits")
+        nlabel = f"{int(n):,}" if isinstance(n, int) and n else cards.DASH
+        nw = cards._w(nlabel, 7.4) + 10
+        span = cards._span_label(start, end)
+        sw = (cards._w(span, cards.TL_SPAN_SIZE) + 8) if span else 0
+        out += cards._g(cards.D_LETTER + i * 0.03,
+                        bp.caps(X0, ry, p.get("pn") or cards.DASH, t, size=6.6,
+                                track=0.8))
+        out += cards._g(cards.D_LETTER + i * 0.03,
+                        bp.text(X0 + 42, ry,
+                                cards._fit(str(p.get("name") or cards.DASH),
+                                           SPAN - 42 - nw - sw, 8.2), t,
+                                size=8.2))
+        if span:
+            out += cards._g(d + 0.05,
+                            bp.text(X1 - nw, ry, span, t,
+                                    size=cards.TL_SPAN_SIZE, color="faint",
+                                    anchor="end"))
+        out += cards._g(d + 0.14,
+                        bp.text(X1, ry, nlabel, t, size=7.4, anchor="end",
+                                color="soft" if n else "faint"))
 
-    # The GitHub events API does not carry per-push commit counts, so the axis
-    # says PUSHES. Labelling it COMMITS would be a nicer number and a false one.
-    lx, ly = X0 + 6, (pty + pby) / 2
-    out += cards._g(cards.D_LETTER,
-                    f'<g transform="rotate(-90 {lx} {ly:.1f})">'
-                    + bp.caps(lx, ly, "PUSHES", t, size=7.4, track=1.6,
-                              anchor="middle") + "</g>")
+        by = ry + 5
+        bh = 8
+        if start is None:
+            out += cards._nodata(X0, by, SPAN, bh + 2, t, delay=d,
+                                 label="NO DATES")
+            continue
+        if live:
+            live_rows += 1
 
-    # The footer stacks rather than setting MOST ACTIVE and LAST PUSH on one
-    # line: side by side they would leave each about 130px, which cuts the
-    # second repository name off every time.
-    fy = pby + 30
-    tops = [cards._repo_name(n) for n, _c in (data.get("top_repos") or [])][:3]
-    out += cards._g(cards.D_LETTER + 0.35,
-                    bp.caps(X0, fy, "MOST ACTIVE", t, size=6.8, track=1.1))
-    out += cards._g(cards.D_DATA + 0.4,
-                    bp.text(X0, fy + 13,
-                            cards._fit(" · ".join(tops) if tops else cards.DASH,
-                                       SPAN, 8.4), t, size=8.4, color="soft"))
-    lp = data.get("last_push") or {}
-    stamp = cards._datestr(lp.get("at"), "%Y-%m-%d %H:%M")
-    out += cards._g(cards.D_DATA + 0.45,
-                    bp.caps(X0, fy + 27, f"LAST PUSH {stamp or cards.DASH}", t,
-                            size=6.8, track=0.9))
+        bx, ex = px(start), px(end)
+        if milestone:
+            r = bh * 0.72
+            bx = min(X1 - r, max(X0 + r, bx))
+            cy = by + bh / 2
+            out += cards._g(d, f'<path d="M{bx:.1f} {cy-r:.1f} '
+                               f'L{bx+r:.1f} {cy:.1f} L{bx:.1f} {cy+r:.1f} '
+                               f'L{bx-r:.1f} {cy:.1f} Z" fill="{color}" '
+                               f'stroke="{color}" stroke-width="1"/>')
+        else:
+            bw = max(cards.TL_MIN_BAR, ex - bx)
+            out += cards._g(d, cards._grow_bar(bx, by, bw, bh, f"url(#h{i})",
+                                               d, stroke=color, sw=1.0))
+            if str(p.get("status") or "").upper() == "QUALIFIED":
+                out += cards._g(d + 0.1,
+                                bp.rule(bx + bw, by - 1.5, bx + bw, by + bh + 1.5,
+                                        t, color="rule", w=1.3))
+            else:
+                out += cards._g(d + 0.1,
+                                f'<path d="M{bx+bw+1.5:.1f} {by:.1f} '
+                                f'L{bx+bw+5.5:.1f} {by+bh/2:.1f} '
+                                f'L{bx+bw+1.5:.1f} {by+bh:.1f}" fill="none" '
+                                f'stroke="{color}" stroke-width="1.3" '
+                                f'opacity="0.9"/>')
 
-    H = int(fy + 50)
-    return _sheet("activity", H, t, out, label="PUSH ACTIVITY / 30 D")
+    fy = plot_b + 18
+    out += cards._g(cards.D_DATA + 0.1,
+                    bp.caps(min(X1, max(X0 + 16, tx)), fy, "TODAY", t,
+                            size=6.4, track=0.9, anchor="middle",
+                            color="accent"))
+    fy += 18
+    stale = sum(1 for r in rows if r[1] and not r[4])
+    for i, line in enumerate(cards._wrap(
+            "First commit to most recent. "
+            f"{live_rows} refreshed from GitHub, {stale} from the config.",
+            SPAN, 6.9)):
+        out += cards._g(cards.D_LETTER + 0.4,
+                        bp.text(X0, fy + i * 10, line, t, size=6.9,
+                                color="faint"))
+        fy_last = fy + i * 10
+    if any(r[3] for r in rows):
+        out += cards._g(cards.D_LETTER + 0.45,
+                        bp.text(X0, fy_last + 11,
+                                "◆ whole history pushed in one day", t,
+                                size=6.9, color="faint"))
+        fy_last += 11
+
+    return _sheet("timeline", fy_last + 26, t, out, defs=defs,
+                  label="PROJECT TIMELINE")
+
+
+# ── sheet 6: toolbox ─────────────────────────────────────────────────────────
+#
+# Three columns will not fit in 264px, so each tool becomes a block instead of a
+# row: name on the swatch line, then the sentence wrapped under it, then the
+# projects. Same content, stacked, which is the rule the whole of this module
+# follows.
+
+def _toolbox(cfg, data, t):
+    tools = list(cfg.get("tools") or [])
+    if not tools:
+        return _sheet("toolbox", 160, t,
+                      cards._nodata(X0, 46, SPAN, 70, t,
+                                    label="NO TOOLS LISTED"), label="TOOLBOX")
+
+    defs = ""
+    for i, tool in enumerate(tools):
+        if tool.get("lang"):
+            defs += bp.defs_hatch(
+                i, cards._lang_color(cfg, tool["lang"], t, spare_at=i),
+                angle=cards.HATCH_ANGLES[i % len(cards.HATCH_ANGLES)],
+                gap=4.5, w=1.1)
+
+    out, y = "", 48
+    for i, tool in enumerate(tools):
+        d = cards.D_DATA + i * 0.06
+        if i:
+            out += cards._g(cards.D_RULE + 0.1,
+                            bp.rule(X0, y - 15, X1, y - 15, t, w=0.6,
+                                    opacity=0.6))
+        if tool.get("lang"):
+            c = cards._lang_color(cfg, tool["lang"], t, spare_at=i)
+            out += cards._g(d, f'<rect x="{X0:.1f}" y="{y-8:.1f}" width="13" '
+                               f'height="10" fill="url(#h{i})" stroke="{c}" '
+                               f'stroke-width="0.9"/>')
+        else:
+            out += cards._g(d, bp.rule(X0 + 2, y - 3, X0 + 11, y - 3, t,
+                                       color="faint", w=1.0, opacity=0.7))
+        out += cards._g(d, bp.text(X0 + 20, y,
+                                   cards._fit(str(tool.get("name") or cards.DASH),
+                                              SPAN - 20, 9), t, size=9,
+                                   weight=600))
+        y += 13
+
+        for line in cards._wrap(str(tool.get("for") or cards.DASH), SPAN, 8.2):
+            out += cards._g(d + 0.04,
+                            bp.text(X0, y, line, t, size=8.2, color="soft"))
+            y += 11
+
+        on = [str(s) for s in (tool.get("on") or []) if str(s).strip()]
+        if on:
+            for line in cards._wrap(" · ".join(on), SPAN - 22, 7.6):
+                out += cards._g(d + 0.08,
+                                bp.caps(X0, y + 1, "on", t, size=6.6,
+                                        track=0.8)
+                                + bp.text(X0 + 22, y + 1, line, t, size=7.6,
+                                          color="soft"))
+                y += 10
+        else:
+            out += cards._g(d + 0.08,
+                            bp.caps(X0, y + 1, "not on this sheet", t, size=6.8,
+                                    track=0.8))
+            y += 10
+        y += 15
+
+    y += 4
+    for i, line in enumerate(cards._wrap(
+            "Projects named here are parts on sheet "
+            f"{cards.CARDS.index('bom') + 1}.", SPAN, 6.9)):
+        out += cards._g(cards.D_LETTER + 0.4,
+                        bp.text(X0, y + i * 10, line, t, size=6.9,
+                                color="faint"))
+        y += 10
+
+    return _sheet("toolbox", y + 22, t, out, defs=defs, label="TOOLBOX")
 
 
 RENDERERS = {
     "titleblock": _titleblock,
     "general": _general,
     "composition": _composition,
-    "activity": _activity,
+    "timeline": _timeline,
+    "toolbox": _toolbox,
 }
