@@ -28,17 +28,17 @@
   There is no plain-text copy of the sheets any more. What a screen reader gets
   is the alt text, so the alt text is written to carry the content rather than
   to name the picture: the bill of materials lists its parts and their status,
-  the assemblies sheet reads out each stack and what is built that way.
+  the frameworks matrix reads out each framework and what uses it.
   Keep it that way when adding a sheet.
 -->
 
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=372adf956e">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=bda0ea1ba4">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=a71f6dbbd6">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=3a87f80db9" alt="Title block. Henry Kanaskie. MACHINE LEARNING · SIGNAL PROCESSING · TOOLS I USE MYSELF. I like building things and taking them apart to see how they work. MS STUDENT, OREGON STATE, CORVALLIS, OREGON. Recent commits: aggregateAnalytics, Lines snapshot 2026-09-10 07:48 UTC; Ground-Control, Give each colour one job; animAgent, feat(scene): compact rooms, and a room that says whose it is.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-dark.svg?v=e08054e373">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-narrow-light.svg?v=4464c38448">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-dark.svg?v=b5e27b8f7c">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/titleblock-light.svg?v=e879da99de" alt="Title block. Henry Kanaskie. MACHINE LEARNING · SIGNAL PROCESSING · TOOLS I USE MYSELF. I like building things and taking them apart to see how they work. MS STUDENT, OREGON STATE, CORVALLIS, OREGON. Recent commits: aggregateAnalytics, Lines snapshot 2026-09-10 07:48 UTC; Ground-Control, Give each colour one job; animAgent, feat(scene): compact rooms, and a room that says whose it is.">
 </picture>
 
 <picture><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-blank.svg?v=9059e608fe"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-dark.svg?v=97d92cb020"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/rail-links-light.svg?v=6a349416aa" alt=""></picture><a href="https://henrykanaskie.com"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-dark.svg?v=20c4c5c1c8"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-narrow-light.svg?v=b2cea950d1"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-dark.svg?v=5956186fbb"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-site-light.svg?v=2f0fec82c8" alt="henrykanaskie.com"></picture></a><a href="https://github.com/henrykanaskie?tab=repositories"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-dark.svg?v=97c99b5425"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-narrow-light.svg?v=937b74f8ca"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-dark.svg?v=13d5c8f635"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-repos-light.svg?v=98b2e93e34" alt="repositories"></picture></a><a href="SETUP.md"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-dark.svg?v=459a84d22c"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-narrow-light.svg?v=b716ad92ac"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-dark.svg?v=e823c0f080"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-setup-light.svg?v=78b2aece65" alt="how this is built"></picture></a><a href="data/profile.toml"><picture><source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-dark.svg?v=26f5efe254"><source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-narrow-light.svg?v=410f0eba46"><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-dark.svg?v=4ddaae53c8"><img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/chip-source-light.svg?v=bb53ba5025" alt="the source of truth"></picture></a>
@@ -66,10 +66,10 @@
 <div align="center">
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-narrow-dark.svg?v=dfdb407e11">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-narrow-light.svg?v=8a504e822e">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-dark.svg?v=8d3f51ab99">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/assemblies-light.svg?v=ddf0db5364" alt="Typical assemblies, each read from what you touch down to where it lands. RUNS IN A TERMINAL: a command, or a prompt, then solver, model, or raw syscalls, then files on disk, or nothing at all. Built this way: Cap_Match_Net, small-shell, aggregateAnalytics; LOCAL SERVER, NATIVE WINDOW: a WKWebView in a Swift app, then HTTP on 127.0.0.1, and nowhere else, then a standard-library server, then plain files on disk. Built this way: groupStat, Ground-Control, orchestrate; NATIVE APP: SwiftUI, and SpriteKit where it moves, then app state, one source of it, then one shared store on disk. Built this way: animAgent, GrowthApp; WEB SERVICE: React, or a page it serves itself, then a JSON API over HTTP, then a model or an index, then the dataset underneath. Built this way: floralytics, accliMate. 6 of 10 install nothing at all.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/frameworks-narrow-dark.svg?v=c52942ba97">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/frameworks-narrow-light.svg?v=d8a5cc5d31">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/frameworks-dark.svg?v=2bd83a8706">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/frameworks-light.svg?v=4825c33af0" alt="Frameworks, and which project uses each. WKWebView (bundled with the platform) in groupStat, Ground-Control, orchestrate; Node standard library (bundled with the platform) in Ground-Control, orchestrate; Python standard library (bundled with the platform) in groupStat; SwiftUI (bundled with the platform) in GrowthApp; SwiftData (bundled with the platform) in GrowthApp; WidgetKit (bundled with the platform) in GrowthApp; AppKit (bundled with the platform) in animAgent; SpriteKit (bundled with the platform) in animAgent; POSIX / libc (bundled with the platform) in small-shell; FastAPI (installed) in floralytics, accliMate, aggregateAnalytics; NumPy (installed) in floralytics, aggregateAnalytics; React (installed) in floralytics; MapLibre GL (installed) in floralytics; OR-Tools (installed) in Cap_Match_Net; polars (installed) in aggregateAnalytics; scikit-learn (installed) in aggregateAnalytics; tree-sitter (installed) in accliMate; ChromaDB (installed) in accliMate; PyTorch (installed) in accliMate. 6 of 10 install nothing at all.">
 </picture>
 
 <picture>
@@ -80,10 +80,10 @@
 </picture>
 
 <picture>
-  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-narrow-dark.svg?v=08d0204ba1">
-  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-narrow-light.svg?v=ff8494adf4">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-dark.svg?v=92bf381e6e">
-  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-light.svg?v=34616f33e2" alt="Toolbox. Python for models, data pipelines, and anything that ends in a number I have to trust; C / C++ for embedded work and the OS-level projects, where the details are the point; Swift / SwiftUI for native macOS and iOS apps, and the small app shells I wrap servers in; Node, no deps for local dashboards that have to still run in a year with no install step; OR-Tools for constraint problems where the answer has to be a part you can order; polars for season-scale football data, because pandas was the slow half of the loop; tree-sitter for splitting code by function and class instead of by line count; MATLAB for plasma thruster signal processing in the lab, and only in the lab; VHDL for FPGA modules for reading sensors nobody could measure before.">
+  <source media="(max-width: 500px) and (prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-narrow-dark.svg?v=8e3dc2cca2">
+  <source media="(max-width: 500px)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-narrow-light.svg?v=916e9b40d7">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-dark.svg?v=ec8e8f32ad">
+  <img src="https://raw.githubusercontent.com/henrykanaskie/henrykanaskie/main/assets/toolbox-light.svg?v=d86d3d4821" alt="Toolbox. Python for models, data pipelines, and anything that ends in a number I have to trust; C / C++ for embedded work and the OS-level projects, where the details are the point; Swift for native macOS and iOS apps, and the small app shells I wrap servers in; Node, no deps for local dashboards that have to still run in a year with no install step; MATLAB for plasma thruster signal processing in the lab, and only in the lab; VHDL for FPGA modules for reading sensors nobody could measure before.">
 </picture>
 
 <picture>
@@ -92,7 +92,7 @@
 </picture>
 
 <sub>
-6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-10 07:49 UTC<br>
+6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-10 07:58 UTC<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
