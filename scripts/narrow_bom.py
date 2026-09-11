@@ -129,6 +129,19 @@ def _bom_block(cfg, p, i, langs, statuses, top, d, t):
             y += 10.5
         y += 2
 
+    # ── what it is useful for ───────────────────────────────────────────────
+    # A step smaller and in the faint ink, the same as the wide sheet, so the
+    # block reads name, then function, then use. Here it takes as many lines as
+    # it needs: nothing below it has to line up with anything in another block.
+    why = " ".join(str(p.get("why") or "").split())
+    if why:
+        for line in cards._wrap(why, BOM_TW, cards.WHY_SIZE):
+            out += cards._g(d + 0.07, bp.text(BOM_TX, y + 8, line, t,
+                                              size=cards.WHY_SIZE,
+                                              color="faint"))
+            y += 10.5
+        y += 2
+
     # ── tolerance callouts ──────────────────────────────────────────────────
     # The project's own notes. On the wide sheet they run out right-aligned the
     # way a tolerance block sits under a feature; at 264 a right-aligned wrapped

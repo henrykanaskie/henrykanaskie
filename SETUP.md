@@ -91,9 +91,8 @@ name       = "repo-name"
 lang       = "Python"
 status     = "FLIGHT"
 completion = 0.60
-summary    = "one line, shown collapsed, at most 81 characters"
-detail     = """
-The expanded paragraph. What it is, and the actual interesting problem in it."""
+summary    = "what it does, in one line, at most 81 characters"
+why        = "what it is useful for. Up to two lines in the same column, so about 160"
 notes      = ["tolerance callout", "another one", "at most three"]
 repo       = "https://github.com/henrykanaskie/repo-name"
 ```
@@ -107,11 +106,21 @@ Then name it from at least one `[[frameworks]]` entry, or the build fails. See b
 | `lang`       | Must exist in `[palette.lang]` further down the file, or the build fails. |
 | `status`     | One of the `[[status]]` keys. See the band rule below.              |
 | `completion` | `0.0` to `1.0`.                                                        |
-| `summary`    | One line. Shown collapsed.                                          |
-| `detail`     | The expanded paragraph.                                             |
-| `notes`      | Short, factual. Three maximum.                                      |
+| `summary`    | **What it does**, one line. Over 81 characters and the build fails and says by how much. |
+| `why`        | **What it is useful for**, up to two lines. Not why it is clever and not why you enjoyed writing it: what a person gets out of it that they would not have otherwise. |
+| `notes`      | Short, factual. Three maximum, and the build also checks their combined length, since three notes that each fit can still overflow joined. |
 | `repo`       | **Omit entirely** for a private or unpushed project.                |
 | `private`    | Optional. One line explaining why there is no link.                 |
+
+### Why there is no `detail` field
+
+There was one, holding a paragraph per project, and it was rendered on nothing at
+all. Ten carefully written paragraphs sat in the config being read by nobody. That
+is the worst version of the rule this drawing set runs on: not that a sheet said
+something untrue, but that the file said something no sheet ever carried.
+
+`summary` and `why` replaced it, and both are drawn. If you want to say more about
+a project than two lines, the place for it is that project's own README.
 
 What a part is built **on** is not written here. It lives in `[[frameworks]]`, keyed
 the other way round: one entry per framework listing the parts that use it. That is

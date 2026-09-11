@@ -133,6 +133,19 @@ def validate(cfg: dict) -> None:
             problems.append(f"{who}: duplicate project name")
         seen_name.add(p.get("name"))
 
+        why = str(p.get("why") or "").strip()
+        if not why:
+            problems.append(
+                f"{who}: no 'why'. The bill of materials draws what a part "
+                f"does and what it is useful for, and the second line is the "
+                f"one a reader cannot work out on their own")
+        else:
+            lines = cards.why_capacity(why)
+            if lines > cards.WHY_LINES:
+                problems.append(
+                    f"{who}: 'why' wraps to {lines} lines and the row holds "
+                    f"{cards.WHY_LINES}. Trim it")
+
         cap = cards.summary_capacity()
         if len(p.get("summary", "")) > cap:
             problems.append(
@@ -146,6 +159,13 @@ def validate(cfg: dict) -> None:
         if len(p.get("notes", [])) > 3:
             problems.append(
                 f"{who}: {len(p['notes'])} notes; three is the most a row fits")
+        run = " · ".join(str(x) for x in (p.get("notes") or []))
+        ncap = cards.notes_capacity()
+        if len(run) > ncap:
+            problems.append(
+                f"{who}: the notes run to {len(run)} characters joined and the "
+                f"row letters {ncap}, so it would be cut with an ellipsis. "
+                f"Trim by {len(run) - ncap}")
 
     # A stray key is the TOML table-binding trap: an array that drifted below a
     # table header and got absorbed by it. It parses cleanly and produces an
@@ -404,10 +424,15 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
     alt text straight through with no punctuation pauses to lean on.
     """
     if card == "bom":
-        parts = ", ".join(
-            f'{p["name"]} {p["status"].lower()} at {round(p["completion"]*100)}%'
+        # The row's two description lines go in too. Alt text is the whole of
+        # what a screen reader gets from this sheet, and a list of names and
+        # percentages is the sheet's index rather than its content.
+        parts = ". ".join(
+            f'{p["name"]}, {p["status"].lower()} at '
+            f'{round(p["completion"]*100)}%. {p.get("summary", "")}. '
+            f'{p.get("why", "")}'.strip()
             for p in cfg.get("projects", []))
-        return f"Bill of materials. {parts}." if parts else "Bill of materials, empty."
+        return f"Bill of materials. {parts}" if parts else "Bill of materials, empty."
     if card == "general":
         body = " ".join(" ".join(cfg.get("about", {}).get("body", [])).split())
         pts = ". ".join(x.replace("**", "")

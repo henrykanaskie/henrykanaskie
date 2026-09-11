@@ -98,6 +98,12 @@ the 60/hour anonymous budget:
 
 ## Voice
 
+Every part gets two lines on the bill of materials: `summary` says what it does,
+`why` says what it is useful for. Both are drawn. Anything you write into this
+config that no sheet renders is worse than writing nothing, because it reads as
+work and it reaches nobody: a `detail` field held a paragraph per project for
+months and was rendered on precisely nothing.
+
 Every entry says what the thing does, then why it was built. That is the whole
 shape of it, and the failure mode is writing anything else.
 
@@ -109,8 +115,8 @@ an RF impedance matching network" is the job. "Picks matching-network capacitors
 from values you can actually buy" is an advertisement for the same function, and
 the word doing the selling is "actually".
 
-**The catchy ending.** Every expanded entry had grown a closing line that summed
-it up with a turn of phrase: "watching it is the entire feature", "which is the
+**The catchy ending.** Every entry had grown a closing line that summed it up
+with a turn of phrase: "watching it is the entire feature", "which is the
 part of the job it was actually meant to fix", "instead of my word for it". They
 read as written-to-be-quoted. An entry should stop once it has said why the
 thing was built.

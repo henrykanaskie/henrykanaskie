@@ -108,11 +108,21 @@ blurb = "scaffold and intent"
 #    lang       must appear in [palette.lang] below
 #    status     one of the keys above
 #    completion 0.0 to 1.0, and must fall inside that status's band
-#    summary    one line, shown collapsed. At most 81 characters, which is what
+#    summary    WHAT IT DOES, in one line. At most 81 characters, which is what
 #               the BOM description column holds. Go over and the build fails
 #               and tells you by how much, rather than cutting it with an
 #               ellipsis.
-#    detail     the expanded paragraph
+#    why        WHY IT IS USEFUL. Up to two lines in the same column, so about
+#               160 characters. Not why it is clever and not why you enjoyed
+#               writing it: what a person gets out of it that they would not
+#               have otherwise.
+#
+#               These two fields replaced `detail`, which held a paragraph per
+#               project and was rendered on precisely nothing. Ten carefully
+#               written paragraphs sat in this file being read by nobody, which
+#               is the worst version of the rule this drawing set runs on: it
+#               was not that the sheet said something untrue, it was that the
+#               file said something the sheet never carried.
 #    notes      tolerance callouts. Short, factual, no more than three
 #    repo       omit entirely for a private or unpushed project
 #    private    optional note explaining why there is no link
@@ -129,8 +139,7 @@ lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Picks capacitor values for an RF impedance matching network"
-detail     = """
-Takes a target impedance and returns a network of capacitors that reaches it, restricted to values that exist in the E12 series rather than the exact numbers the math gives you. Google OR-Tools solves it as a constraint problem. I wrote it for the plasma lab, where the matching network was being tuned by hand."""
+why        = "The network it returns is buildable from stocked parts, so nothing has to be rounded afterwards and re-checked to see whether it still matches."
 notes      = ["OR-Tools CP-SAT", "E12 series parts only"]
 repo       = "https://github.com/henrykanaskie/Cap_Match_Net"
 
@@ -141,9 +150,8 @@ lang       = "C"
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "A Unix shell in C: job control, I/O redirection, and signal handling"
-detail     = """
-Runs commands, handles pipes and I/O redirection, moves jobs between the foreground and the background, and handles SIGINT and SIGTSTP. Written for the operating systems course. I had not understood process groups from the reading, and writing the shell was what made them make sense."""
-notes      = ["POSIX job control", "SIGTSTP / SIGINT handled"]
+why        = "A small, complete example of how a shell hands the terminal to a process group and takes it back, which is the part of job control most write-ups skip."
+notes      = ["POSIX job control", "SIGTSTP and SIGINT handled", "operating systems course"]
 repo       = "https://github.com/henrykanaskie/small-shell"
 
 [[projects]]
@@ -153,8 +161,7 @@ lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Ranks plants for a county from Oregon Bee Atlas visit records"
-detail     = """
-An interactive map over the Oregon Bee Atlas. Recorded bee visits to plants form a sparse matrix, and a truncated SVD estimates the entries nobody recorded, so asking about a county or an ecoregion returns a ranked list of plants. React front end, FastAPI backend, and downloadable PDF reports. Written with five other students for the Oregon Bee Project, who wanted the Atlas usable by people planning habitat restoration."""
+why        = "Turns a statewide dataset into an answer for one county, so a restoration planner gets a ranked list for the place they are planting, not a general guide."
 notes      = ["truncated SVD over the Bee Atlas", "React + FastAPI", "six authors"]
 repo       = "https://github.com/Kellen-Sullivan/bee-plant-data-exploration"
 
@@ -165,10 +172,7 @@ lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Answers questions about a codebase and links the lines it read"
-detail     = """
-Clones a public repository, splits the code into functions and classes with tree-sitter, embeds it into a local ChromaDB, and answers questions with links to the lines it used. It also generates a component diagram, traces what depends on a given file, and searches symbols. Built over a weekend at BeaverHacks 2026, \
-for the problem of being dropped into a large codebase and not knowing \
-where anything is."""
+why        = "Every answer links the lines it came from, so you can check it rather than trust it. The dependency view answers the other day-one question: what uses this file."
 notes      = ["AST-aware chunking", "every answer cites its lines", "BeaverHacks 2026"]
 repo       = "https://github.com/henrykanaskie/accliMate"
 
@@ -179,8 +183,7 @@ lang       = "Swift"
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Shows running Claude Code agents as characters in a pixel-art room"
-detail     = """
-Claude Code hooks POST to a listener running inside the app. Each session becomes a character in a pixel-art room and each tool call becomes something that character is doing. It reads hook metadata only: never prompt text, never response text, and it cannot control an agent. I run several agents at once and had no way to see what they were doing without reading log files."""
+why        = "Answers one question at a glance: are the agents working, or is one waiting on me. Because it cannot touch an agent it is safe to leave open beside them."
 notes      = ["reads hook metadata only", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
 
@@ -191,9 +194,8 @@ lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
 summary    = "Counts iMessage tapbacks and ranks a group chat eight ways"
-detail     = """
-Copies the macOS Messages database, counts the tapbacks that are still standing, and ranks everyone in a group chat eight ways: who receives the most of each reaction, and who gives the most. Python standard library only, in a WKWebView with a server on localhost and no outbound requests. Message text is off by default, because counting reactions does not need it. I wrote it for my group chat."""
-notes      = ["reads a copy, never the live database", "message bodies off by default"]
+why        = "Settles the argument with what the chat reacted to rather than what anyone remembers. Nothing leaves the machine, so it can be run on a real history."
+notes      = ["reads a copy, not the live one", "bodies off by default", "standard library only"]
 private    = "private repository"
 
 [[projects]]
@@ -203,8 +205,7 @@ lang       = "JavaScript"
 status     = "FLIGHT"
 completion = 0.90
 summary    = "Lists every repo on my disk and what state each one is in"
-detail     = """
-Point it at a folder of repositories and it lists each project with its git state, whether a coding agent is running in it, and its onboarding document. It can write that document, open a project in an editor, and clear out folders that came to nothing. Node standard library, no install step, in a Swift WKWebView wrapper. I had more project folders than I could keep track of."""
+why        = "Replaces cd-ing through twenty folders running git status: what has uncommitted work, what has an agent in it, and what a project was when you come back cold."
 notes      = ["Node standard library, no install step", "Swift app shell"]
 repo       = "https://github.com/henrykanaskie/Ground-Control"
 
@@ -215,8 +216,7 @@ lang       = "JavaScript"
 status     = "FLIGHT"
 completion = 0.90
 summary    = "Runs a team of Claude Code agents at a project as a dependency graph"
-detail     = """
-Eight teams of agents, thirty-five roles between them, pointed at whatever project the dashboard is open on. Each team is a dependency graph rather than a list, so an agent starts once its upstream reports land, and the graph is drawn while it runs. It calls the local claude CLI. I was retyping the same long prompts into Claude Code for every new project."""
+why        = "What it saves is the scheduling. The whole pass runs in the right order without holding the pipeline in your head or watching for the moment each step can start."
 notes      = ["35 agents across 8 teams", "calls the local claude CLI"]
 private    = "private repository"
 
@@ -227,9 +227,7 @@ lang       = "Swift"
 status     = "FLIGHT"
 completion = 0.62
 summary    = "A habit tracker that draws each streak as a filament of a graph"
-detail     = """
-Each habit is a filament running out from the centre of a sphere, and each day you keep it is a node on that filament. A WidgetKit suite draws the same sphere from code shared with the app, reading one App Group store. Themes and board layout persist across launches. I wanted a habit tracker that showed more \
-than a row of checkmarks."""
+why        = "Drawing the history as one shape makes a month visible at once, which a row of checkmarks is not. The widgets put that view where you already look."
 notes      = ["full WidgetKit suite", "shared App Group store", "no sync yet"]
 private    = "private repository"
 
@@ -240,8 +238,7 @@ lang       = "Python"
 status     = "FLIGHT"
 completion = 0.60
 summary    = "An Elo model for NFL games, with each week's predictions logged"
-detail     = """
-A margin-aware Elo rating carried across seasons, fitted on games back to 2020 and used to predict the current week. Logging a slate writes each prediction to a parquet file along with the parameters that produced it. A separate dashboard covers player props. I wrote it to find out whether the model is any good, which needs predictions that cannot be edited after the result is known. The log is not committed to the repository yet, so for now it only exists on my laptop."""
+why        = "Produces a predicted margin per game, which is the form you can hold against a posted line. The log is what would make a record mean anything once committed."
 notes      = ["log not committed yet", "111 tests", "walk-forward, not backfit"]
 repo       = "https://github.com/henrykanaskie/aggregateAnalytics"
 
