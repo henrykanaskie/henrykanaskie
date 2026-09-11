@@ -92,7 +92,7 @@
 </picture>
 
 <sub>
-6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-11 08:17 UTC<br>
+6 SHEETS &nbsp;·&nbsp; BUILT 2026-09-11 08:24 UTC<br>
 Drawn from <code>data/profile.toml</code> by <code>scripts/build.py</code>, rebuilt every morning.<br>
 The sheets draw themselves in when they load. Where SMIL is unsupported they arrive finished.
 </sub>
