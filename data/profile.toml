@@ -108,21 +108,23 @@ blurb = "scaffold and intent"
 #    lang       must appear in [palette.lang] below
 #    status     one of the keys above
 #    completion 0.0 to 1.0, and must fall inside that status's band
-#    summary    WHAT IT DOES, in one line. At most 81 characters, which is what
-#               the BOM description column holds. Go over and the build fails
-#               and tells you by how much, rather than cutting it with an
-#               ellipsis.
-#    why        WHY IT IS USEFUL. Up to two lines in the same column, so about
-#               160 characters. Not why it is clever and not why you enjoyed
-#               writing it: what a person gets out of it that they would not
-#               have otherwise.
+#    description
+#               One or two sentences: what the thing does and what it is useful
+#               for, written as prose rather than as two fields. Up to three
+#               lines in the bill of materials' description column, which the
+#               build measures against the real column width and rejects if it
+#               overflows.
 #
-#               These two fields replaced `detail`, which held a paragraph per
-#               project and was rendered on precisely nothing. Ten carefully
-#               written paragraphs sat in this file being read by nobody, which
-#               is the worst version of the rule this drawing set runs on: it
-#               was not that the sheet said something untrue, it was that the
-#               file said something the sheet never carried.
+#               This was briefly a terse `summary` plus a separate `why`, and
+#               the pair read like a spec sheet: a clipped noun phrase, then a
+#               sentence beginning "useful because". Splitting a description
+#               into what-it-does and what-it-is-for is a shape no person
+#               writing about their own project would choose.
+#
+#               Before that it was `summary` plus a `detail` paragraph that was
+#               rendered on nothing at all, which is the worse failure of the
+#               two: not a sheet saying something untrue, but the file holding
+#               ten paragraphs no sheet ever carried.
 #    notes      tolerance callouts. Short, factual, no more than three
 #    repo       omit entirely for a private or unpushed project
 #    private    optional note explaining why there is no link
@@ -138,8 +140,7 @@ name       = "Cap_Match_Net"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "Picks capacitor values for an RF impedance matching network"
-why        = "The network it returns is buildable from stocked parts, so nothing has to be rounded afterwards and re-checked to see whether it still matches."
+description = "Picks the capacitor values for an RF impedance matching network, searching only over parts the lab stocks, so the network it hands back can be built as-is instead of rounded to the nearest real value and checked again."
 notes      = ["OR-Tools CP-SAT", "E12 series parts only"]
 repo       = "https://github.com/henrykanaskie/Cap_Match_Net"
 
@@ -149,8 +150,7 @@ name       = "small-shell"
 lang       = "C"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "A Unix shell in C: job control, I/O redirection, and signal handling"
-why        = "A small, complete example of how a shell hands the terminal to a process group and takes it back, which is the part of job control most write-ups skip."
+description = "A Unix shell in C with job control, I/O redirection and signal handling. It is the smallest complete example I have of how a shell hands the terminal to a process group and takes it back, which is the part most write-ups skip."
 notes      = ["POSIX job control", "SIGTSTP and SIGINT handled", "operating systems course"]
 repo       = "https://github.com/henrykanaskie/small-shell"
 
@@ -160,8 +160,7 @@ name       = "floralytics"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "Ranks plants for a county from Oregon Bee Atlas visit records"
-why        = "Turns a statewide dataset into an answer for one county, so a restoration planner gets a ranked list for the place they are planting, not a general guide."
+description = "Ranks the plants worth planting in a given county from the visits recorded in the Oregon Bee Atlas, turning a statewide dataset into an answer for one place. A restoration planner gets a list for where they are planting, not a general guide."
 notes      = ["truncated SVD over the Bee Atlas", "React + FastAPI", "six authors"]
 repo       = "https://github.com/Kellen-Sullivan/bee-plant-data-exploration"
 
@@ -171,8 +170,7 @@ name       = "accliMate"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "Answers questions about a codebase and links the lines it read"
-why        = "Every answer links the lines it came from, so you can check it rather than trust it. The dependency view answers the other day-one question: what uses this file."
+description = "Answers questions about a codebase you have never seen, linking the lines each answer came from so you can check it rather than trust it. A dependency view covers the other day-one question: what else uses the file you are changing."
 notes      = ["AST-aware chunking", "every answer cites its lines", "BeaverHacks 2026"]
 repo       = "https://github.com/henrykanaskie/accliMate"
 
@@ -182,8 +180,7 @@ name       = "animAgent"
 lang       = "Swift"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "Shows running Claude Code agents as characters in a pixel-art room"
-why        = "Answers one question at a glance: are the agents working, or is one waiting on me. Because it cannot touch an agent it is safe to leave open beside them."
+description = "Shows the Claude Code agents you have running as characters in a pixel-art room, so one glance says whether they are working or waiting on you. It reads hook metadata only and cannot touch an agent, so it is safe to leave open beside them."
 notes      = ["reads hook metadata only", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
 
@@ -193,8 +190,7 @@ name       = "groupStat"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "Counts iMessage tapbacks and ranks a group chat eight ways"
-why        = "Settles the argument with what the chat reacted to rather than what anyone remembers. Nothing leaves the machine, so it can be run on a real history."
+description = "Counts the tapbacks in a macOS Messages database and ranks a group chat eight ways, settling the argument with what people reacted to rather than what anyone remembers. It works on a copy and makes no outbound requests of any kind."
 notes      = ["reads a copy, not the live one", "bodies off by default", "standard library only"]
 private    = "private repository"
 
@@ -204,8 +200,7 @@ name       = "Ground-Control"
 lang       = "JavaScript"
 status     = "FLIGHT"
 completion = 0.90
-summary    = "Lists every repo on my disk and what state each one is in"
-why        = "Replaces cd-ing through twenty folders running git status: what has uncommitted work, what has an agent in it, and what a project was when you come back cold."
+description = "Lists every repository on my disk with its git state, whether an agent is running in it, and its onboarding document. It replaces cd-ing through twenty folders running git status, and says what a project was when I come back to it cold."
 notes      = ["Node standard library, no install step", "Swift app shell"]
 repo       = "https://github.com/henrykanaskie/Ground-Control"
 
@@ -215,8 +210,7 @@ name       = "orchestrate"
 lang       = "JavaScript"
 status     = "FLIGHT"
 completion = 0.90
-summary    = "Runs a team of Claude Code agents at a project as a dependency graph"
-why        = "What it saves is the scheduling. The whole pass runs in the right order without holding the pipeline in your head or watching for the moment each step can start."
+description = "Runs a team of Claude Code agents at a project as a dependency graph, starting each one when its upstream reports land. What it saves is the scheduling: the whole pass runs in the right order without me holding the pipeline in my head."
 notes      = ["35 agents across 8 teams", "calls the local claude CLI"]
 private    = "private repository"
 
@@ -226,8 +220,7 @@ name       = "GrowthApp"
 lang       = "Swift"
 status     = "FLIGHT"
 completion = 0.62
-summary    = "A habit tracker that draws each streak as a filament of a graph"
-why        = "Drawing the history as one shape makes a month visible at once, which a row of checkmarks is not. The widgets put that view where you already look."
+description = "A habit tracker that draws each streak as a filament of one graph, so a month of history is visible at once in a way a row of checkmarks is not. A WidgetKit suite puts the same view on the home screen."
 notes      = ["full WidgetKit suite", "shared App Group store", "no sync yet"]
 private    = "private repository"
 
@@ -237,8 +230,7 @@ name       = "aggregateAnalytics"
 lang       = "Python"
 status     = "FLIGHT"
 completion = 0.60
-summary    = "An Elo model for NFL games, with each week's predictions logged"
-why        = "Produces a predicted margin per game, which is the form you can hold against a posted line. The log is what would make a record mean anything once committed."
+description = "A margin-aware Elo model that gives a predicted margin for each NFL game, in the form you can hold against a posted line. Every week's predictions are logged before kickoff, though the log is not committed to the repository yet."
 notes      = ["log not committed yet", "111 tests", "walk-forward, not backfit"]
 repo       = "https://github.com/henrykanaskie/aggregateAnalytics"
 

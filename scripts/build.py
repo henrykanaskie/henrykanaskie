@@ -105,7 +105,8 @@ def validate(cfg: dict) -> None:
     for p in cfg.get("projects", []):
         who = p.get("name", "<unnamed>")
 
-        for required in ("pn", "name", "lang", "status", "completion", "summary"):
+        for required in ("pn", "name", "lang", "status", "completion",
+                         "description"):
             if not p.get(required) and p.get(required) != 0:
                 problems.append(f"{who}: missing required field '{required}'")
 
@@ -133,26 +134,18 @@ def validate(cfg: dict) -> None:
             problems.append(f"{who}: duplicate project name")
         seen_name.add(p.get("name"))
 
-        why = str(p.get("why") or "").strip()
-        if not why:
+        description = " ".join(str(p.get("description") or "").split())
+        if not description:
             problems.append(
-                f"{who}: no 'why'. The bill of materials draws what a part "
-                f"does and what it is useful for, and the second line is the "
-                f"one a reader cannot work out on their own")
+                f"{who}: no 'description'. One or two sentences saying what it "
+                f"does and what it is useful for")
         else:
-            lines = cards.why_capacity(why)
-            if lines > cards.WHY_LINES:
+            lines = cards.description_lines(description)
+            if lines > cards.DESC_LINES:
                 problems.append(
-                    f"{who}: 'why' wraps to {lines} lines and the row holds "
-                    f"{cards.WHY_LINES}. Trim it")
-
-        cap = cards.summary_capacity()
-        if len(p.get("summary", "")) > cap:
-            problems.append(
-                f"{who}: summary is {len(p['summary'])} characters. The "
-                f"description column fits {cap}, so it would be cut with an "
-                f"ellipsis on the sheet. Trim it by "
-                f"{len(p['summary']) - cap}.")
+                    f"{who}: the description wraps to {lines} lines and the "
+                    f"row holds {cards.DESC_LINES}, so it would be cut with an "
+                    f"ellipsis on the sheet. Trim it")
 
         if p.get("repo") and p.get("private"):
             problems.append(f"{who}: has both 'repo' and 'private'; pick one")
@@ -427,10 +420,9 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
         # The row's two description lines go in too. Alt text is the whole of
         # what a screen reader gets from this sheet, and a list of names and
         # percentages is the sheet's index rather than its content.
-        parts = ". ".join(
+        parts = " ".join(
             f'{p["name"]}, {p["status"].lower()} at '
-            f'{round(p["completion"]*100)}%. {p.get("summary", "")}. '
-            f'{p.get("why", "")}'.strip()
+            f'{round(p["completion"]*100)}%. {p.get("description", "")}'.strip()
             for p in cfg.get("projects", []))
         return f"Bill of materials. {parts}" if parts else "Bill of materials, empty."
     if card == "general":

@@ -352,23 +352,21 @@ def _status_map(cfg) -> dict:
 # ── bill of materials geometry ──────────────────────────────────────────────
 #
 # The one number here anything outside this file depends on is COL_DESC_R, by
-# way of summary_capacity(): build.py rejects a summary longer than the
-# description column can hold, so the column width and the length check cannot
-# disagree.
+# way of description_lines() and notes_capacity(): build.py rejects text that
+# would overflow the description column, so the column width and the checks
+# against it cannot disagree.
 
 BOM_W = 900
 BOM_X0, BOM_X1 = 26, 874
 BOM_HEAD_Y = 58                 # header lettering baseline
 BOM_HEAD_RULE = 64
 BOM_BODY_Y = 66                 # top of the first row
-# A row carries three bands of lettering: the name, one line saying what the
-# part does, and up to two lines saying what it is useful for. The `why` band
-# always reserves both lines even when it only fills one, so the tolerance
-# callouts under it sit on the same baseline down the whole sheet.
+# A row carries the name, then the description as prose, then the tolerance
+# callouts. The description band always reserves its full three lines even when
+# it fills fewer, so the callouts sit on one baseline down the whole sheet.
 BOM_ROW_H = 76
-WHY_SIZE = 7.8
-WHY_LEAD = 11.5
-WHY_LINES = 2
+DESC_LEAD = 11.5
+DESC_LINES = 3
 COL_ITEM = 46                   # balloon centre
 COL_PN = 66
 COL_DESC, COL_DESC_R = 108, 508
@@ -379,17 +377,14 @@ COL_COMP0, COL_COMP1 = 726, 866
 SUMMARY_SIZE = 8.2
 
 
-def summary_capacity() -> int:
-    """How many characters of `summary` the BOM description column holds.
+def description_lines(text: str) -> int:
+    """How many lines of the description column a description wraps to.
 
-    Exported so build.py can reject an over-long summary during validation
-    instead of letting it reach the sheet as a silent ellipsis. A truncated
-    description is the one failure here that looks deliberate. Nothing about
-    "…the not…" says "your config is too long". That is worth failing the build
-    over, and the check belongs next to the metrics it depends on rather than
-    living as a magic number in the validator.
+    Exported so build.py can reject one that overflows the row. Measured
+    against the real column width rather than by counting characters, because
+    the wrap is what decides whether the row holds it.
     """
-    return int((COL_DESC_R - COL_DESC) / (SUMMARY_SIZE * CW))
+    return len(_wrap(str(text), COL_DESC_R - COL_DESC, SUMMARY_SIZE))
 
 
 def notes_capacity() -> int:
@@ -401,16 +396,6 @@ def notes_capacity() -> int:
     which is the same silent ellipsis the summary check exists to prevent.
     """
     return int((COL_DESC_R - COL_DESC) / (7.4 * CW + 0.2))
-
-
-def why_capacity(text: str) -> int:
-    """How many lines of the description column a `why` string wraps to.
-
-    Exported so build.py can reject one that overflows the row, the same way it
-    rejects an over-long summary. Measured against the real column width rather
-    than a character count, because the wrap is what decides the row height.
-    """
-    return len(_wrap(str(text), COL_DESC_R - COL_DESC, WHY_SIZE))
 
 
 def _bom_height(n_rows: int) -> int:
@@ -798,29 +783,23 @@ def _bom(cfg, data, t):
         out += _g(d, text(COL_DESC, ty + 17, _fit(name, COL_DESC_R - COL_DESC,
                                                   12, 0.2), t, size=12,
                           weight=700, track=0.2))
-        summary = str(p.get("summary") or "").strip()
-        if summary:
-            out += _g(d + 0.05,
-                      text(COL_DESC, ty + 30,
-                           _fit(summary, COL_DESC_R - COL_DESC, SUMMARY_SIZE), t,
-                           size=SUMMARY_SIZE, color="soft"))
-
-        # What the part is useful for, under what it does. Set a step smaller
-        # and in the faint ink, so the row still reads name first, function
-        # second, and this third rather than as two competing descriptions.
-        why = str(p.get("why") or "").strip()
+        # The description, as one run of prose. It used to be a clipped line
+        # in `soft` with a smaller `why` underneath in `faint`, and the two
+        # weights made a single description look like two competing ones.
+        description = " ".join(str(p.get("description") or "").split())
         for k, line in enumerate(
-                _wrap(why, COL_DESC_R - COL_DESC, WHY_SIZE)[:WHY_LINES]):
-            out += _g(d + 0.07 + k * 0.03,
-                      text(COL_DESC, ty + 45 + k * WHY_LEAD, line, t,
-                           size=WHY_SIZE, color="faint"))
+                _wrap(description, COL_DESC_R - COL_DESC,
+                      SUMMARY_SIZE)[:DESC_LINES]):
+            out += _g(d + 0.05 + k * 0.03,
+                      text(COL_DESC, ty + 30 + k * DESC_LEAD, line, t,
+                           size=SUMMARY_SIZE, color="soft"))
         # Tolerance callouts: the project's own notes, run out right-aligned
         # under the description the way a tolerance block sits under a feature.
         notes = [str(x) for x in (p.get("notes") or []) if str(x).strip()][:3]
         if notes:
             run = " · ".join(notes)
             out += _g(d + 0.1,
-                      text(COL_DESC_R, ty + 45 + WHY_LINES * WHY_LEAD,
+                      text(COL_DESC_R, ty + 32 + DESC_LINES * DESC_LEAD,
                            _fit(run, COL_DESC_R - COL_DESC, 7.4, 0.2), t,
                            size=7.4, color="faint", anchor="end", track=0.2))
 

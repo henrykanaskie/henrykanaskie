@@ -59,7 +59,7 @@ When adding to a sheet, the question is not "would a drawing have this" but
     python3 scripts/build.py --offline    # render everything, no network
 
 Standard library only, no install step. `--check` runs the real validators:
-summary length against the BOM description column, the status/completion band
+description length against the BOM description column, the status/completion band
 assertions, the notes-per-row cap, that every part is named by at least one
 framework, and every project name a `[[tools]]` or `[[frameworks]]` row
 cites. It prints `config ok: N projects` when the config is
@@ -98,22 +98,26 @@ the 60/hour anonymous budget:
 
 ## Voice
 
-Every part gets two lines on the bill of materials: `summary` says what it does,
-`why` says what it is useful for. Both are drawn. Anything you write into this
-config that no sheet renders is worse than writing nothing, because it reads as
-work and it reaches nobody: a `detail` field held a paragraph per project for
-months and was rendered on precisely nothing.
+Each part gets one `description` on the bill of materials: one or two sentences
+covering what it does and what it is useful for, as prose. It is deliberately
+not two fields. Splitting it into a clipped `summary` and a separate `why` was
+tried and read like a spec sheet, which is a shape nobody writing about their
+own project would choose.
 
-Every entry says what the thing does, then why it was built. That is the whole
+Anything written into this config that no sheet renders is worse than writing
+nothing, because it reads as work and reaches nobody. A `detail` field held a
+paragraph per project and was rendered on precisely nothing.
+
+Every entry says what the thing does and why it is worth having. That is the whole
 shape of it, and the failure mode is writing anything else.
 
 Two specific habits to avoid, because both got written into this profile and
 both had to come out:
 
-**Selling.** A summary describes; it does not pitch. "Picks capacitor values for
-an RF impedance matching network" is the job. "Picks matching-network capacitors
-from values you can actually buy" is an advertisement for the same function, and
-the word doing the selling is "actually".
+**Selling.** A description describes; it does not pitch. "Picks the capacitor
+values for an RF impedance matching network" is the job. "Picks matching-network
+capacitors from values you can actually buy" is an advertisement for the same
+function, and the word doing the selling is "actually".
 
 **The catchy ending.** Every entry had grown a closing line that summed it up
 with a turn of phrase: "watching it is the entire feature", "which is the
