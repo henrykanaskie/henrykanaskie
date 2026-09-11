@@ -24,7 +24,7 @@ name     = "Henry Kanaskie"
 # The drawing's title block. Set in caps at a large size, so keep it short.
 # It names the subject matter, not a self-description.
 title    = "MACHINE LEARNING · SIGNAL PROCESSING · TOOLS I USE MYSELF"
-tagline  = "I like building things and taking them apart to see how they work."
+tagline  = "What I have built, what each one does, and why I built it."
 website  = "https://henrykanaskie.com"
 github   = "henrykanaskie"
 
@@ -39,18 +39,18 @@ location = "CORVALLIS, OREGON"
 # file don't become line breaks on the profile. These are joined with spaces.
 body = [
   "I'm a computer science student at Oregon State, working on a master's after",
-  "finishing my undergrad there. Most of what's on this sheet exists because I",
-  "wanted to use it, or because I didn't understand something well enough and",
-  "building it was the only way I was going to. Some of it came out of research:",
-  "a matching-network solver for the plasma lab, signal processing for thruster",
-  "data. The rest is tools I open every day, and a leaderboard for my group chat.",
+  "finishing my undergrad there. Two of the projects below came out of research",
+  "in the plasma lab: a solver that picks capacitor values for RF matching",
+  "networks, and signal processing for thruster data. The rest I wrote for",
+  "myself, because I wanted to use them. Each row of the bill of materials says",
+  "what a project does, and the entry under it says why I wrote it.",
 ]
 
 # The three lines under the prose. Bold with **, as in normal markdown.
 points = [
-  "Master's in CS at **Oregon State**, after two years of undergrad research in the plasma lab",
-  "Six months at **DZYNE Technologies** on embedded C/C++ and the test framework around it",
-  "Away from a keyboard I'm usually behind a camera, on skis, or in the gym",
+  "Master's in CS at **Oregon State**. Two years of undergrad research in the plasma lab before that",
+  "Six months at **DZYNE Technologies**, writing embedded C and C++ and the Python test framework around it",
+  "Outside of school: photography, skiing, lifting",
 ]
 
 
@@ -128,13 +128,9 @@ name       = "Cap_Match_Net"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "picks matching-network capacitors from values you can actually buy"
+summary    = "Picks capacitor values for an RF impedance matching network"
 detail     = """
-An impedance matching network solved as a constraint problem with Google \
-OR-Tools, written for the plasma lab. You give it a target impedance and it \
-returns a network built out of components that exist in a parts bin, instead of \
-the ideal values a textbook hands you and nobody stocks. It replaced matching \
-the network by hand, which is the part of the job it was actually meant to fix."""
+Takes a target impedance and returns a network of capacitors that reaches it, restricted to values that exist in the E12 series rather than the exact numbers the math gives you. Google OR-Tools solves it as a constraint problem. I wrote it for the plasma lab, where the matching network was being tuned by hand."""
 notes      = ["OR-Tools CP-SAT", "E12 series parts only"]
 repo       = "https://github.com/henrykanaskie/Cap_Match_Net"
 
@@ -144,13 +140,9 @@ name       = "small-shell"
 lang       = "C"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "a Unix shell in C: job control, redirection, and the signal handling"
+summary    = "A Unix shell in C: job control, I/O redirection, and signal handling"
 detail     = """
-A shell written for the operating systems course. Job control, I/O redirection, \
-and signal handling, including the parts that only misbehave once a process is \
-backgrounded and something sends it a SIGTSTP at an inconvenient moment. It is \
-the project that taught me what a process group is, which no amount of reading \
-about process groups had managed to do."""
+Runs commands, handles pipes and I/O redirection, moves jobs between the foreground and the background, and handles SIGINT and SIGTSTP. Written for the operating systems course. I had not understood process groups from the reading, and writing the shell was what made them make sense."""
 notes      = ["POSIX job control", "SIGTSTP / SIGINT handled"]
 repo       = "https://github.com/henrykanaskie/small-shell"
 
@@ -160,15 +152,9 @@ name       = "floralytics"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "Oregon bee-plant records turned into a ranked planting list for a county"
+summary    = "Ranks plants for a county from Oregon Bee Atlas visit records"
 detail     = """
-An interactive map over the Oregon Bee Atlas, written with five other students \
-for the Oregon Bee Project. Recorded bee visits to plants become a sparse \
-interaction matrix, and a truncated SVD fills in what nobody wrote down, so \
-asking about a county or an ecoregion returns a ranked list of plants worth \
-planting rather than only the visits somebody happened to observe. React front \
-end over a FastAPI backend, with PDF reports and enough rate limiting that a \
-small host survives a room full of people opening it at once."""
+An interactive map over the Oregon Bee Atlas. Recorded bee visits to plants form a sparse matrix, and a truncated SVD estimates the entries nobody recorded, so asking about a county or an ecoregion returns a ranked list of plants. React front end, FastAPI backend, and downloadable PDF reports. Written with five other students for the Oregon Bee Project, who wanted the Atlas usable by people planning habitat restoration."""
 notes      = ["truncated SVD over the Bee Atlas", "React + FastAPI", "six authors"]
 repo       = "https://github.com/Kellen-Sullivan/bee-plant-data-exploration"
 
@@ -178,15 +164,11 @@ name       = "accliMate"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "paste a repo URL, get answers that cite the exact lines they came from"
+summary    = "Answers questions about a codebase and links the lines it read"
 detail     = """
-A codebase onboarding assistant, built over a weekend at BeaverHacks 2026. It \
-clones a public repository, splits the code by function and class with \
-tree-sitter instead of by line count, embeds it into a local ChromaDB, and \
-answers questions with citations that open the lines behind them. Four ways in: \
-plain question and answer, an animated walkthrough over a generated component \
-diagram, an agent that searches symbols and traces dependencies, and a view of \
-everything that depends on one file."""
+Clones a public repository, splits the code into functions and classes with tree-sitter, embeds it into a local ChromaDB, and answers questions with links to the lines it used. It also generates a component diagram, traces what depends on a given file, and searches symbols. Built over a weekend at BeaverHacks 2026, \
+for the problem of being dropped into a large codebase and not knowing \
+where anything is."""
 notes      = ["AST-aware chunking", "every answer cites its lines", "BeaverHacks 2026"]
 repo       = "https://github.com/henrykanaskie/accliMate"
 
@@ -196,15 +178,10 @@ name       = "animAgent"
 lang       = "Swift"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "a macOS app that draws the agents you have running as pixel-art characters"
+summary    = "Shows running Claude Code agents as characters in a pixel-art room"
 detail     = """
-A small pixel-art room on your desktop where every running Claude Code agent is \
-a character and every tool call is something that character is visibly doing. \
-Read-only on purpose: it never controls an agent and never shows prompt or \
-response text, so watching it is the entire feature. The room is a lattice, so \
-each character stays in its own seat's column instead of drifting into its \
-neighbour. Six themed rooms sit behind a picker."""
-notes      = ["read-only by design", "871 tests / 87 suites green"]
+Claude Code hooks POST to a listener running inside the app. Each session becomes a character in a pixel-art room and each tool call becomes something that character is doing. It reads hook metadata only: never prompt text, never response text, and it cannot control an agent. I run several agents at once and had no way to see what they were doing without reading log files."""
+notes      = ["reads hook metadata only", "871 tests / 87 suites green"]
 repo       = "https://github.com/henrykanaskie/animAgent"
 
 [[projects]]
@@ -213,14 +190,9 @@ name       = "groupStat"
 lang       = "Python"
 status     = "QUALIFIED"
 completion = 1.00
-summary    = "ranks a group chat eight ways by the tapbacks people actually left"
+summary    = "Counts iMessage tapbacks and ranks a group chat eight ways"
 detail     = """
-Reads a copy of the macOS Messages database, counts the reactions still \
-standing, and ranks everybody eight ways: funniest, most agreeable, most \
-disagreeable, most confusing, and the same four in reverse for who hands those \
-out. Python standard library only, in a WKWebView talking to its own server on \
-localhost, with no outbound requests of any kind. Message text stays off by \
-default, because counting reactions never needed to read what anyone said."""
+Copies the macOS Messages database, counts the tapbacks that are still standing, and ranks everyone in a group chat eight ways: who receives the most of each reaction, and who gives the most. Python standard library only, in a WKWebView with a server on localhost and no outbound requests. Message text is off by default, because counting reactions does not need it. I wrote it for my group chat."""
 notes      = ["reads a copy, never the live database", "message bodies off by default"]
 private    = "private repository"
 
@@ -230,15 +202,10 @@ name       = "Ground-Control"
 lang       = "JavaScript"
 status     = "FLIGHT"
 completion = 0.90
-summary    = "one dashboard over every repo on my disk, and a place to work from"
+summary    = "Lists every repo on my disk and what state each one is in"
 detail     = """
-Point it at a folder of repositories, or at one project anywhere on disk, and it \
-tells you what state each is in, which of them have coding agents running right \
-now, and puts each project's onboarding document one click away. It writes that \
-document when there isn't one, opens anything in your editor, and helps clear \
-out the folders that turned out to be nothing. Node standard library, no \
-install step, wrapped in a 1.9 MB Swift app rather than 150 MB of Electron."""
-notes      = ["no dependencies, no build step", "native app shell, not Electron"]
+Point it at a folder of repositories and it lists each project with its git state, whether a coding agent is running in it, and its onboarding document. It can write that document, open a project in an editor, and clear out folders that came to nothing. Node standard library, no install step, in a Swift WKWebView wrapper. I had more project folders than I could keep track of."""
+notes      = ["Node standard library, no install step", "Swift app shell"]
 repo       = "https://github.com/henrykanaskie/Ground-Control"
 
 [[projects]]
@@ -247,15 +214,10 @@ name       = "orchestrate"
 lang       = "JavaScript"
 status     = "FLIGHT"
 completion = 0.90
-summary    = "runs a team of coding agents at a project as a real dependency graph"
+summary    = "Runs a team of Claude Code agents at a project as a dependency graph"
 detail     = """
-Eight teams of specialist agents, thirty-five roles between them, pointed at \
-whatever project the dashboard is open on. Each team is a dependency graph \
-rather than a list, so an agent starts the moment its own upstream report \
-lands, and the graph is drawn live while it runs. It drives the local claude \
-CLI, so it costs a subscription rather than an API key, and it binds to \
-127.0.0.1 until you deliberately open it up."""
-notes      = ["dependency graph, not a queue", "local CLI, no API key"]
+Eight teams of agents, thirty-five roles between them, pointed at whatever project the dashboard is open on. Each team is a dependency graph rather than a list, so an agent starts once its upstream reports land, and the graph is drawn while it runs. It calls the local claude CLI. I was retyping the same long prompts into Claude Code for every new project."""
+notes      = ["35 agents across 8 teams", "calls the local claude CLI"]
 private    = "private repository"
 
 [[projects]]
@@ -264,13 +226,10 @@ name       = "GrowthApp"
 lang       = "Swift"
 status     = "FLIGHT"
 completion = 0.62
-summary    = "a SwiftUI habit tracker that draws each streak as a filament of a graph"
+summary    = "A habit tracker that draws each streak as a filament of a graph"
 detail     = """
-Every habit is a filament radiating from the centre, every kept day a node on \
-it, and the day you just kept glows gold. A full WidgetKit suite draws the same \
-sphere held still, compiled from code shared with the app and reading one App \
-Group store. Themes and board layout are real settings, and every choice a \
-reader makes survives a relaunch."""
+Each habit is a filament running out from the centre of a sphere, and each day you keep it is a node on that filament. A WidgetKit suite draws the same sphere from code shared with the app, reading one App Group store. Themes and board layout persist across launches. I wanted a habit tracker that showed more \
+than a row of checkmarks."""
 notes      = ["full WidgetKit suite", "shared App Group store", "no sync yet"]
 private    = "private repository"
 
@@ -280,15 +239,10 @@ name       = "aggregateAnalytics"
 lang       = "Python"
 status     = "FLIGHT"
 completion = 0.60
-summary    = "an Elo model for NFL games that logs every prediction before kickoff"
+summary    = "An Elo model for NFL games, with each week's predictions logged"
 detail     = """
-A margin-aware Elo rating carried across seasons, fitted on games back to 2020 \
-and used to predict the current week. The part that matters is the log: every \
-prediction is written down before kickoff and committed, so the track record \
-has an independent timestamp instead of my word for it. A separate props \
-research dashboard sits over the same data. Not published yet, and the scoring \
-function is the next thing to write."""
-notes      = ["predictions committed pre-kickoff", "111 tests", "walk-forward, not backfit"]
+A margin-aware Elo rating carried across seasons, fitted on games back to 2020 and used to predict the current week. Logging a slate writes each prediction to a parquet file along with the parameters that produced it. A separate dashboard covers player props. I wrote it to find out whether the model is any good, which needs predictions that cannot be edited after the result is known. The log is not committed to the repository yet, so for now it only exists on my laptop."""
+notes      = ["log not committed yet", "111 tests", "walk-forward, not backfit"]
 repo       = "https://github.com/henrykanaskie/aggregateAnalytics"
 
 [bom]
@@ -304,10 +258,14 @@ mark_last_push = false
 #  Real drawings carry a numbered notes block. This one is yours to write.
 #
 #  One of these is drawn at the foot of the GENERAL NOTES sheet each day, under
-#  a FIELD NOTE label. They are not jokes and should not read as jokes. They are
-#  the part of the drawing where a person is obviously behind it. Write them the
-#  way you'd annotate your own work: flat, specific, true. One is chosen per day,
-#  rotating by date so the same note doesn't sit there for a week.
+#  a FIELD NOTE label. One is chosen per day, rotating by date so the same note
+#  doesn't sit there for a week.
+#
+#  Write them the way you'd annotate your own drawing: one fact about the work,
+#  stated flat. Not jokes, and not lines meant to be quoted. The test is whether
+#  it would still be worth writing down if nobody else read it. Anything that
+#  ends on a turn of phrase has been written to be read rather than to record
+#  something, and it goes.
 #
 #  This lives under its own [notes] header rather than as a bare `field_notes`
 #  array on purpose. TOML binds a bare key to the table above it, so an array
@@ -316,16 +274,16 @@ mark_last_push = false
 
 [notes]
 field = [
-  "Cap_Match_Net exists because the component values in the textbook aren't the ones in anybody's parts bin.",
-  "Ground Control started as a shell script that told me which repos had uncommitted changes. It got away from me.",
-  "The shell taught me more about signals than the chapter on signals did.",
-  "The bee-plant matrix is mostly empty, and that is the whole reason the SVD is there. Nobody recording a visit is not the same as the visit not happening.",
-  "The Bee Atlas records where people went looking, not only what was there. Any recommendation off it has to be read that way.",
-  "The NFL model commits its predictions before kickoff. A track record you could have backfilled is not a track record.",
-  "groupStats counts reactions and does not read the messages. That limit cost the one feature that needed the words, which felt like the right trade.",
-  "Almost everything here started as something I wanted to use myself. That is the only reason any of it got finished.",
-  "The pixel-art agent room is read-only. Watching is the feature, and giving it control would have made it something I'd have to trust.",
-  "Most of a week on GrowthApp went into where a node is allowed to sit. I did not expect that to be the hard part.",
+  "The Bee Atlas records where people went looking, not everywhere bees went. The rankings have to be read with that in mind.",
+  "Cap_Match_Net searches E12 values because those are the capacitors the lab stocks.",
+  "groupStats can read message text, but it is off by default and every board works the same without it.",
+  "aggregateAnalytics writes each week's predictions to a log before kickoff. The log is not committed to the repository yet, which is the next thing to fix.",
+  "Ground Control started as a shell script that listed which repositories had uncommitted changes.",
+  "animAgent reads hook metadata only. It never sees prompt or response text.",
+  "Orchestrate exists because I was retyping the same long prompts into Claude Code for every new project.",
+  "floralytics was written by six students for the Oregon Bee Project.",
+  "The hardest part of GrowthApp so far has been deciding where a node is allowed to sit.",
+  "small-shell was a course project. The signal handling is the part that took the longest.",
 ]
 
 
@@ -491,25 +449,25 @@ on      = ["accliMate"]
 
 [[tools]]
 name = "Python"
-for  = "models, data pipelines, and anything that ends in a number I have to trust"
+for  = "models, data pipelines, and most of the analysis work"
 on   = ["aggregateAnalytics", "floralytics", "Cap_Match_Net"]
 lang = "Python"
 
 [[tools]]
 name = "C / C++"
-for  = "embedded work and the OS-level projects, where the details are the point"
+for  = "embedded work and the operating-systems projects"
 on   = ["small-shell"]
 lang = "C"
 
 [[tools]]
 name = "Swift"
-for  = "native macOS and iOS apps, and the small app shells I wrap servers in"
+for  = "native macOS and iOS apps, and the app shells around local servers"
 on   = ["animAgent", "GrowthApp", "groupStat"]
 lang = "Swift"
 
 [[tools]]
 name = "Node, no deps"
-for  = "local dashboards that have to still run in a year with no install step"
+for  = "local dashboards, on the standard library so there is no install step"
 on   = ["Ground-Control", "orchestrate"]
 lang = "JavaScript"
 
@@ -518,12 +476,12 @@ lang = "JavaScript"
 
 [[tools]]
 name = "MATLAB"
-for  = "plasma thruster signal processing in the lab, and only in the lab"
+for  = "signal processing for plasma thruster data, in the lab"
 on   = []
 
 [[tools]]
 name = "VHDL"
-for  = "FPGA modules for reading sensors nobody could measure before"
+for  = "FPGA modules for reading micro-sensor signals"
 on   = []
 
 
