@@ -59,7 +59,7 @@ When adding to a sheet, the question is not "would a drawing have this" but
     python3 scripts/build.py --offline    # render everything, no network
 
 Standard library only, no install step. `--check` runs the real validators:
-summary length against the BOM description column, the status/completion band
+description length against the BOM description column, the status/completion band
 assertions, the notes-per-row cap, that every part is named by at least one
 framework, and every project name a `[[tools]]` or `[[frameworks]]` row
 cites. It prints `config ok: N projects` when the config is
@@ -98,9 +98,36 @@ the 60/hour anonymous budget:
 
 ## Voice
 
-The prose on this profile is written by a person about their own work, and it
-has to read that way. Flat, specific, first person, no aphorisms. "Happiest in a
-debugger" and "I work at the boundary between models and hardware" are both
-things that came off this profile for sounding like a character rather than a
-student who likes building things. Field notes in particular are annotations on
-your own work, not jokes and not mottos.
+Each part gets one `description` on the bill of materials: one or two sentences
+covering what it does and what it is useful for, as prose. It is deliberately
+not two fields. Splitting it into a clipped `summary` and a separate `why` was
+tried and read like a spec sheet, which is a shape nobody writing about their
+own project would choose.
+
+Anything written into this config that no sheet renders is worse than writing
+nothing, because it reads as work and reaches nobody. A `detail` field held a
+paragraph per project and was rendered on precisely nothing.
+
+Every entry says what the thing does and why it is worth having. That is the whole
+shape of it, and the failure mode is writing anything else.
+
+Two specific habits to avoid, because both got written into this profile and
+both had to come out:
+
+**Selling.** A description describes; it does not pitch. "Picks the capacitor
+values for an RF impedance matching network" is the job. "Picks matching-network
+capacitors from values you can actually buy" is an advertisement for the same
+function, and the word doing the selling is "actually".
+
+**The catchy ending.** Every entry had grown a closing line that summed it up
+with a turn of phrase: "watching it is the entire feature", "which is the
+part of the job it was actually meant to fix", "instead of my word for it". They
+read as written-to-be-quoted. An entry should stop once it has said why the
+thing was built.
+
+Watch for: "actually", "real", "the whole point", "the part that matters", a
+final sentence shorter than the ones before it, and any comparison that exists
+to flatter (1.9 MB "rather than 150 MB of Electron").
+
+Field notes are annotations on your own drawing: one fact, stated flat. The test
+is whether it would still be worth writing down if nobody else read it.

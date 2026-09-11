@@ -105,7 +105,8 @@ def validate(cfg: dict) -> None:
     for p in cfg.get("projects", []):
         who = p.get("name", "<unnamed>")
 
-        for required in ("pn", "name", "lang", "status", "completion", "summary"):
+        for required in ("pn", "name", "lang", "status", "completion",
+                         "description"):
             if not p.get(required) and p.get(required) != 0:
                 problems.append(f"{who}: missing required field '{required}'")
 
@@ -133,19 +134,31 @@ def validate(cfg: dict) -> None:
             problems.append(f"{who}: duplicate project name")
         seen_name.add(p.get("name"))
 
-        cap = cards.summary_capacity()
-        if len(p.get("summary", "")) > cap:
+        description = " ".join(str(p.get("description") or "").split())
+        if not description:
             problems.append(
-                f"{who}: summary is {len(p['summary'])} characters. The "
-                f"description column fits {cap}, so it would be cut with an "
-                f"ellipsis on the sheet. Trim it by "
-                f"{len(p['summary']) - cap}.")
+                f"{who}: no 'description'. One or two sentences saying what it "
+                f"does and what it is useful for")
+        else:
+            lines = cards.description_lines(description)
+            if lines > cards.DESC_LINES:
+                problems.append(
+                    f"{who}: the description wraps to {lines} lines and the "
+                    f"row holds {cards.DESC_LINES}, so it would be cut with an "
+                    f"ellipsis on the sheet. Trim it")
 
         if p.get("repo") and p.get("private"):
             problems.append(f"{who}: has both 'repo' and 'private'; pick one")
         if len(p.get("notes", [])) > 3:
             problems.append(
                 f"{who}: {len(p['notes'])} notes; three is the most a row fits")
+        run = " · ".join(str(x) for x in (p.get("notes") or []))
+        ncap = cards.notes_capacity()
+        if len(run) > ncap:
+            problems.append(
+                f"{who}: the notes run to {len(run)} characters joined and the "
+                f"row letters {ncap}, so it would be cut with an ellipsis. "
+                f"Trim by {len(run) - ncap}")
 
     # A stray key is the TOML table-binding trap: an array that drifted below a
     # table header and got absorbed by it. It parses cleanly and produces an
@@ -404,10 +417,14 @@ def card_alt(card: str, cfg: dict, data: dict) -> str:
     alt text straight through with no punctuation pauses to lean on.
     """
     if card == "bom":
-        parts = ", ".join(
-            f'{p["name"]} {p["status"].lower()} at {round(p["completion"]*100)}%'
+        # The row's two description lines go in too. Alt text is the whole of
+        # what a screen reader gets from this sheet, and a list of names and
+        # percentages is the sheet's index rather than its content.
+        parts = " ".join(
+            f'{p["name"]}, {p["status"].lower()} at '
+            f'{round(p["completion"]*100)}%. {p.get("description", "")}'.strip()
             for p in cfg.get("projects", []))
-        return f"Bill of materials. {parts}." if parts else "Bill of materials, empty."
+        return f"Bill of materials. {parts}" if parts else "Bill of materials, empty."
     if card == "general":
         body = " ".join(" ".join(cfg.get("about", {}).get("body", [])).split())
         pts = ". ".join(x.replace("**", "")

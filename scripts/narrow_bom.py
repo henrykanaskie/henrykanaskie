@@ -75,7 +75,7 @@ def _bom_block(cfg, p, i, langs, statuses, top, d, t):
     The wide sheet reads left to right across six columns; this reads top to
     bottom through the same six facts in the same order, so a reader who knows
     one sheet knows the other. Height is returned rather than assumed because
-    the summary and the tolerance callouts both wrap, and a block sized for one
+    the description and the tolerance callouts both wrap, and a block sized for one
     line of each would clip every part that has two.
 
     `status_y` is where the status line starts. It is the one row of the block
@@ -120,10 +120,12 @@ def _bom_block(cfg, p, i, langs, statuses, top, d, t):
     y += 15
 
     # ── description ─────────────────────────────────────────────────────────
-    summary = " ".join(str(p.get("summary") or "").split())
-    if summary:
-        lines = _wrap_capped(summary, BOM_TW, BOM_SUM_SIZE, 0.0, 3)
-        for k, line in enumerate(lines):
+    # The description, as one run of prose. Unlike the wide sheet this takes as
+    # many lines as it needs: nothing below it has to line up with anything in
+    # another block, so there is no cap and nothing to truncate.
+    description = " ".join(str(p.get("description") or "").split())
+    if description:
+        for line in cards._wrap(description, BOM_TW, BOM_SUM_SIZE):
             out += cards._g(d + 0.05, bp.text(BOM_TX, y + 8, line, t,
                                               size=BOM_SUM_SIZE, color="soft"))
             y += 10.5

@@ -91,9 +91,8 @@ name       = "repo-name"
 lang       = "Python"
 status     = "FLIGHT"
 completion = 0.60
-summary    = "one line, shown collapsed, at most 81 characters"
-detail     = """
-The expanded paragraph. What it is, and the actual interesting problem in it."""
+description = """
+One or two sentences: what it does and what it is useful for, as prose."""
 notes      = ["tolerance callout", "another one", "at most three"]
 repo       = "https://github.com/henrykanaskie/repo-name"
 ```
@@ -107,11 +106,26 @@ Then name it from at least one `[[frameworks]]` entry, or the build fails. See b
 | `lang`       | Must exist in `[palette.lang]` further down the file, or the build fails. |
 | `status`     | One of the `[[status]]` keys. See the band rule below.              |
 | `completion` | `0.0` to `1.0`.                                                        |
-| `summary`    | One line. Shown collapsed.                                          |
-| `detail`     | The expanded paragraph.                                             |
-| `notes`      | Short, factual. Three maximum.                                      |
+| `description` | One or two sentences: what it does and what it is useful for. Up to three lines of the description column, measured against the real column width, and the build fails if it overflows. Not why it is clever and not why you enjoyed writing it. |
+| `notes`      | Short, factual. Three maximum, and the build also checks their combined length, since three notes that each fit can still overflow joined. |
 | `repo`       | **Omit entirely** for a private or unpushed project.                |
 | `private`    | Optional. One line explaining why there is no link.                 |
+
+### Why there is one description field and not three
+
+This has been wrong twice.
+
+It was `summary` plus a `detail` paragraph, and `detail` was rendered on nothing at
+all. Ten carefully written paragraphs sat in the config being read by nobody, which
+is the worse of the two failures: not a sheet saying something untrue, but the file
+holding something no sheet ever carried.
+
+Then it was a terse `summary` plus a separate `why`, both drawn, and the pair read
+like a spec sheet. A clipped noun phrase in one weight, then a sentence underneath
+in another, is a shape nobody writing about their own project would choose.
+
+Now it is one field of prose. If you want to say more about a project than three
+lines, the place for it is that project's own README.
 
 What a part is built **on** is not written here. It lives in `[[frameworks]]`, keyed
 the other way round: one entry per framework listing the parts that use it. That is
